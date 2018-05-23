@@ -3,6 +3,7 @@
   <project Name="spn7">
     <configuration
       Name="Common"
+      STLport="Yes"
       arm_architecture="v7EM"
       arm_core_type="Cortex-M4"
       arm_endian="Little"
@@ -14,8 +15,11 @@
       arm_simulator_memory_simulation_parameter="RX 08000000,00080000,FFFFFFFF;RWX 20000000,00010000,CDCDCDCD"
       arm_target_device_name="STM32F303RE"
       arm_target_interface_type="SWD"
-      c_user_include_directories=".;inc;CMSIS/Include;STM32F3xx_HAL_Driver/Inc"
+      c_user_include_directories=".;inc;CMSIS;STM32F3xx_HAL_Driver/Inc"
       debug_target_connection="J-Link"
+      debug_type_file="$(StudioDir)/bin/STLport.xml"
+      gcc_c_language_standard="c11"
+      gcc_cplusplus_language_standard="c++14"
       linker_output_format="hex"
       linker_section_placement_file="$(ProjectDir)/flash_placement.xml"
       linker_section_placements_segments="FLASH RX 0x08000000 0x00080000;SRAM RWX 0x20000000 0x00010000"
@@ -37,12 +41,11 @@
       <file file_name="system/HardFaultHandler.S" />
       <file file_name="system/thumb_crt0.s" />
       <file file_name="system/SEGGER_HardFaultHandler.c" />
+      <file file_name="system/system_stm32f3xx.c" />
     </folder>
-    <file file_name="main.c" />
     <file file_name="6StepLib.c" />
     <file file_name="ihm07m1.c" />
     <file file_name="stm32f3xx_nucleo.c" />
-    <file file_name="system_stm32f3xx.c" />
     <file file_name="UART_UI.c" />
     <folder Name="inc">
       <file file_name="inc/6StepLib.h" />
@@ -193,6 +196,7 @@
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usart.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c" />
     </folder>
+    <file file_name="main.cpp" />
   </project>
   <configuration
     Name="Debug"

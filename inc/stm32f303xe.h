@@ -1,9 +1,10 @@
-#ifndef __STM32F303xE_H
+#pragma once
 #define __STM32F303xE_H
-
+//{{{
 #ifdef __cplusplus
  extern "C" {
 #endif /* __cplusplus */
+//}}}
 
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
@@ -15176,18 +15177,8 @@ typedef struct
 #define CAN_RX0_IRQHandler     USB_LP_CAN_RX0_IRQHandler
 
 
+//{{{
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* __STM32F303xE_H */
-
-/**
-  * @}
-  */
-
-  /**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+//}}}

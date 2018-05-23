@@ -1,6 +1,12 @@
 #pragma once
+
 #include "stdint.h"
 #include "stm32f3xx_hal.h"
+//{{{
+#ifdef __cplusplus
+ extern "C" {
+#endif /* __cplusplus */
+//}}}
 
 //{{{  defines
 #define HF_TIMx            htim1
@@ -108,3 +114,9 @@ void MC_SixStep_Current_Reference_Setvalue (uint16_t);
 
 void BSP_X_NUCLEO_FAULT_LED_ON();
 void BSP_X_NUCLEO_FAULT_LED_OFF();
+
+//{{{
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+//}}}

@@ -59,61 +59,63 @@ extern SIXSTEP_Base_InitTypeDef SIXSTEP_parameters;
 //}}}
 
 // irq handlers
-//{{{
-void SysTick_Handler() {
+extern "C" {
+  //{{{
+  void SysTick_Handler() {
 
-  HAL_IncTick();
-  HAL_SYSTICK_IRQHandler();
-  }
-//}}}
-//{{{
-void ADC1_IRQHandler() {
-
-  //printf ("ADC1_IRQHandler\n");
-  HAL_ADC_IRQHandler (&hadc1);
-  }
-//}}}
-//{{{
-void USART2_IRQHandler() {
-
-  HAL_UART_IRQHandler (&huart2);
-
-  #ifdef UART_COMM
-    UART_Set_Value();
-  #endif
-  }
-//}}}
-//{{{
-void TIM1_BRK_TIM15_IRQHandler() {
-
-  printf ("TIM1_BRK_TIM15_IRQHandler\n");
-
-  if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET) {
-    MC_StopMotor();
-    SIXSTEP_parameters.STATUS = OVERCURRENT;
+    HAL_IncTick();
+    HAL_SYSTICK_IRQHandler();
     }
+  //}}}
+  //{{{
+  void ADC1_IRQHandler() {
 
-  HAL_TIM_IRQHandler (&htim1);
+    //printf ("ADC1_IRQHandler\n");
+    HAL_ADC_IRQHandler (&hadc1);
+    }
+  //}}}
+  //{{{
+  void USART2_IRQHandler() {
+
+    HAL_UART_IRQHandler (&huart2);
+
+    #ifdef UART_COMM
+      UART_Set_Value();
+    #endif
+    }
+  //}}}
+  //{{{
+  void TIM1_BRK_TIM15_IRQHandler() {
+
+    printf ("TIM1_BRK_TIM15_IRQHandler\n");
+
+    if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET) {
+      MC_StopMotor();
+      SIXSTEP_parameters.STATUS = OVERCURRENT;
+      }
+
+    HAL_TIM_IRQHandler (&htim1);
+    }
+  //}}}
+  //{{{
+  void TIM6_DAC_IRQHandler() {
+
+    //printf ("TIM6_DAC_IRQHandler\n");
+    HAL_TIM_IRQHandler (&htim6);
+    HAL_DAC_IRQHandler (&hdac);
+    }
+  //}}}
+  //{{{
+  void EXTI15_10_IRQHandler() {
+
+    printf ("EXTI15_10_IRQHandler\n");
+    HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13);
+    }
+  //}}}
   }
-//}}}
-//{{{
-void TIM6_DAC_IRQHandler() {
-
-  //printf ("TIM6_DAC_IRQHandler\n");
-  HAL_TIM_IRQHandler (&htim6);
-  HAL_DAC_IRQHandler (&hdac);
-  }
-//}}}
-//{{{
-void EXTI15_10_IRQHandler() {
-
-  printf ("EXTI15_10_IRQHandler\n");
-  HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13);
-  }
-//}}}
 
 //{{{
-void _Error_Handler (char* file, int line) {
+void _Error_Handler (const char* file, int line) {
   printf ("Error %s %n\n", file, line);
   while(1) {
     }

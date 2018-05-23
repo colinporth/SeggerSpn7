@@ -2,6 +2,11 @@
 
 #include "ihm07m1.h"
 #include "6StepParam.h"
+//{{{
+#ifdef __cplusplus
+ extern "C" {
+#endif
+//}}}
 
 //{{{  enum SIXSTEP_Base_SystStatus_t;
 typedef enum {
@@ -103,3 +108,9 @@ void MC_StartMotor();
 void MC_StopMotor();
 void MC_Set_Speed (uint16_t);
 void MC_EXT_button_SixStep();
+
+//{{{
+#ifdef __cplusplus
+}
+#endif
+//}}}

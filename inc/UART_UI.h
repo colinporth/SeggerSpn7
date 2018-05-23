@@ -1,6 +1,11 @@
 #pragma once
 #include "6StepLib.h"
 
+//{{{
+#ifdef __cplusplus
+ extern "C" {
+#endif
+//}}}
 #define TOKEN "\r"
 #define CMD_NUM 16
 
@@ -26,3 +31,9 @@ void CMD_POLESP(void);
 void CMD_ACCELE(void);
 void CMD_KP_PRM(void);
 void CMD_KI_PRM(void);
+
+//{{{
+#ifdef __cplusplus
+}
+#endif
+//}}}
