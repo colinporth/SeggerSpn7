@@ -392,7 +392,7 @@ static void MC_SixStep_Alignment() {
   MC_SixStep_Speed_Val_target_potentiometer();
 
   index_align++;
-  if (index_align >= TIME_FOR_ALIGN+1) {
+  if (index_align >= TIME_FOR_ALIGN + 1) {
     SIXSTEP_parameters.ALIGN_OK = TRUE;
     SIXSTEP_parameters.STATUS = STARTUP;
     index_startup_motor = 1;
@@ -734,8 +734,10 @@ static void MC_TIMx_SixStep_timebase() {
 //{{{
 static void MC_SysTick_SixStep_MediumFrequencyTask() {
 
-  if (SIXSTEP_parameters.ALIGNMENT == TRUE && SIXSTEP_parameters.ALIGN_OK == FALSE)
+  if ((SIXSTEP_parameters.ALIGNMENT == TRUE) && (SIXSTEP_parameters.ALIGN_OK == FALSE)) {
+    printf ("align\n");
     MC_SixStep_Alignment();
+    }
 
   #ifdef UART_COMM
     if (UART_FLAG_RECEIVE == TRUE)
@@ -797,7 +799,7 @@ void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
   MC_ADCx_SixStep_Bemf();
   }
 
-void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef *htim) {
+void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
   MC_TIMx_SixStep_timebase();
   }
 
@@ -815,11 +817,11 @@ void MC_SixStep_INIT() {
 
   MC_SixStep_Nucleo_Init();
 
-  SIXSTEP_parameters.HF_TIMx_CCR  = HF_TIMx.Instance->HF_TIMx_CCR1;
-  SIXSTEP_parameters.HF_TIMx_ARR  = HF_TIMx.Instance->ARR;
-  SIXSTEP_parameters.HF_TIMx_PSC  = HF_TIMx.Instance->PSC;
-  SIXSTEP_parameters.LF_TIMx_ARR  = LF_TIMx.Instance->ARR;
-  SIXSTEP_parameters.LF_TIMx_PSC  = LF_TIMx.Instance->PSC;
+  SIXSTEP_parameters.HF_TIMx_CCR = HF_TIMx.Instance->HF_TIMx_CCR1;
+  SIXSTEP_parameters.HF_TIMx_ARR = HF_TIMx.Instance->ARR;
+  SIXSTEP_parameters.HF_TIMx_PSC = HF_TIMx.Instance->PSC;
+  SIXSTEP_parameters.LF_TIMx_ARR = LF_TIMx.Instance->ARR;
+  SIXSTEP_parameters.LF_TIMx_PSC = LF_TIMx.Instance->PSC;
 
   // MC_SixStep_Current_Reference_Start();
   MC_SixStep_Current_Reference_Setvalue (SIXSTEP_parameters.Ireference);
@@ -1044,11 +1046,13 @@ void MC_Set_Speed (uint16_t speed_value) {
 void MC_EXT_button_SixStep() {
 
   if (Enable_start_button == TRUE) {
-    if (SIXSTEP_parameters.RUN_Motor == 0 && SIXSTEP_parameters.Button_ready == TRUE) {
+    if ((SIXSTEP_parameters.RUN_Motor == 0) && (SIXSTEP_parameters.Button_ready == TRUE)) {
+      printf ("StartMotor\n");
       MC_StartMotor();
       Enable_start_button = FALSE;
       }
     else {
+      printf ("StopMotor\n");
       MC_StopMotor();
       Enable_start_button = FALSE;
       }
