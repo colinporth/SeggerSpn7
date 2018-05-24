@@ -212,7 +212,7 @@ void HAL_TIM_Base_MspInit (TIM_HandleTypeDef* htim_base) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
 
     // config GPIO PA12 TIM1_ETR timer output
     GPIO_InitStruct.Pin = GPIO_PIN_12;
@@ -260,7 +260,7 @@ void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
     }
 
   else if (htim->Instance == TIM2) {
@@ -270,7 +270,7 @@ void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
     }
 
   else if (htim->Instance == TIM16) {
@@ -280,7 +280,7 @@ void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim) {
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
     GPIO_InitStruct.Alternate = GPIO_AF1_TIM16;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init (GPIOB, &GPIO_InitStruct);
     }
   }
 //}}}
@@ -319,7 +319,7 @@ void HAL_DAC_MspInit (DAC_HandleTypeDef* hdac) {
     GPIO_InitStruct.Pin = GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
 
     // DAC interrupt Init
     HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
@@ -699,10 +699,10 @@ int main() {
   HAL_Init();
   SystemClock_Config();
 
-  BSP_LED_Init (LED2);
-  BSP_LED_On (LED2);
-  BSP_LED_Off (LED2);
-  BSP_LED_On (LED2);
+  //BSP_LED_Init (LED2);
+  //BSP_LED_On (LED2);
+  //BSP_LED_Off (LED2);
+  //BSP_LED_On (LED2);
 
   MX_GPIO_Init();
   MX_ADC1_Init();
@@ -718,9 +718,9 @@ int main() {
   int loop = 0;
   while (1) {
     HAL_Delay (1000);
-    BSP_LED_Off (LED2);
+    //BSP_LED_Off (LED2);
     HAL_Delay (1000);
-    BSP_LED_On (LED2);
+    //BSP_LED_On (LED2);
     printf ("loop %d\n", loop++);
     }
   }

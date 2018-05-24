@@ -1,3 +1,4 @@
+//{{{
 /**
   ******************************************************************************
   * @file    system_stm32f3xx.c
@@ -6,7 +7,7 @@
   *
   * 1. This file provides two functions and one global variable to be called from
   *    user application:
-  *      - SystemInit(): This function is called at startup just after reset and 
+  *      - SystemInit(): This function is called at startup just after reset and
   *                      before branch to main program. This call is made inside
   *                      the "startup_stm32f3xx.s" file.
   *
@@ -70,37 +71,11 @@
   *
   ******************************************************************************
   */
-
-/** @addtogroup CMSIS
-  * @{
-  */
-
-/** @addtogroup stm32f3xx_system
-  * @{
-  */
-
-/** @addtogroup STM32F3xx_System_Private_Includes
-  * @{
-  */
+//}}}
 
 #include "stm32f3xx.h"
 
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_TypesDefinitions
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_Defines
-  * @{
-  */
-#if !defined  (HSE_VALUE) 
+#if !defined  (HSE_VALUE)
   #define HSE_VALUE    ((uint32_t)8000000) /*!< Default value of the External oscillator in Hz.
                                                 This value can be provided and adapted by the user application. */
 #endif /* HSE_VALUE */
@@ -115,56 +90,12 @@
 /* #define VECT_TAB_SRAM */
 #define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field.
                                   This value must be a multiple of 0x200. */
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_Macros
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_Variables
-  * @{
-  */
-  /* This variable is updated in three ways:
-      1) by calling CMSIS function SystemCoreClockUpdate()
-      2) by calling HAL API function HAL_RCC_GetHCLKFreq()
-      3) each time HAL_RCC_ClockConfig() is called to configure the system clock frequency
-         Note: If you use this function to configure the system clock there is no need to
-               call the 2 first functions listed above, since SystemCoreClock variable is 
-               updated automatically.
-  */
 uint32_t SystemCoreClock = 8000000;
 
 const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
 const uint8_t APBPrescTable[8]  = {0, 0, 0, 0, 1, 2, 3, 4};
 
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_FunctionPrototypes
-  * @{
-  */
-
-/**
-  * @}
-  */
-
-/** @addtogroup STM32F3xx_System_Private_Functions
-  * @{
-  */
-
-/**
-  * @brief  Setup the microcontroller system
-  *         Initialize the FPU setting, vector table location and the PLL configuration is reset.
-  * @param  None
-  * @retval None
-  */
+//{{{
 void SystemInit(void)
 {
   /* FPU settings ------------------------------------------------------------*/
@@ -203,7 +134,8 @@ void SystemInit(void)
   SCB->VTOR = FLASH_BASE | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal FLASH */
 #endif
 }
-
+//}}}
+//{{{
 /**
    * @brief  Update SystemCoreClock variable according to Clock Register Values.
   *         The SystemCoreClock variable contains the core clock (HCLK), it can
@@ -273,7 +205,7 @@ void SystemCoreClockUpdate (void)
         /* HSI oscillator clock selected as PREDIV1 clock entry */
         SystemCoreClock = (HSI_VALUE / predivfactor) * pllmull;
       }
-#else      
+#else
       if (pllsource == RCC_CFGR_PLLSRC_HSI_DIV2)
       {
         /* HSI oscillator clock divided by 2 selected as PLL clock entry */
@@ -297,18 +229,4 @@ void SystemCoreClockUpdate (void)
   /* HCLK clock frequency */
   SystemCoreClock >>= tmp;
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-
+//}}}
