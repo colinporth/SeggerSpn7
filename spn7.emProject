@@ -242,7 +242,6 @@
     <folder Name="System Files">
       <configuration Name="Common" macros="STLport=No" />
       <file file_name="../system/Cortex_M_Startup.s" />
-      <file file_name="../system/HardFaultHandler.S" />
       <file file_name="../system/SEGGER_HardFaultHandler.c" />
       <file file_name="../system/thumb_crt0.s" />
       <file file_name="../system/system_stm32f3xx.c" />
@@ -255,7 +254,6 @@
     <file file_name="motor_control_protocol.c" />
     <file file_name="motorcontrol.c" />
     <file file_name="stm32f3xx_hal_msp.c" />
-    <file file_name="stm32f3xx_it.c" />
     <file file_name="stm32f30x_mc_it.c" />
     <file file_name="ui_task.c" />
     <file file_name="user_interface.c" />
@@ -336,7 +334,10 @@
         <file file_name="../MCSDK_v5.0.3/MCLib/Inc/feed_forward_ctrl.h" />
         <file file_name="../MCSDK_v5.0.3/SystemDriveParams/Definitions.h" />
         <file file_name="../MCSDK_v5.0.3/SystemDriveParams/usart_params.h" />
+        <file file_name="../MCSDK_v5.0.3/Applications/Test_MotorApp/Inc/UITask.h" />
+        <file file_name="../MCSDK_v5.0.3/Applications/Test_MotorApp/Inc/TimeBase.h" />
       </folder>
+      <file file_name="../MCSDK_v5.0.3/Applications/Test_MotorApp/Src/TimeBase.c" />
     </folder>
     <folder Name="ui">
       <file file_name="../MCSDK_v5.0.3/UILibrary/Src/dac_common_ui.c" />

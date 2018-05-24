@@ -14,7 +14,7 @@
 #include "Timebase.h"
 #include "stm32f3xx_hal.h"
 #include "stm32f3xx.h"
-#include "stm32f3xx_it.h"
+//#include "stm32f3xx_it.h"
 #include "mc_config.h"
 
 #if defined (CCMRAM)

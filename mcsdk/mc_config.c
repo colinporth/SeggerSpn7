@@ -21,12 +21,9 @@
 #include "dac_ui.h"
 #include "motor_control_protocol.h"
 #include "usart_frame_communication_protocol.h"
-
 #include "UIIRQHandlerClass.h"
-
 #include "pwm_curr_fdbk.h"
 #include "r3_4_f30x_pwm_curr_fdbk.h"
-
 #include "virtual_speed_sensor.h"
 #include "sto_speed_pos_fdbk.h"
 #include "sto_pll_speed_pos_fdbk.h"
@@ -38,6 +35,7 @@
 
 #include "pqd_motor_power_measurement.h"
 
+//{{{
 PQD_MotorPowMeas_Handle_t PQD_MotorPowMeasM1 =
 {
 	.wConvFact = PQD_CONVERSION_FACTOR/*!< It is the conversion factor used to convert the
@@ -46,11 +44,10 @@ PQD_MotorPowMeas_Handle_t PQD_MotorPowMeasM1 =
 																				 the power in watts. It must be equal to
 																				 (1000 * 3 * Vdd)/(sqrt(3) * CurrentAmpGain) */
 };
+//}}}
 PQD_MotorPowMeas_Handle_t *pPQD_MotorPowMeasM1 = &PQD_MotorPowMeasM1;
 
-/**
-	* @brief  PI / PID Speed loop parameters Motor 1
-	*/
+//{{{
 PID_Handle_t PIDSpeedHandle_M1 =
 {
 	.hDefKpGain          = (int16_t)PID_SPEED_KP_DEFAULT,       /*!< Default Kp gain, used to initialize Kp gain
@@ -94,10 +91,8 @@ PID_Handle_t PIDSpeedHandle_M1 =
 	.hKdDivisor           = 0x0000U,
 	.hKdDivisorPOW2       = 0x0000U,
 };
-
-/**
-	* @brief  PI / PID Iq loop parameters Motor 1
-	*/
+//}}}
+//{{{
 PID_Handle_t PIDIqHandle_M1 =
 {
 	.hDefKpGain          = (int16_t)PID_TORQUE_KP_DEFAULT,   /*!< Default Kp gain, used to initialize Kp gain
@@ -141,10 +136,8 @@ PID_Handle_t PIDIqHandle_M1 =
 	.hKdDivisor           = 0x0000U,
 	.hKdDivisorPOW2       = 0x0000U,
 };
-
-/**
-	* @brief  PI / PID Id loop parameters Motor 1
-	*/
+//}}}
+//{{{
 PID_Handle_t PIDIdHandle_M1 =
 {
 	.hDefKpGain          = (int16_t)PID_FLUX_KP_DEFAULT,    /*!< Default Kp gain, used to initialize Kp gain
@@ -188,10 +181,8 @@ PID_Handle_t PIDIdHandle_M1 =
 	.hKdDivisor           = 0x0000U,
 	.hKdDivisorPOW2       = 0x0000U,
 };
-
-/**
-	* @brief  SpeednTorque Controller parameters Motor 1
-	*/
+//}}}
+//{{{
 SpeednTorqCtrl_Handle_t SpeednTorqCtrlM1 =
 {
 	.STCFrequencyHz =               MEDIUM_FREQUENCY_TASK_RATE,            /*!< Frequency on which the user updates
@@ -231,7 +222,8 @@ SpeednTorqCtrl_Handle_t SpeednTorqCtrlM1 =
 																																							 Iq current reference expressed in
 																																							 digit.*/
 };
-
+//}}}
+//{{{
 RevUpCtrl_Handle_t RevUpControlM1 =
 {
 	.hRUCFrequencyHz         = MEDIUM_FREQUENCY_TASK_RATE,         /*!< Frequency expressed in Hz at which the user
@@ -262,10 +254,8 @@ RevUpCtrl_Handle_t RevUpControlM1 =
 														 {(uint16_t)PHASE5_DURATION,(int16_t)(PHASE5_FINAL_SPEED_RPM/6),(int16_t)PHASE5_FINAL_CURRENT,(void*)MC_NULL},
 														},
 };
-
-/**
-	* @brief  Internal OPAMP parameters Motor 1 - three shunt - F30x - Independent Resources
-	*/
+//}}}
+//{{{
 R3_4_F30XOPAMPParams_t R3_4_F30XOPAMPParamsM1 =
 {
 /* Internal OPAMP1 settings --------------------------------------------------*/
@@ -287,10 +277,8 @@ R3_4_F30XOPAMPParams_t R3_4_F30XOPAMPParamsM1 =
 	.wOPAMP2_NonInvertingInput_PHB           = OPAMP2_NONINVERTINGINPUT_PHB,
 	.wOPAMP2_NonInvertingInput_PHC           = OPAMP2_NONINVERTINGINPUT_PHC,
 };
-
-/**
-	* @brief  Current sensor parameters Motor 1 - three shunt - F30x - Independent Resources
-	*/
+//}}}
+//{{{
 R3_4_F30XParams_t R3_4_F30XParamsM1 =
 {
 /* Dual MC parameters --------------------------------------------------------*/
@@ -347,8 +335,9 @@ R3_4_F30XParams_t R3_4_F30XParamsM1 =
 	.regconvADCx = REGCONVADC
 
 };
-
+//}}}
 extern R3_4_F30XParams_t R3_4_F30XParamsM1;
+//{{{
 PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
 {
  {
@@ -410,10 +399,8 @@ PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
 	.BrakeActionLock = false,
 	.pParams_str = &R3_4_F30XParamsM1,
 };
-
-/**
-	* @brief  SpeedNPosition sensor parameters Motor 1 - Base Class
-	*/
+//}}}
+//{{{
 VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
 {
 
@@ -452,10 +439,8 @@ VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
 																	set TPH as multiple of medium frequency task period
 															*/
 };
-
-/**
-	* @brief  SpeedNPosition sensor parameters Motor 1 - State Observer + PLL
-	*/
+//}}}
+//{{{
 STO_PLL_Handle_t STO_PLL_M1 =
 {
 	._Super = {
@@ -613,7 +598,9 @@ STO_PLL_Handle_t STO_PLL_M1 =
 																																								 E.g. if gain divisor is 512 the value
 																																								 must be 9 because 2^9 = 512 */
 };
+//}}}
 STO_PLL_Handle_t *pSTO_PLL_M1 = &STO_PLL_M1;
+//{{{
 STO_Handle_t STO_M1 =
 {
 	._Super                        = (SpeednPosFdbk_Handle_t*)&STO_PLL_M1,
@@ -623,7 +610,8 @@ STO_Handle_t STO_M1 =
 	.pFctSTO_SpeedReliabilityCheck = &STO_PLL_IsVarianceTight
 ,
 };
-
+//}}}
+//{{{
 NTC_Handle_t TempSensorParamsM1 =
 {
 	.bSensorType = REAL_SENSOR,
@@ -638,7 +626,8 @@ NTC_Handle_t TempSensorParamsM1 =
 	.wV0                     = (uint16_t)(V0_V *65536/ MCU_SUPPLY_VOLTAGE),
 	.hT0                     = T0_C,
 };
-
+//}}}
+//{{{
 RDivider_Handle_t RealBusVoltageSensorParamsM1 =
 {
 	._Super                =
@@ -691,7 +680,8 @@ RDivider_Handle_t RealBusVoltageSensorParamsM1 =
 																														 Under Voltage Threshold (V) * 65536
 																																								/ hConversionFactor */
 };
-
+//}}}
+//{{{
 UI_Handle_t UI_Params =
 {
 				.bDriveNum = 0,
@@ -702,7 +692,8 @@ UI_Handle_t UI_Params =
 				.pFctDACSetUserChannelValue = &DAC_SetUserChannelValue,
 				.pFctDACGetUserChannelValue = &DAC_GetUserChannelValue,
 };
-
+//}}}
+//{{{
 DAC_UI_Handle_t DAC_UI_Params =
 {
 	.hDAC_CH1_ENABLED = DEBUG_DAC_CH1,          /*!< Set to ENABLE to assign the channel 1 to the DAC object
@@ -710,18 +701,14 @@ DAC_UI_Handle_t DAC_UI_Params =
 	.hDAC_CH2_ENABLED = DEBUG_DAC_CH2           /*!< Set to ENABLE to assign the channel 2 to the DAC object
 												otherwise set DISABLE */
 };
-
-/** RAMP for Motor1.
-	*
-	*/
+//}}}
+//{{{
 RampExtMngr_Handle_t RampExtMngrHFParamsM1 =
 {
 	.FrequencyHz = TF_REGULATION_RATE /*!< Execution frequency expressed in Hz */
 };
-
-/**
-	* @brief  CircleLimitation Component parameters Motor 1 - Base Component
-	*/
+//}}}
+//{{{
 CircleLimitation_Handle_t CircleLimitationM1 =
 {
 	.MaxModule          = MAX_MODULE,         /*!< Circle limitation maximum allowed
@@ -730,7 +717,8 @@ CircleLimitation_Handle_t CircleLimitationM1 =
 	.Start_index        = START_INDEX,    /*!< Circle limitation table indexing
 												 start */
 };
-
+//}}}
+//{{{
 UFCP_Handle_t pUSART =
 {
 		._Super.RxTimeout = 0,
@@ -738,3 +726,4 @@ UFCP_Handle_t pUSART =
 		.USARTx              = USART,
 		.UIIRQn              = UI_IRQ_USART,
 };
+//}}}

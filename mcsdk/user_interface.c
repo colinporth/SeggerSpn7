@@ -1,6 +1,5 @@
 #include "MC_Type.h"
 #include "parameters_conversion.h"
-
 #include "MC_config.h"
 #include "user_interface.h"
 #include "bus_voltage_sensor.h"
@@ -20,7 +19,7 @@
 	*         the exported configuration option UI_CFGOPT_xxx (eventually OR-ed).
 	*  @retval none.
 	*/
-void UI_Init(UI_Handle_t *pHandle, uint8_t bMCNum, MCI_Handle_t ** pMCI, MCT_Handle_t** pMCT, uint32_t* pUICfg)
+void UI_Init (UI_Handle_t *pHandle, uint8_t bMCNum, MCI_Handle_t ** pMCI, MCT_Handle_t** pMCT, uint32_t* pUICfg)
 {
 
 	pHandle->bDriveNum = bMCNum;
@@ -38,7 +37,7 @@ void UI_Init(UI_Handle_t *pHandle, uint8_t bMCNum, MCI_Handle_t ** pMCI, MCT_Han
 	* @param  bSelectMC: The new selected MC, zero based, on which UI operates.
 	*  @retval Boolean set to true if the bSelectMC is valid oterwise return false.
 	*/
-bool UI_SelectMC(UI_Handle_t *pHandle,uint8_t bSelectMC)
+bool UI_SelectMC (UI_Handle_t *pHandle,uint8_t bSelectMC)
 {
 	bool retVal = true;
 	if (bSelectMC  >= pHandle->bDriveNum)
@@ -59,7 +58,7 @@ bool UI_SelectMC(UI_Handle_t *pHandle,uint8_t bSelectMC)
 	* @param  pHandle: Pointer on Handle structure of UI component.
 	*  @retval Return the currently selected MC, zero based, on which UI operates.
 	*/
-uint8_t UI_GetSelectedMC(UI_Handle_t *pHandle)
+uint8_t UI_GetSelectedMC (UI_Handle_t *pHandle)
 {
 	return (pHandle->bSelectedDrive);
 }
@@ -72,7 +71,7 @@ uint8_t UI_GetSelectedMC(UI_Handle_t *pHandle)
 	*         It represents a bit field containing one (or more) of
 	*         the exported configuration option UI_CFGOPT_xxx (eventually OR-ed).
 	*/
-uint32_t UI_GetSelectedMCConfig(UI_Handle_t *pHandle)
+uint32_t UI_GetSelectedMCConfig (UI_Handle_t *pHandle)
 {
 	return pHandle->pUICfg[pHandle->bSelectedDrive];
 }
@@ -83,7 +82,7 @@ uint32_t UI_GetSelectedMCConfig(UI_Handle_t *pHandle)
 	* @param  pHandle: Pointer on Handle structure of UI component.
 	*  @retval Return the currently selected MC tuning component on which UI operates.
 	*/
-MCT_Handle_t* UI_GetCurrentMCT(UI_Handle_t *pHandle)
+MCT_Handle_t* UI_GetCurrentMCT (UI_Handle_t *pHandle)
 {
 	return (pHandle->pMCT[pHandle->bSelectedDrive]);
 }
@@ -98,7 +97,7 @@ MCT_Handle_t* UI_GetCurrentMCT(UI_Handle_t *pHandle)
 	* @param  wValue: New value to set.
 	* @retval Return the currently selected MC, zero based, on which UI operates.
 	*/
-bool UI_SetReg(UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID, int32_t wValue)
+bool UI_SetReg (UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID, int32_t wValue)
 {
 	MCT_Handle_t* pMCT = pHandle->pMCT[pHandle->bSelectedDrive];
 	MCI_Handle_t * pMCI = pHandle->pMCI[pHandle->bSelectedDrive];
@@ -303,7 +302,7 @@ bool UI_SetReg(UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID, int32_t wValue)
 	*         See MC_PROTOCOL_REG_xxx values for code definition.
 	*  @retval Register value read.
 	*/
-int32_t UI_GetReg(UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID)
+int32_t UI_GetReg (UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID)
 {
 	MCT_Handle_t* pMCT = pHandle->pMCT[pHandle->bSelectedDrive];
 	MCI_Handle_t * pMCI = pHandle->pMCI[pHandle->bSelectedDrive];
@@ -815,7 +814,7 @@ int32_t UI_GetReg(UI_Handle_t *pHandle, MC_Protocol_REG_t bRegID)
 	*         See MC_PROTOCOL_CMD_xxx for code definition.
 	*  @retval Return true if the command executed succesfully, otherwise false.
 */
-bool UI_ExecCmd(UI_Handle_t *pHandle, uint8_t bCmdID)
+bool UI_ExecCmd (UI_Handle_t *pHandle, uint8_t bCmdID)
 {
 	bool retVal = true;
 
@@ -897,7 +896,7 @@ bool UI_ExecCmd(UI_Handle_t *pHandle, uint8_t bCmdID)
 	*         It is possible to set 0 to perform an instantaneous change in the value.
 	*  @retval Return true if the command executed succesfully, otherwise false.
 	*/
-bool UI_ExecSpeedRamp(UI_Handle_t *pHandle, int32_t wFinalMecSpeedRPM, uint16_t hDurationms)
+bool UI_ExecSpeedRamp (UI_Handle_t *pHandle, int32_t wFinalMecSpeedRPM, uint16_t hDurationms)
 {
 
 	MCI_Handle_t * pMCI = pHandle->pMCI[pHandle->bSelectedDrive];
@@ -917,7 +916,7 @@ bool UI_ExecSpeedRamp(UI_Handle_t *pHandle, int32_t wFinalMecSpeedRPM, uint16_t 
 	*         is possible to set 0 to perform an instantaneous change in the value.
 	*  @retval Return true if the command executed succesfully, otherwise false.
 	*/
-bool UI_ExecTorqueRamp(UI_Handle_t *pHandle, int16_t hTargetFinal, uint16_t hDurationms)
+bool UI_ExecTorqueRamp (UI_Handle_t *pHandle, int16_t hTargetFinal, uint16_t hDurationms)
 {
 
 	MCI_Handle_t * pMCI = pHandle->pMCI[pHandle->bSelectedDrive];
@@ -927,6 +926,7 @@ bool UI_ExecTorqueRamp(UI_Handle_t *pHandle, int16_t hTargetFinal, uint16_t hDur
 	return true;
 }
 //}}}
+
 //{{{
 /**
 	* @brief  It is used to execute a get Revup data command coming from the user.
@@ -943,7 +943,7 @@ bool UI_ExecTorqueRamp(UI_Handle_t *pHandle, int16_t hTargetFinal, uint16_t hDur
 	*         digit.
 	*  @retval Return true if the command executed succesfully, otherwise false.
 	*/
-bool UI_GetRevupData(UI_Handle_t *pHandle, uint8_t bStage, uint16_t* pDurationms,
+bool UI_GetRevupData (UI_Handle_t *pHandle, uint8_t bStage, uint16_t* pDurationms,
 										 int16_t* pFinalMecSpeed01Hz, int16_t* pFinalTorque )
 {
 	bool hRetVal = true;
@@ -975,7 +975,7 @@ bool UI_GetRevupData(UI_Handle_t *pHandle, uint8_t bStage, uint16_t* pDurationms
 	*         digit.
 	*  @retval Return true if the command executed succesfully, otherwise false.
 	*/
-bool UI_SetRevupData(UI_Handle_t *pHandle, uint8_t bStage, uint16_t hDurationms,
+bool UI_SetRevupData (UI_Handle_t *pHandle, uint8_t bStage, uint16_t hDurationms,
 										 int16_t hFinalMecSpeed01Hz, int16_t hFinalTorque )
 {
 	RevUpCtrl_Handle_t *pRevupCtrl = pHandle->pMCT[pHandle->bSelectedDrive]->pRevupCtrl;
@@ -997,7 +997,7 @@ bool UI_SetRevupData(UI_Handle_t *pHandle, uint8_t bStage, uint16_t hDurationms,
 	*         This value is expressed in digit. See hIqRef param description.
 	* @retval none.
 	*/
-void UI_SetCurrentReferences(UI_Handle_t *pHandle, int16_t hIqRef, int16_t hIdRef)
+void UI_SetCurrentReferences (UI_Handle_t *pHandle, int16_t hIqRef, int16_t hIdRef)
 {
 
 	MCI_Handle_t * pMCI = pHandle->pMCI[pHandle->bSelectedDrive];
@@ -1017,7 +1017,7 @@ void UI_SetCurrentReferences(UI_Handle_t *pHandle, int16_t hIqRef, int16_t hIdRe
 	*         It is populated by this function.
 	* @retval true if MP is enabled, false otherwise.
 	*/
-bool UI_GetMPInfo(pMPInfo_t stepList, pMPInfo_t pMPInfo)
+bool UI_GetMPInfo (pMPInfo_t stepList, pMPInfo_t pMPInfo)
 {
 		return false;
 }
@@ -1028,7 +1028,7 @@ bool UI_GetMPInfo(pMPInfo_t stepList, pMPInfo_t pMPInfo)
 	* @param  pHandle: Pointer on Handle structure of DACx UI component.
 	* @retval none.
 	*/
-void UI_DACInit(UI_Handle_t *pHandle)
+void UI_DACInit (UI_Handle_t *pHandle)
 {
 	if (pHandle->pFct_DACInit)
 	{
@@ -1042,7 +1042,7 @@ void UI_DACInit(UI_Handle_t *pHandle)
 	* @param  pHandle: Pointer on Handle structure of DACx UI component.
 	* @retval none.
 	*/
-void UI_DACExec(UI_Handle_t *pHandle)
+void UI_DACExec (UI_Handle_t *pHandle)
 {
 	if (pHandle->pFct_DACExec)
 	{
@@ -1061,7 +1061,7 @@ void UI_DACExec(UI_Handle_t *pHandle)
 	*         It must be one of the exported UI register (Example: MC_PROTOCOL_REG_I_A).
 	* @retval none.
 	*/
-void UI_SetDAC(UI_Handle_t *pHandle, DAC_Channel_t bChannel,
+void UI_SetDAC (UI_Handle_t *pHandle, DAC_Channel_t bChannel,
 												 MC_Protocol_REG_t bVariable)
 {
 	if (pHandle->pFctDACSetChannelConfig)
@@ -1080,7 +1080,7 @@ void UI_SetDAC(UI_Handle_t *pHandle, DAC_Channel_t bChannel,
 	* @retval MC_Protocol_REG_t: Variables provided in out through the inspected channel.
 	*         It must be one of the exported UI register (Example: MC_PROTOCOL_REG_I_A).
 	*/
-MC_Protocol_REG_t UI_GetDAC(UI_Handle_t *pHandle, DAC_Channel_t bChannel)
+MC_Protocol_REG_t UI_GetDAC (UI_Handle_t *pHandle, DAC_Channel_t bChannel)
 {
 	MC_Protocol_REG_t retVal = MC_PROTOCOL_REG_UNDEFINED;
 	if (pHandle->pFctDACGetChannelConfig)
@@ -1090,7 +1090,6 @@ MC_Protocol_REG_t UI_GetDAC(UI_Handle_t *pHandle, DAC_Channel_t bChannel)
 	return retVal;
 }
 //}}}
-
 //{{{
 /**
 	* @brief  Allow to set the value of the user DAC channel.
@@ -1099,7 +1098,7 @@ MC_Protocol_REG_t UI_GetDAC(UI_Handle_t *pHandle, DAC_Channel_t bChannel)
 	* @param  hValue: Value to be put in output.
 	* @retval none.
 	*/
-void UI_SetUserDAC(UI_Handle_t *pHandle, DAC_UserChannel_t bUserChNumber, int16_t hValue)
+void UI_SetUserDAC (UI_Handle_t *pHandle, DAC_UserChannel_t bUserChNumber, int16_t hValue)
 {
 	if (pHandle->pFctDACSetUserChannelValue)
 	{
