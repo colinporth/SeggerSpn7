@@ -1,5 +1,4 @@
 #pragma once
-
 #include "stdint.h"
 #include "stm32f3xx_hal.h"
 //{{{
@@ -10,10 +9,10 @@
 
 //{{{  defines
 #define HF_TIMx            htim1
-#define LF_TIMx            htim6
 #define HALL_ENCODER_TIMx  htim2
-#define ADCx               hadc1
+#define LF_TIMx            htim6
 #define REFx               htim16
+#define ADCx               hadc1
 #define UART               huart2
 
 #define GPIO_PORT_1        GPIOC
@@ -65,9 +64,9 @@
 #define INIREF_CMD  4     /*!<  Set the new STARUP_CURRENT_REFERENCE value command received */
 #define POLESP_CMD  5     /*!<  Set the Pole Pairs value command received */
 #define ACCELE_CMD  6     /*!<  Set the Accelleration for Start-up of the motor command received */
-#define KP_PRM_CMD  7    /*!<  Set the KP PI param command received */
-#define KI_PRM_CMD  8    /*!<  Set the KI PI param command received */
-#define POTENZ_CMD  9    /*!<  Enable Potentiometer command received */
+#define KP_PRM_CMD  7     /*!<  Set the KP PI param command received */
+#define KI_PRM_CMD  8     /*!<  Set the KI PI param command received */
+#define POTENZ_CMD  9     /*!<  Enable Potentiometer command received */
 #define HELP_CMD    10    /*!<  Help command received */
 #define STATUS_CMD  11    /*!<  Get the Status of the system command received */
 #define DIRECT_CMD  12    /*!<  Get the motor direction */
@@ -81,11 +80,6 @@ extern TIM_HandleTypeDef htim16;
 extern DAC_HandleTypeDef hdac;
 extern UART_HandleTypeDef huart2;
 
-uint32_t Get_UART_Data();
-
-void MC_SixStep_ADC_Channel (uint32_t);
-void MC_SixStep_Nucleo_Init();
-
 void START_Ref_Generation();
 void STOP_Ref_Generation();
 void Set_Ref_Generation (uint16_t);
@@ -95,6 +89,9 @@ void STOP_DAC();
 void SET_DAC_value (uint16_t);
 
 void Bemf_delay_calc();
+
+void MC_SixStep_ADC_Channel (uint32_t);
+void MC_SixStep_Nucleo_Init();
 
 void MC_SixStep_EnableInput_CH1_E_CH2_E_CH3_D();
 void MC_SixStep_EnableInput_CH1_E_CH2_D_CH3_E();
@@ -111,6 +108,8 @@ void MC_SixStep_HF_TIMx_SetDutyCycle_CH3 (uint16_t);
 void MC_SixStep_Current_Reference_Start();
 void MC_SixStep_Current_Reference_Stop();
 void MC_SixStep_Current_Reference_Setvalue (uint16_t);
+
+uint32_t Get_UART_Data();
 
 void BSP_X_NUCLEO_FAULT_LED_ON();
 void BSP_X_NUCLEO_FAULT_LED_OFF();

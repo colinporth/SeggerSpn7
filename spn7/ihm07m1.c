@@ -6,7 +6,7 @@ extern SIXSTEP_Base_InitTypeDef SIXSTEP_parameters;
 extern SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;
 
 //{{{
-void L6230_ECH1CH2_DCH3_IO_Write() {
+static void L6230_ECH1CH2_DCH3_IO_Write() {
 
   HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH1, GPIO_SET);      //EN1 ENABLE
   HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH2, GPIO_SET);      //EN2 DISABLE
@@ -14,7 +14,7 @@ void L6230_ECH1CH2_DCH3_IO_Write() {
   }
 //}}}
 //{{{
-void L6230_ECH1CH3_DCH2_IO_Write()
+static void L6230_ECH1CH3_DCH2_IO_Write()
 {
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH1,GPIO_SET);    //EN1 ENABLE
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH2,GPIO_RESET);  //EN2 DISABLE
@@ -22,7 +22,7 @@ void L6230_ECH1CH3_DCH2_IO_Write()
 }
 //}}}
 //{{{
-void L6230_ECH2CH3_DCH1_IO_Write()
+static void L6230_ECH2CH3_DCH1_IO_Write()
 {
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH1,GPIO_RESET);  //EN1 DISABLE
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH2,GPIO_SET);    //EN2 ENABLE
@@ -30,7 +30,7 @@ void L6230_ECH2CH3_DCH1_IO_Write()
 }
 //}}}
 //{{{
-void L6230_DCH1CH2CH3_IO_Write()
+static void L6230_DCH1CH2CH3_IO_Write()
 {
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH1,GPIO_RESET);  //EN1 DISABLE
   HAL_GPIO_WritePin (GPIO_PORT_1,GPIO_CH2,GPIO_RESET);  //EN2 DISABLE
@@ -38,7 +38,7 @@ void L6230_DCH1CH2CH3_IO_Write()
 }
 //}}}
 //{{{
-void L6230_Start_PWM_generation() {
+static void L6230_Start_PWM_generation() {
 
   HAL_TIM_PWM_Start (&HF_TIMx, HF_TIMx_CH1);  // TIM1_CH1 ENABLE
   HAL_TIM_PWM_Start (&HF_TIMx, HF_TIMx_CH2);  // TIM1_CH2 ENABLE
@@ -46,7 +46,7 @@ void L6230_Start_PWM_generation() {
   }
 //}}}
 //{{{
-void L6230_Stop_PWM_generation() {
+static void L6230_Stop_PWM_generation() {
 
   HAL_TIM_PWM_Stop (&HF_TIMx, HF_TIMx_CH1);  // TIM1_CH1 DISABLE
   HAL_TIM_PWM_Stop (&HF_TIMx, HF_TIMx_CH2);  // TIM1_CH2 DISABLE
@@ -54,43 +54,33 @@ void L6230_Stop_PWM_generation() {
   }
 //}}}
 //{{{
-void L6230_HFTIM_DC_CH1 (uint16_t CCRx) {
+static void L6230_HFTIM_DC_CH1 (uint16_t CCRx) {
   HF_TIMx.Instance->HF_TIMx_CCR1 = CCRx;
   }
 //}}}
 //{{{
-void L6230_HFTIM_DC_CH2 (uint16_t CCRx) {
+static void L6230_HFTIM_DC_CH2 (uint16_t CCRx) {
   HF_TIMx.Instance->HF_TIMx_CCR2 = CCRx;
   }
 //}}}
 //{{{
-void L6230_HFTIM_DC_CH3 (uint16_t CCRx) {
+static void L6230_HFTIM_DC_CH3 (uint16_t CCRx) {
   HF_TIMx.Instance->HF_TIMx_CCR3 = CCRx;
   }
 //}}}
-//{{{
-void BSP_X_NUCLEO_FAULT_LED_ON() {
-  HAL_GPIO_WritePin (GPIOB,GPIO_PIN_2,GPIO_PIN_SET);
-  }
-//}}}
-//{{{
-void BSP_X_NUCLEO_FAULT_LED_OFF() {
-  HAL_GPIO_WritePin (GPIOB,GPIO_PIN_2,GPIO_PIN_RESET);
-  }
-//}}}
 
-void EnableInput_CH1_E_CH2_E_CH3_D() { L6230_ECH1CH2_DCH3_IO_Write(); }
-void EnableInput_CH1_E_CH2_D_CH3_E() { L6230_ECH1CH3_DCH2_IO_Write(); }
-void EnableInput_CH1_D_CH2_E_CH3_E() { L6230_ECH2CH3_DCH1_IO_Write(); }
-void DisableInput_CH1_D_CH2_D_CH3_D() { L6230_DCH1CH2CH3_IO_Write(); }
-void Start_PWM_driving() { L6230_Start_PWM_generation(); }
-void Stop_PWM_driving() { L6230_Stop_PWM_generation(); }
-void HF_TIMx_SetDutyCycle_CH1 (uint16_t CCR_value) { L6230_HFTIM_DC_CH1 (CCR_value); }
-void HF_TIMx_SetDutyCycle_CH2 (uint16_t CCR_value) { L6230_HFTIM_DC_CH2 (CCR_value); }
-void HF_TIMx_SetDutyCycle_CH3 (uint16_t CCR_value) { L6230_HFTIM_DC_CH3 (CCR_value); }
-void Current_Reference_Start() { START_Ref_Generation(); }
-void Current_Reference_Stop() { STOP_Ref_Generation(); }
-void Current_Reference_Setvalue(uint16_t Iref) { Set_Ref_Generation (Iref); }
+static void EnableInput_CH1_E_CH2_E_CH3_D() { L6230_ECH1CH2_DCH3_IO_Write(); }
+static void EnableInput_CH1_E_CH2_D_CH3_E() { L6230_ECH1CH3_DCH2_IO_Write(); }
+static void EnableInput_CH1_D_CH2_E_CH3_E() { L6230_ECH2CH3_DCH1_IO_Write(); }
+static void DisableInput_CH1_D_CH2_D_CH3_D() { L6230_DCH1CH2CH3_IO_Write(); }
+static void Start_PWM_driving() { L6230_Start_PWM_generation(); }
+static void Stop_PWM_driving() { L6230_Stop_PWM_generation(); }
+static void HF_TIMx_SetDutyCycle_CH1 (uint16_t CCR_value) { L6230_HFTIM_DC_CH1 (CCR_value); }
+static void HF_TIMx_SetDutyCycle_CH2 (uint16_t CCR_value) { L6230_HFTIM_DC_CH2 (CCR_value); }
+static void HF_TIMx_SetDutyCycle_CH3 (uint16_t CCR_value) { L6230_HFTIM_DC_CH3 (CCR_value); }
+static void Current_Reference_Start() { START_Ref_Generation(); }
+static void Current_Reference_Stop() { STOP_Ref_Generation(); }
+static void Current_Reference_Setvalue(uint16_t Iref) { Set_Ref_Generation (Iref); }
 //{{{  struct L6230_MotorDriver_TypeDef
 typedef struct {
   void (*EnableInput_CH1_E_CH2_E_CH3_D)(void);  /*!< Enable the channel 1,2 and Disable the channel 3 */
@@ -122,6 +112,105 @@ L6230_MotorDriver_TypeDef L6230MotorDriver = {
   Current_Reference_Stop,
   Current_Reference_Setvalue,
   };
+//}}}
+
+//{{{
+void START_Ref_Generation() {
+  REFx.Instance->CCR1 = 0;
+  HAL_TIM_PWM_Start (&REFx, HF_TIMx_CH1);
+  }
+//}}}
+//{{{
+void STOP_Ref_Generation() {
+  REFx.Instance->CCR1 = 0;
+  HAL_TIM_PWM_Stop(&REFx, HF_TIMx_CH1);
+  }
+//}}}
+//{{{
+void Set_Ref_Generation (uint16_t Iref) {
+  REFx.Instance->CCR1 = (uint32_t)(Iref * REFx.Instance->ARR)/4096;
+  }
+//}}}
+
+//{{{
+void START_DAC() {
+  HAL_DAC_Start (&DACx,DACx_CH);
+  }
+//}}}
+//{{{
+void STOP_DAC() {
+  HAL_DAC_Stop (&DACx,DACx_CH);
+  }
+//}}}
+//{{{
+void SET_DAC_value (uint16_t dac_value) {
+  HAL_DAC_SetValue (&DACx, DACx_CH, DACx_ALIGN, dac_value);
+  }
+//}}}
+//{{{
+void Bemf_delay_calc() {
+
+ if (PI_parameters.Reference >= 0) {
+   if(SIXSTEP_parameters.speed_fdbk_filtered<=12000 && SIXSTEP_parameters.speed_fdbk_filtered>10000)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=10000 && SIXSTEP_parameters.speed_fdbk_filtered>7800)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=7800 && SIXSTEP_parameters.speed_fdbk_filtered>6400)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=6400 && SIXSTEP_parameters.speed_fdbk_filtered>5400)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=5400 && SIXSTEP_parameters.speed_fdbk_filtered>4650)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4650 && SIXSTEP_parameters.speed_fdbk_filtered>4100)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4100 && SIXSTEP_parameters.speed_fdbk_filtered>3650)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3650 && SIXSTEP_parameters.speed_fdbk_filtered>3300)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3300 && SIXSTEP_parameters.speed_fdbk_filtered>2600)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=2600 && SIXSTEP_parameters.speed_fdbk_filtered>1800)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1800 && SIXSTEP_parameters.speed_fdbk_filtered>1500)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1500 && SIXSTEP_parameters.speed_fdbk_filtered>1300)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1300 && SIXSTEP_parameters.speed_fdbk_filtered>1000)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1000 && SIXSTEP_parameters.speed_fdbk_filtered>500)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
+     }
+   else {
+    if(SIXSTEP_parameters.speed_fdbk_filtered>=-12000 && SIXSTEP_parameters.speed_fdbk_filtered<-10000)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-10000 && SIXSTEP_parameters.speed_fdbk_filtered<-7800)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-7800 && SIXSTEP_parameters.speed_fdbk_filtered<-6400)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-6400 && SIXSTEP_parameters.speed_fdbk_filtered<-5400)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-5400 && SIXSTEP_parameters.speed_fdbk_filtered<-4650)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4650 && SIXSTEP_parameters.speed_fdbk_filtered<-4100)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4100 && SIXSTEP_parameters.speed_fdbk_filtered<-3650)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3650 && SIXSTEP_parameters.speed_fdbk_filtered<-3300)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3300 && SIXSTEP_parameters.speed_fdbk_filtered<-2650)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-2600 && SIXSTEP_parameters.speed_fdbk_filtered<-1800)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1800 && SIXSTEP_parameters.speed_fdbk_filtered<-1500)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1500 && SIXSTEP_parameters.speed_fdbk_filtered<-1300)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1300 && SIXSTEP_parameters.speed_fdbk_filtered<-1000)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
+    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1000 && SIXSTEP_parameters.speed_fdbk_filtered<-500)
+      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
+    }
+  }
 //}}}
 
 //{{{
@@ -191,112 +280,84 @@ void MC_SixStep_Nucleo_Init() {
   HAL_ADC_ConfigChannel(&hadc1, &sConfig);
   }
 //}}}
+
 //{{{
-void START_Ref_Generation() {
-  REFx.Instance->CCR1 = 0;
-  HAL_TIM_PWM_Start (&REFx, HF_TIMx_CH1);
+void MC_SixStep_EnableInput_CH1_E_CH2_E_CH3_D() {
+  L6230MotorDriver.EnableInput_CH1_E_CH2_E_CH3_D();
   }
 //}}}
 //{{{
-void STOP_Ref_Generation() {
-  REFx.Instance->CCR1 = 0;
-  HAL_TIM_PWM_Stop(&REFx, HF_TIMx_CH1);
+void MC_SixStep_EnableInput_CH1_E_CH2_D_CH3_E() {
+  L6230MotorDriver.EnableInput_CH1_E_CH2_D_CH3_E();
   }
 //}}}
 //{{{
-void Set_Ref_Generation (uint16_t Iref) {
-  REFx.Instance->CCR1 = (uint32_t)(Iref * REFx.Instance->ARR)/4096;
+void MC_SixStep_EnableInput_CH1_D_CH2_E_CH3_E() {
+  L6230MotorDriver.EnableInput_CH1_D_CH2_E_CH3_E();
+  }
+//}}}
+//{{{
+void MC_SixStep_DisableInput_CH1_D_CH2_D_CH3_D() {
+  L6230MotorDriver.DisableInput_CH1_D_CH2_D_CH3_D();
   }
 //}}}
 
-void START_DAC() { HAL_DAC_Start (&DACx,DACx_CH); }
-void STOP_DAC() { HAL_DAC_Stop (&DACx,DACx_CH); }
-void SET_DAC_value (uint16_t dac_value) { HAL_DAC_SetValue (&DACx, DACx_CH, DACx_ALIGN, dac_value); }
+//{{{
+void MC_SixStep_Start_PWM_driving() {
+  L6230MotorDriver.Start_PWM_driving();
+  }
+//}}}
+//{{{
+void MC_SixStep_Stop_PWM_driving() {
+  L6230MotorDriver.Stop_PWM_driving();
+  }
+//}}}
 
-void MC_SixStep_EnableInput_CH1_E_CH2_E_CH3_D() { L6230MotorDriver.EnableInput_CH1_E_CH2_E_CH3_D(); }
-void MC_SixStep_EnableInput_CH1_E_CH2_D_CH3_E() { L6230MotorDriver.EnableInput_CH1_E_CH2_D_CH3_E(); }
-void MC_SixStep_EnableInput_CH1_D_CH2_E_CH3_E() { L6230MotorDriver.EnableInput_CH1_D_CH2_E_CH3_E(); }
-void MC_SixStep_DisableInput_CH1_D_CH2_D_CH3_D() { L6230MotorDriver.DisableInput_CH1_D_CH2_D_CH3_D(); }
-
-void MC_SixStep_Start_PWM_driving() { L6230MotorDriver.Start_PWM_driving(); }
-void MC_SixStep_Stop_PWM_driving() { L6230MotorDriver.Stop_PWM_driving(); }
-
+//{{{
 void MC_SixStep_HF_TIMx_SetDutyCycle_CH1 (uint16_t CCR_value) {
-  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH1 (CCR_value); }
-void MC_SixStep_HF_TIMx_SetDutyCycle_CH2 (uint16_t CCR_value) {
-  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH2 (CCR_value); }
-void MC_SixStep_HF_TIMx_SetDutyCycle_CH3 (uint16_t CCR_value) {
-  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH3 (CCR_value); }
-
-void MC_SixStep_Current_Reference_Start() { L6230MotorDriver.Current_Reference_Start(); }
-void MC_SixStep_Current_Reference_Stop() { L6230MotorDriver.Current_Reference_Stop(); }
-void MC_SixStep_Current_Reference_Setvalue(uint16_t Iref) {
-  L6230MotorDriver.Current_Reference_Setvalue (Iref); }
-
+  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH1 (CCR_value);
+  }
+//}}}
 //{{{
-void Bemf_delay_calc() {
-
- if (PI_parameters.Reference >= 0) {
-   if(SIXSTEP_parameters.speed_fdbk_filtered<=12000 && SIXSTEP_parameters.speed_fdbk_filtered>10000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=10000 && SIXSTEP_parameters.speed_fdbk_filtered>7800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=7800 && SIXSTEP_parameters.speed_fdbk_filtered>6400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=6400 && SIXSTEP_parameters.speed_fdbk_filtered>5400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=5400 && SIXSTEP_parameters.speed_fdbk_filtered>4650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4650 && SIXSTEP_parameters.speed_fdbk_filtered>4100)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4100 && SIXSTEP_parameters.speed_fdbk_filtered>3650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3650 && SIXSTEP_parameters.speed_fdbk_filtered>3300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3300 && SIXSTEP_parameters.speed_fdbk_filtered>2600)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=2600 && SIXSTEP_parameters.speed_fdbk_filtered>1800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1800 && SIXSTEP_parameters.speed_fdbk_filtered>1500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1500 && SIXSTEP_parameters.speed_fdbk_filtered>1300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1300 && SIXSTEP_parameters.speed_fdbk_filtered>1000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1000 && SIXSTEP_parameters.speed_fdbk_filtered>500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
-     }
-   else {
-    if(SIXSTEP_parameters.speed_fdbk_filtered>=-12000 && SIXSTEP_parameters.speed_fdbk_filtered<-10000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-10000 && SIXSTEP_parameters.speed_fdbk_filtered<-7800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-7800 && SIXSTEP_parameters.speed_fdbk_filtered<-6400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-6400 && SIXSTEP_parameters.speed_fdbk_filtered<-5400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-5400 && SIXSTEP_parameters.speed_fdbk_filtered<-4650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4650 && SIXSTEP_parameters.speed_fdbk_filtered<-4100)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4100 && SIXSTEP_parameters.speed_fdbk_filtered<-3650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3650 && SIXSTEP_parameters.speed_fdbk_filtered<-3300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3300 && SIXSTEP_parameters.speed_fdbk_filtered<-2650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-2600 && SIXSTEP_parameters.speed_fdbk_filtered<-1800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1800 && SIXSTEP_parameters.speed_fdbk_filtered<-1500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1500 && SIXSTEP_parameters.speed_fdbk_filtered<-1300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1300 && SIXSTEP_parameters.speed_fdbk_filtered<-1000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1000 && SIXSTEP_parameters.speed_fdbk_filtered<-500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
-    }
+void MC_SixStep_HF_TIMx_SetDutyCycle_CH2 (uint16_t CCR_value) {
+  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH2 (CCR_value);
+  }
+//}}}
+//{{{
+void MC_SixStep_HF_TIMx_SetDutyCycle_CH3 (uint16_t CCR_value) {
+  L6230MotorDriver.HF_TIMx_SetDutyCycle_CH3 (CCR_value);
   }
 //}}}
 
-uint32_t Get_UART_Data() { return (UART.Instance->RDR); }
+//{{{
+void MC_SixStep_Current_Reference_Start() {
+  L6230MotorDriver.Current_Reference_Start();
+  }
+//}}}
+//{{{
+void MC_SixStep_Current_Reference_Stop() {
+  L6230MotorDriver.Current_Reference_Stop();
+  }
+//}}}
+//{{{
+void MC_SixStep_Current_Reference_Setvalue (uint16_t Iref) {
+  L6230MotorDriver.Current_Reference_Setvalue (Iref);
+  }
+//}}}
+
+//{{{
+uint32_t Get_UART_Data() { 
+  return (UART.Instance->RDR); 
+  }
+//}}}
+
+//{{{
+void BSP_X_NUCLEO_FAULT_LED_ON() {
+  HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+  }
+//}}}
+//{{{
+void BSP_X_NUCLEO_FAULT_LED_OFF() {
+  HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+  }
+//}}}
