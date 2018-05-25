@@ -1,3 +1,4 @@
+//{{{  includes
 #include "pid_regulator.h"
 #include "digital_output.h"
 #include "mc_type.h"
@@ -9,7 +10,6 @@
 #include "pwm_common.h"
 #include "circle_limitation.h"
 #include "pwm_curr_fdbk.h"
-/* PWMC derived class includes */
 #include "r3_4_f30x_pwm_curr_fdbk.h"
 #include "revup_ctrl.h"
 #include "bus_voltage_sensor.h"
@@ -20,10 +20,10 @@
 #include "mc_tuning.h"
 #include "ramp_ext_mngr.h"
 #include "SystemNDriveParams.h"
-
 #include "mc_tasks.h"
 #include "mc_extended_api.h"
-
+//}}}
+//{{{  defines
 #define CHARGE_BOOT_CAP_MS  10
 #define CHARGE_BOOT_CAP_MS2 10
 #define OFFCALIBRWAIT_MS     0
@@ -36,10 +36,9 @@
 #define OFFCALIBRWAITTICKS2    (uint16_t)((SYS_TICK_FREQUENCY * OFFCALIBRWAIT_MS2)/ 1000)
 #define STOPPERMANENCY_TICKS   (uint16_t)((SYS_TICK_FREQUENCY * STOPPERMANENCY_MS)/ 1000)
 #define STOPPERMANENCY_TICKS2  (uint16_t)((SYS_TICK_FREQUENCY * STOPPERMANENCY_MS2)/ 1000)
-
+//}}}
+//{{{  vars
 /* #define  MC.SMOOTH_BRAKING_ACTION_ON_OVERVOLTAGE */
-
-/* Private variables----------------------------------------------------------*/
 FOCVars_t FOCVars[NBR_OF_MOTORS];
 MCI_Handle_t Mci[NBR_OF_MOTORS];
 MCI_Handle_t * oMCInterface[NBR_OF_MOTORS];
@@ -69,11 +68,8 @@ static volatile UDRC_State_t UDC_State = UDRC_STATE_IDLE;
 
 static bool SWO_transitionStartM1 = false;
 uint8_t bMCBootCompleted = 0;
-/* USER CODE BEGIN Private Variables */
+//}}}
 
-/* USER CODE END Private Variables */
-
-/* Private functions ---------------------------------------------------------*/
 static void TSK_MediumFrequencyTaskM1(void);
 static void FOC_Clear(uint8_t bMotor);
 static void FOC_InitAdditionalMethods(uint8_t bMotor);
@@ -83,12 +79,9 @@ void TSK_SetChargeBootCapDelayM1(uint16_t hTickCount);
 bool TSK_ChargeBootCapDelayHasElapsedM1(void);
 static void TSK_SetStopPermanencyTimeM1(uint16_t hTickCount);
 static bool TSK_StopPermanencyTimeHasElapsedM1(void);
-
 void TSK_SafetyTask_PWMOFF(uint8_t motor);
 
-/* USER CODE BEGIN Private Functions */
-
-/* USER CODE END Private Functions */
+//{{{
 /**
 	* @brief  It initializes the whole MC core according to user defined
 	*         parameters.
@@ -196,7 +189,8 @@ void MCboot( MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF
 
 	/* USER CODE END MCboot 2 */
 }
-
+//}}}
+//{{{
 /**
 	* @brief  It executes MC tasks: safety task and medium frequency for all
 	*         drive instances. It have to be clocked with Systick frequnecy.
@@ -239,7 +233,9 @@ void MC_Scheduler(void)
 
 	/* USER CODE END MC_Scheduler 2 */
 }
+//}}}
 
+//{{{
 /**
 	* @brief  It executes some of the control duties on Motor 1 accordingly with
 	*         the present state of its state machine. In particular, duties
@@ -417,7 +413,9 @@ void TSK_MediumFrequencyTaskM1(void)
 
 	/* USER CODE END MediumFrequencyTask M1 6 */
 }
+//}}}
 
+//{{{
 /**
 	* @brief  It re-initializes the current and voltage variables. Moreover
 	*         it clears qd currents PI controllers, voltage sensor and SpeednTorque
@@ -455,7 +453,8 @@ void FOC_Clear(uint8_t bMotor)
 
 	/* USER CODE END FOC_Clear 1 */
 }
-
+//}}}
+//{{{
 /**
 	* @brief  Use this method to initialize additional methods (if any) in
 	*         START_TO_RUN state
@@ -468,7 +467,8 @@ void FOC_InitAdditionalMethods(uint8_t bMotor)
 
 	/* USER CODE END FOC_InitAdditionalMethods 0 */
 }
-
+//}}}
+//{{{
 /**
 	* @brief  It computes the new values of Iqdref (current references on qd
 	*         reference frame) based on the required electrical torque information
@@ -493,7 +493,9 @@ void FOC_CalcCurrRef(uint8_t bMotor)
 
 	/* USER CODE END FOC_CalcCurrRef 1 */
 }
+//}}}
 
+//{{{
 /**
 	* @brief  It set a counter intended to be used for counting the delay required
 	*         for drivers boot capacitors charging of motor 1
@@ -504,7 +506,8 @@ void TSK_SetChargeBootCapDelayM1(uint16_t hTickCount)
 {
 	 hBootCapDelayCounterM1 = hTickCount;
 }
-
+//}}}
+//{{{
 /**
 	* @brief  Use this function to know whether the time required to charge boot
 	*         capacitors of motor 1 has elapsed
@@ -520,7 +523,8 @@ bool TSK_ChargeBootCapDelayHasElapsedM1(void)
 	}
 	return (retVal);
 }
-
+//}}}
+//{{{
 /**
 	* @brief  It set a counter intended to be used for counting the permanency
 	*         time in STOP state of motor 1
@@ -531,7 +535,8 @@ void TSK_SetStopPermanencyTimeM1(uint16_t hTickCount)
 {
 	hStopPermanencyCounterM1 = hTickCount;
 }
-
+//}}}
+//{{{
 /**
 	* @brief  Use this function to know whether the permanency time in STOP state
 	*         of motor 1 has elapsed
@@ -547,6 +552,7 @@ bool TSK_StopPermanencyTimeHasElapsedM1(void)
 	}
 	return (retVal);
 }
+//}}}
 
 #if defined (CCMRAM_ENABLED)
 #if defined (__ICCARM__)
@@ -555,6 +561,7 @@ bool TSK_StopPermanencyTimeHasElapsedM1(void)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
 	* @brief  Accordingly with the present state(s) of the state machine(s), it
 	*         executes those motor control duties requiring a high frequency rate
@@ -619,6 +626,7 @@ uint8_t TSK_HighFrequencyTask(void)
 	/* USER CODE END HighFrequencyTask 1 */
 	return bMotorNbr;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -627,6 +635,7 @@ uint8_t TSK_HighFrequencyTask(void)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
 	* @brief It executes the core of FOC drive that is the controllers for Iqd
 	*        currents regulation. Reference frame transformations are carried out
@@ -636,7 +645,7 @@ __attribute__((section ("ccmram")))
 	* @retval int16_t It returns MC_NO_FAULTS if the FOC has been ended before
 	*         next PWM Update event, MC_FOC_DURATION otherwise
 	*/
-#pragma inline
+#pragma inline 
 uint16_t FOC_CurrController(uint8_t bMotor)
 {
 	Curr_Components Iab, Ialphabeta, Iqd;
@@ -664,7 +673,9 @@ uint16_t FOC_CurrController(uint8_t bMotor)
 	FOCVars[bMotor].hElAngle = hElAngledpp;
 	return(hCodeError);
 }
+//}}}
 
+//{{{
 /**
 * @brief  This function requests a user-defined regular conversion. All user
 *         defined conversion requests must be performed inside routines with the
@@ -688,7 +699,8 @@ void MC_RequestRegularConv(uint8_t bChannel, uint8_t bSamplTime)
 		UDC_Channel = bChannel;
 	}
 }
-
+//}}}
+//{{{
 /**
 * @brief  Get the last user-defined regular conversion.
 * @retval uint16_t It returns converted value or oxFFFF for conversion error.
@@ -705,7 +717,8 @@ uint16_t MC_GetRegularConv(void)
 	}
 	return hRetVal;
 }
-
+//}}}
+//{{{
 /**
 * @brief  Use this function to know the status of the last requested regular
 *         conversion.
@@ -721,7 +734,9 @@ UDRC_State_t MC_RegularConvState(void)
 {
 	return UDC_State;
 }
+//}}}
 
+//{{{
 /**
 	* @brief  It executes safety checks (e.g. bus voltage and temperature) for all
 	*         drive instances. Faults flags are also here updated
@@ -747,7 +762,8 @@ void TSK_SafetyTask(void)
 	/* USER CODE END TSK_SafetyTask 1 */
 	}
 }
-
+//}}}
+//{{{
 /**
 	* @brief  Safety task implementation if  MC.ON_OVER_VOLTAGE == TURN_OFF_PWM
 	* @param  bMotor Motor reference number defined
@@ -794,7 +810,9 @@ void TSK_SafetyTask_PWMOFF(uint8_t bMotor)
 
 	/* USER CODE END TSK_SafetyTask_PWMOFF 3 */
 }
+//}}}
 
+//{{{
 /**
 	* @brief  This function returns the reference of the MCInterface relative to
 	*         the selected drive.
@@ -813,7 +831,8 @@ MCI_Handle_t * GetMCI(uint8_t bMotor)
 	}
 	return retVal;
 }
-
+//}}}
+//{{{
 /**
 	* @brief  This function returns the reference of the MCTuning relative to
 	*         the selected drive.
@@ -832,7 +851,9 @@ MCT_Handle_t* GetMCT(uint8_t bMotor)
 	}
 	return retVal;
 }
+//}}}
 
+//{{{
 /**
 	* @brief  It is executed when a general hardware failure has been detected by
 	*         the microcontroller and is used to put the system in safety
@@ -853,8 +874,9 @@ void TSK_HardwareFaultTask(void)
 
 	/* USER CODE END TSK_HardwareFaultTask 1 */
 }
+//}}}
 
-
+//{{{
  /**
 	* @brief  It locks GPIO pins used for Motor Control. This prevents accidental reconfiguration
 	*
@@ -877,9 +899,4 @@ HAL_GPIO_LockPin(M1_CURR_AMPL_U_GPIO_Port, M1_CURR_AMPL_U_Pin);
 HAL_GPIO_LockPin(M1_CURR_AMPL_V_GPIO_Port, M1_CURR_AMPL_V_Pin);
 HAL_GPIO_LockPin(M1_TEMPERATURE_GPIO_Port, M1_TEMPERATURE_Pin);
 }
-
-/* USER CODE BEGIN mc_task 0 */
-
-/* USER CODE END mc_task 0 */
-
-/******************* (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

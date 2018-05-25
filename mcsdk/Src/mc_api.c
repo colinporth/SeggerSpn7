@@ -7,171 +7,171 @@ extern MCI_Handle_t * pMCI[MC_NUM];
 
 //{{{
 /**
-	* @brief  Initiates the start-up procedure for Motor 1
-	*
-	* If the state machine of Motor 1 is in #IDLE state, the command is immediately
-	* executed. Otherwise the command is discarded. The Application can check the
-	* return value to know whether the command was executed or discarded.
-	*
-	* One of the following commands must be executed before calling MC_StartMotor1():
-	*
-	* - MC_ProgramSpeedRampMotor1()
-	* - MC_ProgramTorqueRampMotor1()
-	* - MC_SetCurrentReferenceMotor1()
-	*
-	* Failing to do so results in an unpredictable behaviour.
-	*
-	* @note The MC_StartMotor1() command only triggers the start-up procedure:
-	* It moves Motor 1's state machine from the #IDLE to the #IDLE_START state and then
-	* returns. It is not blocking the application until the motor is indeed running.
-	* To know if it is running, the application can query Motor 1's state machine and
-	* check if it has reached the #RUN state. See MCI_GetSTMStateMotor1() for more details.
-	*
-	* @retval returns true if the command is successfully executed, false otherwise.
-	*/
+  * @brief  Initiates the start-up procedure for Motor 1
+  *
+  * If the state machine of Motor 1 is in #IDLE state, the command is immediately
+  * executed. Otherwise the command is discarded. The Application can check the
+  * return value to know whether the command was executed or discarded.
+  *
+  * One of the following commands must be executed before calling MC_StartMotor1():
+  *
+  * - MC_ProgramSpeedRampMotor1()
+  * - MC_ProgramTorqueRampMotor1()
+  * - MC_SetCurrentReferenceMotor1()
+  *
+  * Failing to do so results in an unpredictable behaviour.
+  *
+  * @note The MC_StartMotor1() command only triggers the start-up procedure:
+  * It moves Motor 1's state machine from the #IDLE to the #IDLE_START state and then
+  * returns. It is not blocking the application until the motor is indeed running.
+  * To know if it is running, the application can query Motor 1's state machine and
+  * check if it has reached the #RUN state. See MCI_GetSTMStateMotor1() for more details.
+  *
+  * @retval returns true if the command is successfully executed, false otherwise.
+  */
 bool MC_StartMotor1(void)
 {
-	return MCI_StartMotor( pMCI[M1] );
+  return MCI_StartMotor( pMCI[M1] );
 }
 //}}}
 //{{{
 /**
-	* @brief  Initiates the stop procedure for Motor 1.
-	*
-	*  If the state machine is in #RUN or #START states the command is immediately
-	* executed. Otherwise, the command is discarded. The Application can check the
-	* return value to know whether the command was executed or discarded.
-	*
-	* @note The MCI_StopMotor1() command only triggers the stop motor procedure
-	* moving Motor 1's state machine to #ANY_STOP and then returns. It is not
-	* blocking the application until the motor is indeed stopped. To know if it has
-	* stopped, the application can query Motor 1's state machine ans check if the
-	* #IDLE state has been reached back.
-	*
-	* @retval returns true if the command is successfully executed, false otherwise.
-	*/
+  * @brief  Initiates the stop procedure for Motor 1.
+  *
+  *  If the state machine is in #RUN or #START states the command is immediately
+  * executed. Otherwise, the command is discarded. The Application can check the
+  * return value to know whether the command was executed or discarded.
+  *
+  * @note The MCI_StopMotor1() command only triggers the stop motor procedure
+  * moving Motor 1's state machine to #ANY_STOP and then returns. It is not
+  * blocking the application until the motor is indeed stopped. To know if it has
+  * stopped, the application can query Motor 1's state machine ans check if the
+  * #IDLE state has been reached back.
+  *
+  * @retval returns true if the command is successfully executed, false otherwise.
+  */
 void MC_StopMotor1(void)
 {
-	MCI_StopMotor( pMCI[M1] );
+  MCI_StopMotor( pMCI[M1] );
 }
 //}}}
 
 //{{{
 /**
-	* @brief Programs a speed ramp for Motor 1 for later or immediate execution.
-	*
-	*  A speed ramp is a linear change from the current speed reference to the @p hFinalSpeed
-	* target speed in the given @p hDurationms time.
-	*
-	*  Invoking the MC_ProgramSpeedRampMotor1() function programs a new speed ramp
-	* with the provided parameters. The programmed ramp is executed immediately if
-	* Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
-	* ramp is buffered and will be executed when the state machine reaches any of
-	* the aforementioned state.
-	*
-	*  The Application can check the status of the command with the MC_GetCommandStateMotor1()
-	* to know whether the last command was executed immediately or not.
-	*
-	* Only one command can be buffered at any given time. If another ramp - whether a
-	* speed or a torque one - or if another buffered command is programmed before the
-	* current one has completed, the latter replaces the former.
-	*
-	* @note A ramp cannot reverse the rotation direction if the Application is using
-	* sensorless motor control techniques. If the sign of the hFinalSpeed parameter
-	* differs from that of the current speed, the ramp will not complete and a Speed
-	* Feedback error (#MC_SPEED_FDBK) will occur when the rotation speed is about to
-	* reach 0 rpm.
-	*
-	* @param  hFinalSpeed Mechanical rotor speed reference at the end of the ramp.
-	*                     Expressed in tenths of HZ.
-	* @param  hDurationms Duration of the ramp expressed in milliseconds. It
-	*         is possible to set 0 to perform an instantaneous change in the speed
-	*         value.
-	*/
+  * @brief Programs a speed ramp for Motor 1 for later or immediate execution.
+  *
+  *  A speed ramp is a linear change from the current speed reference to the @p hFinalSpeed
+  * target speed in the given @p hDurationms time.
+  *
+  *  Invoking the MC_ProgramSpeedRampMotor1() function programs a new speed ramp
+  * with the provided parameters. The programmed ramp is executed immediately if
+  * Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
+  * ramp is buffered and will be executed when the state machine reaches any of
+  * the aforementioned state.
+  *
+  *  The Application can check the status of the command with the MC_GetCommandStateMotor1()
+  * to know whether the last command was executed immediately or not.
+  *
+  * Only one command can be buffered at any given time. If another ramp - whether a
+  * speed or a torque one - or if another buffered command is programmed before the
+  * current one has completed, the latter replaces the former.
+  *
+  * @note A ramp cannot reverse the rotation direction if the Application is using
+  * sensorless motor control techniques. If the sign of the hFinalSpeed parameter
+  * differs from that of the current speed, the ramp will not complete and a Speed
+  * Feedback error (#MC_SPEED_FDBK) will occur when the rotation speed is about to
+  * reach 0 rpm.
+  *
+  * @param  hFinalSpeed Mechanical rotor speed reference at the end of the ramp.
+  *                     Expressed in tenths of HZ.
+  * @param  hDurationms Duration of the ramp expressed in milliseconds. It
+  *         is possible to set 0 to perform an instantaneous change in the speed
+  *         value.
+  */
 void MC_ProgramSpeedRampMotor1( int16_t hFinalSpeed, uint16_t hDurationms )
 {
-	MCI_ExecSpeedRamp( pMCI[M1], hFinalSpeed, hDurationms );
+  MCI_ExecSpeedRamp( pMCI[M1], hFinalSpeed, hDurationms );
 }
 //}}}
 //{{{
 /**
-	* @brief Programs a torque ramp for Motor 1 for later or immediate execution.
-	*
-	*  A torque ramp is a linear change from the current torque reference to the @p hFinalTorque
-	* target torque reference in the given @p hDurationms time.
-	*
-	*  Invoking the MC_ProgramTorqueRampMotor1() function programs a new torque ramp
-	* with the provided parameters. The programmed ramp is executed immediately if
-	* Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
-	* ramp is buffered and will be executed when the state machine reaches any of
-	* the aforementioned state.
-	*
-	*  The Application can check the status of the command with the MC_GetCommandStateMotor1()
-	* to know whether the last command was executed immediately or not.
-	*
-	* Only one command can be buffered at any given time. If another ramp - whether a
-	* torque or a speed one - or if another buffered command is programmed before the
-	* current one has completed, the latter replaces the former.
-	*
-	* @note A ramp cannot reverse the rotation direction if the Application is using
-	* sensorless motor control techniques. If the sign of the hFinalTorque parameter
-	* differs from that of the current torque, the ramp will not complete and a Speed
-	* Feedback error (#MC_SPEED_FDBK) will occur when the rotation speed is about to
-	* reach 0 rpm.
-	*
-	* @param  hFinalTorque Mechanical motor torque reference at the end of the ramp.
-	*         This value represents actually the Iq current expressed in digit.
-	* @param  hDurationms Duration of the ramp expressed in milliseconds. It
-	*         is possible to set 0 to perform an instantaneous change in the torque
-	*         value.
-	*/
+  * @brief Programs a torque ramp for Motor 1 for later or immediate execution.
+  *
+  *  A torque ramp is a linear change from the current torque reference to the @p hFinalTorque
+  * target torque reference in the given @p hDurationms time.
+  *
+  *  Invoking the MC_ProgramTorqueRampMotor1() function programs a new torque ramp
+  * with the provided parameters. The programmed ramp is executed immediately if
+  * Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
+  * ramp is buffered and will be executed when the state machine reaches any of
+  * the aforementioned state.
+  *
+  *  The Application can check the status of the command with the MC_GetCommandStateMotor1()
+  * to know whether the last command was executed immediately or not.
+  *
+  * Only one command can be buffered at any given time. If another ramp - whether a
+  * torque or a speed one - or if another buffered command is programmed before the
+  * current one has completed, the latter replaces the former.
+  *
+  * @note A ramp cannot reverse the rotation direction if the Application is using
+  * sensorless motor control techniques. If the sign of the hFinalTorque parameter
+  * differs from that of the current torque, the ramp will not complete and a Speed
+  * Feedback error (#MC_SPEED_FDBK) will occur when the rotation speed is about to
+  * reach 0 rpm.
+  *
+  * @param  hFinalTorque Mechanical motor torque reference at the end of the ramp.
+  *         This value represents actually the Iq current expressed in digit.
+  * @param  hDurationms Duration of the ramp expressed in milliseconds. It
+  *         is possible to set 0 to perform an instantaneous change in the torque
+  *         value.
+  */
 void MC_ProgramTorqueRampMotor1( int16_t hFinalTorque, uint16_t hDurationms )
 {
-	MCI_ExecTorqueRamp( pMCI[M1], hFinalTorque, hDurationms );
+  MCI_ExecTorqueRamp( pMCI[M1], hFinalTorque, hDurationms );
 }
 //}}}
 //{{{
 /**
-	* @brief Programs the current reference to Motor 1 for later or immediate execution.
-	*
-	*  The current reference to consider is made of the Id and Iq current components.
-	*
-	*  Invoking the MC_SetCurrentReferenceMotor1() function programs a current reference
-	* with the provided parameters. The programmed reference is executed immediately if
-	* Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
-	* command is buffered and will be executed when the state machine reaches any of
-	* the aforementioned state.
-	*
-	*  The Application can check the status of the command with the MC_GetCommandStateMotor1()
-	* to know whether the last command was executed immediately or not.
-	*
-	* Only one command can be buffered at any given time. If another buffered command is
-	* programmed before the current one has completed, the latter replaces the former.
-	*
-	* @param  Iqdref current reference in the Direct-Quadratic reference frame. Expressed
-	*         in the Curr_Components format.
-	*/
+  * @brief Programs the current reference to Motor 1 for later or immediate execution.
+  *
+  *  The current reference to consider is made of the Id and Iq current components.
+  *
+  *  Invoking the MC_SetCurrentReferenceMotor1() function programs a current reference
+  * with the provided parameters. The programmed reference is executed immediately if
+  * Motor 1's state machine is in the #START_RUN or #RUN states. Otherwise, the
+  * command is buffered and will be executed when the state machine reaches any of
+  * the aforementioned state.
+  *
+  *  The Application can check the status of the command with the MC_GetCommandStateMotor1()
+  * to know whether the last command was executed immediately or not.
+  *
+  * Only one command can be buffered at any given time. If another buffered command is
+  * programmed before the current one has completed, the latter replaces the former.
+  *
+  * @param  Iqdref current reference in the Direct-Quadratic reference frame. Expressed
+  *         in the Curr_Components format.
+  */
 void MC_SetCurrentReferenceMotor1( Curr_Components Iqdref )
 {
-	MCI_SetCurrentReferences( pMCI[M1], Iqdref );
+  MCI_SetCurrentReferences( pMCI[M1], Iqdref );
 }
 //}}}
 
 //{{{
 /**
-	* @brief  Returns the status of the last buffered command for Motor 1.
-	* The status can be one of the following values:
-	* - #MCI_BUFFER_EMPTY: no buffered command is currently programmed.
-	* - #MCI_COMMAND_NOT_ALREADY_EXECUTED: A command has been buffered but the conditions for its
-	*   execution have not occurred yet. The command is still in the buffer, pending execution.
-	* - #MCI_COMMAND_EXECUTED_SUCCESFULLY: the last buffered command has been executed successfully.
-	*   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
-	* - #MCI_COMMAND_EXECUTED_UNSUCCESFULLY: the buffered command has been executed unsuccessfully.
-	*   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
-	*/
+  * @brief  Returns the status of the last buffered command for Motor 1.
+  * The status can be one of the following values:
+  * - #MCI_BUFFER_EMPTY: no buffered command is currently programmed.
+  * - #MCI_COMMAND_NOT_ALREADY_EXECUTED: A command has been buffered but the conditions for its
+  *   execution have not occurred yet. The command is still in the buffer, pending execution.
+  * - #MCI_COMMAND_EXECUTED_SUCCESFULLY: the last buffered command has been executed successfully.
+  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
+  * - #MCI_COMMAND_EXECUTED_UNSUCCESFULLY: the buffered command has been executed unsuccessfully.
+  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
+  */
 MCI_CommandState_t  MC_GetCommandStateMotor1( void)
 {
-	return MCI_IsCommandAcknowledged( pMCI[M1] );
+  return MCI_IsCommandAcknowledged( pMCI[M1] );
 }
 //}}}
 
@@ -185,7 +185,7 @@ MCI_CommandState_t  MC_GetCommandStateMotor1( void)
  */
 bool MC_StopSpeedRampMotor1(void)
 {
-	return MCI_StopSpeedRamp( pMCI[M1] );
+  return MCI_StopSpeedRamp( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -194,7 +194,7 @@ bool MC_StopSpeedRampMotor1(void)
  */
 bool MC_HasRampCompletedMotor1(void)
 {
-	return MCI_RampCompleted( pMCI[M1] );
+  return MCI_RampCompleted( pMCI[M1] );
 }
 //}}}
 
@@ -204,7 +204,7 @@ bool MC_HasRampCompletedMotor1(void)
  */
 int16_t MC_GetMecSpeedReferenceMotor1(void)
 {
-	return MCI_GetMecSpeedRef01Hz( pMCI[M1] );
+  return MCI_GetMecSpeedRef01Hz( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -213,7 +213,7 @@ int16_t MC_GetMecSpeedReferenceMotor1(void)
  */
 int16_t MC_GetMecSpeedAverageMotor1(void)
 {
-	return MCI_GetAvrgMecSpeed01Hz( pMCI[M1] );
+  return MCI_GetAvrgMecSpeed01Hz( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -222,20 +222,18 @@ int16_t MC_GetMecSpeedAverageMotor1(void)
  */
 int16_t MC_GetLastRampFinalSpeedMotor1(void)
 {
-	return MCI_GetLastRampFinalSpeed( pMCI[M1] );
+  return MCI_GetLastRampFinalSpeed( pMCI[M1] );
 }
 //}}}
-
-/**
 //{{{
+/**
  * @brief Returns the Control Mode used for Motor 1 (either Speed or Torque)
  */
 STC_Modality_t MC_GetControlModeMotor1(void)
 {
-	return MCI_GetControlMode( pMCI[M1] );
+  return MCI_GetControlMode( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief Returns the rotation direction imposed by the last command on Motor 1
@@ -250,7 +248,7 @@ STC_Modality_t MC_GetControlModeMotor1(void)
  */
 int16_t MC_GetImposedDirectionMotor1(void)
 {
-	return MCI_GetImposedMotorDirection( pMCI[M1] );
+  return MCI_GetImposedMotorDirection( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -259,7 +257,7 @@ int16_t MC_GetImposedDirectionMotor1(void)
  */
 bool MC_GetSpeedSensorReliabilityMotor1(void)
 {
-	return MCI_GetSpdSensorReliability( pMCI[M1] );
+  return MCI_GetSpdSensorReliability( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -275,7 +273,7 @@ bool MC_GetSpeedSensorReliabilityMotor1(void)
  */
 int16_t MC_GetPhaseCurrentAmplitudeMotor1(void)
 {
-	return MCI_GetPhaseCurrentAmplitude( pMCI[M1] );
+  return MCI_GetPhaseCurrentAmplitude( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -291,7 +289,7 @@ int16_t MC_GetPhaseCurrentAmplitudeMotor1(void)
  */
 int16_t MC_GetPhaseVoltageAmplitudeMotor1(void)
 {
-	return MCI_GetPhaseVoltageAmplitude( pMCI[M1] );
+  return MCI_GetPhaseVoltageAmplitude( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -300,7 +298,7 @@ int16_t MC_GetPhaseVoltageAmplitudeMotor1(void)
  */
 Curr_Components MC_GetIabMotor1(void)
 {
-	return MCI_GetIab( pMCI[M1] );
+  return MCI_GetIab( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -309,7 +307,7 @@ Curr_Components MC_GetIabMotor1(void)
  */
 Curr_Components MC_GetIalphabetaMotor1(void)
 {
-	return MCI_GetIalphabeta( pMCI[M1] );
+  return MCI_GetIalphabeta( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -318,7 +316,7 @@ Curr_Components MC_GetIalphabetaMotor1(void)
  */
 Curr_Components MC_GetIqdMotor1(void)
 {
-	return MCI_GetIqd( pMCI[M1] );
+  return MCI_GetIqd( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -327,7 +325,7 @@ Curr_Components MC_GetIqdMotor1(void)
  */
 Curr_Components MC_GetIqdrefMotor1(void)
 {
-	return MCI_GetIqdref( pMCI[M1] );
+  return MCI_GetIqdref( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -336,7 +334,7 @@ Curr_Components MC_GetIqdrefMotor1(void)
  */
 Volt_Components MC_GetVqdMotor1(void)
 {
-	return MCI_GetVqd( pMCI[M1] );
+  return MCI_GetVqd( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -345,7 +343,7 @@ Volt_Components MC_GetVqdMotor1(void)
  */
 Volt_Components MC_GetValphabetaMotor1(void)
 {
-	return MCI_GetValphabeta( pMCI[M1] );
+  return MCI_GetValphabeta( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -354,7 +352,7 @@ Volt_Components MC_GetValphabetaMotor1(void)
  */
 int16_t MC_GetElAngledppMotor1(void)
 {
-	return MCI_GetElAngledpp( pMCI[M1] );
+  return MCI_GetElAngledpp( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -363,7 +361,7 @@ int16_t MC_GetElAngledppMotor1(void)
  */
 int16_t MC_GetTerefMotor1(void)
 {
-	return MCI_GetTeref( pMCI[M1] );
+  return MCI_GetTeref( pMCI[M1] );
 }
 //}}}
 
@@ -379,7 +377,7 @@ int16_t MC_GetTerefMotor1(void)
  */
 void MC_SetIdrefMotor1( int16_t hNewIdref )
 {
-	MCI_SetIdref( pMCI[M1], hNewIdref );
+  MCI_SetIdref( pMCI[M1], hNewIdref );
 }
 //}}}
 //{{{
@@ -393,7 +391,7 @@ void MC_SetIdrefMotor1( int16_t hNewIdref )
  */
 void MC_Clear_IqdrefMotor1(void)
 {
-	MCI_Clear_Iqdref( pMCI[M1] );
+  MCI_Clear_Iqdref( pMCI[M1] );
 }
 //}}}
 
@@ -408,7 +406,7 @@ void MC_Clear_IqdrefMotor1(void)
  */
 bool MC_AcknowledgeFaultMotor1( void )
 {
-	return MCI_FaultAcknowledged( pMCI[M1] );
+  return MCI_FaultAcknowledged( pMCI[M1] );
 }
 //}}}
 
@@ -424,7 +422,7 @@ bool MC_AcknowledgeFaultMotor1( void )
  */
 uint16_t MC_GetOccurredFaultsMotor1(void)
 {
-	return MCI_GetOccurredFaults( pMCI[M1] );
+  return MCI_GetOccurredFaults( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -439,7 +437,7 @@ uint16_t MC_GetOccurredFaultsMotor1(void)
  */
 uint16_t MC_GetCurrentFaultsMotor1(void)
 {
-	return MCI_GetCurrentFaults( pMCI[M1] );
+  return MCI_GetCurrentFaults( pMCI[M1] );
 }
 //}}}
 //{{{
@@ -448,7 +446,7 @@ uint16_t MC_GetCurrentFaultsMotor1(void)
  */
 State_t  MCI_GetSTMStateMotor1(void)
 {
-	return MCI_GetSTMState( pMCI[M1] );
+  return MCI_GetSTMState( pMCI[M1] );
 }
 //}}}
 
@@ -466,7 +464,7 @@ State_t  MCI_GetSTMStateMotor1(void)
 */
 void MC_ProgramRegularConversion(uint8_t bChannel, uint8_t bSampleTime)
 {
-	MC_RequestRegularConv( bChannel, bSampleTime );
+  MC_RequestRegularConv( bChannel, bSampleTime );
 }
 //}}}
 
@@ -479,7 +477,7 @@ void MC_ProgramRegularConversion(uint8_t bChannel, uint8_t bSampleTime)
 */
 uint16_t MC_GetRegularConversionValue(void)
 {
-	return MC_GetRegularConv();
+  return MC_GetRegularConv();
 }
 //}}}
 
@@ -497,6 +495,6 @@ uint16_t MC_GetRegularConversionValue(void)
 */
 UDRC_State_t MC_GetRegularConversionState(void)
 {
-	return MC_RegularConvState();
+  return MC_RegularConvState();
 }
 //}}}

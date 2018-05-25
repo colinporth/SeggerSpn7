@@ -509,12 +509,9 @@
     <file file_name="Src/main.c" />
     <file file_name="Src/mc_api.c" />
     <file file_name="Src/mc_config.c" />
-    <file file_name="Src/mc_parameters.c" />
     <file file_name="Src/mc_tasks.c" />
     <file file_name="Src/motor_control_protocol.c" />
     <file file_name="Src/motorcontrol.c" />
-    <file file_name="Src/stm32f3xx_hal_msp.c" />
-    <file file_name="Src/stm32f3xx_it.c" />
     <file file_name="Src/stm32f30x_mc_it.c" />
     <file file_name="Src/ui_task.c" />
     <file file_name="Src/user_interface.c" />

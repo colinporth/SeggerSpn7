@@ -8,8 +8,7 @@
 #define MC_PROTOCOL_CODE_NONE        0x00
 
 /* List of error codes */
-typedef enum ERROR_CODE_e
-{
+typedef enum ERROR_CODE_e {
 	ERROR_NONE = 0,             /**<  0x00 - No error */
 	ERROR_BAD_FRAME_ID,         /**<  0x01 - BAD Frame ID. The Frame ID has not been recognized by the firmware. */
 	ERROR_CODE_SET_READ_ONLY,   /**<  0x02 - Write on read-only. The master wants to write on a read-only register. */
@@ -23,7 +22,7 @@ typedef enum ERROR_CODE_e
 	ERROR_CODE_BAD_CRC,         /**<  0x0A - The computed CRC is not equal to the received CRC byte. */
 	ERROR_BAD_MOTOR_SELECTED,   /**<  0x0B - Bad target drive. The target motor is not supported by the firmware. */
 	ERROR_MP_NOT_ENABLED        /**<  0x0C - Motor Profiler not enabled. */
-} ERROR_CODE;
+	} ERROR_CODE;
 
 MPInfo_t MPInfo = {0, 0};
 
