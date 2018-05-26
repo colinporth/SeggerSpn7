@@ -4,7 +4,7 @@
 #define DIRECTION                            0    // Set motor direction CW = 0 and CCW = 1
 #define TARGET_SPEED                      2000    // Target speed in closed loop control
 
-#define STARTUP_CURRENT_REFERENCE         2000    // StartUP Currente Reference (2000 = 2.2A)
+#define STARTUP_CURRENT_REFERENCE         1500    // StartUP Currente Reference (2000 = 2.2A)
 #define ACC                             600000    // Mechanical acceleration rate (setting available in manual mode, LOAD_TYPE = 0)
 #define MINIMUM_ACC                        500    // Mechanical acceleration rate for BIG load application
 #define NUMBER_OF_STEPS                  20000    // Number of elements for motor start-UP (max value 65535)

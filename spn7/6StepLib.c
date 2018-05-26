@@ -57,26 +57,25 @@ uint64_t constant_multiplier_tmp = 0;
 //{{{
 static uint64_t fastSqrt (uint64_t wInput) {
 
-
-  uint64_t wtemproot;
+  uint64_t tempRoot;
   if (wInput <= (uint64_t)((uint64_t)2097152 << shift_n_sqrt))
-    wtemproot = (uint64_t)((uint64_t)128 << shift_n_sqrt);
+    tempRoot = (uint64_t)((uint64_t)128 << shift_n_sqrt);
   else
-    wtemproot = (uint64_t)((uint64_t)8192 << shift_n_sqrt);
+    tempRoot = (uint64_t)((uint64_t)8192 << shift_n_sqrt);
 
   uint8_t biter = 0u;
-  uint64_t wtemprootnew;
+  uint64_t tempRootNew;
   do {
-    wtemprootnew = (wtemproot + wInput/wtemproot)>>1;
-    if (wtemprootnew == wtemproot)
+    tempRootNew = (tempRoot + wInput / tempRoot)>>1;
+    if (tempRootNew == tempRoot)
       biter = (shift_n_sqrt-1);
     else {
       biter ++;
-      wtemproot = wtemprootnew;
+      tempRoot = tempRootNew;
       }
     } while (biter < (shift_n_sqrt-1));
 
-  return (wtemprootnew);
+  return tempRootNew;
   }
 //}}}
 
@@ -737,9 +736,6 @@ void MC_Init() {
   SIXSTEP_parameters.LF_TIMx_ARR = LF_TIMx.Instance->ARR;
   SIXSTEP_parameters.LF_TIMx_PSC = LF_TIMx.Instance->PSC;
 
-  // MC_Current_Reference_Start();
-  MC_Current_Reference_Setvalue (SIXSTEP_parameters.Ireference);
-
   SIXSTEP_parameters.Ireference = STARTUP_CURRENT_REFERENCE;
   SIXSTEP_parameters.NUMPOLESPAIRS = NUM_POLE_PAIRS;
   SIXSTEP_parameters.ACCEL = ACC;
@@ -857,6 +853,7 @@ void MC_Reset() {
 
   target_speed = TARGET_SPEED;
   setPiParam (&PI_parameters);
+
   MC_Current_Reference_Start();
   MC_Current_Reference_Setvalue (SIXSTEP_parameters.Ireference);
 
