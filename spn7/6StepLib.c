@@ -147,9 +147,6 @@ static void potSpeed() {
 //{{{
 static void sixStepTable (uint8_t step_number) {
 
-  if (GPIO_COMM == 1)
-    HAL_GPIO_TogglePin (GPIO_PORT_COMM, GPIO_CH_COMM);
-
   switch (step_number) {
     case 1:
       MC_HF_TIMx_SetDutyCycle_CH1 (SIXSTEP_parameters.pulse_value);
@@ -414,9 +411,7 @@ void arrBemf (uint8_t up_bemf) {
 
   if (SIXSTEP_parameters.status_prev != SIXSTEP_parameters.step_position) {
     if (SIXSTEP_parameters.SPEED_VALIDATED == TRUE) {
-      if (GPIO_ZERO_CROSS == 1)
-        HAL_GPIO_TogglePin (GPIO_PORT_ZCR, GPIO_CH_ZCR);
-      if (cnt_bemf_event> BEMF_CNT_EVENT_MAX)
+       if (cnt_bemf_event> BEMF_CNT_EVENT_MAX)
         startup_bemf_failure = 1;
 
       if ((up_bemf == 1) && (SIXSTEP_parameters.BEMF_OK != TRUE)) {
@@ -540,7 +535,6 @@ static void taskSpeed() {
 void MC_ADC() {
 
   if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
-    HAL_GPIO_WritePin (GPIO_PORT_COMM, GPIO_CH_COMM, GPIO_PIN_SET);
     // UP-counting direction started, GET the ADC value (PHASE CURRENT)
     if ((SIXSTEP_parameters.STATUS != START) && (SIXSTEP_parameters.STATUS != ALIGNMENT)) {
       switch (SIXSTEP_parameters.step_position) {
@@ -658,7 +652,6 @@ void MC_ADC() {
     // SET ADC CHANNEL FOR SPEED/CURRENT/VBUS
     // Set the channel for next ADC Regular reading
     MC_ADC_Channel (SIXSTEP_parameters.ADC_SEQ_CHANNEL[index_adc_chn]);
-    HAL_GPIO_WritePin (GPIO_PORT_COMM, GPIO_CH_COMM, GPIO_PIN_RESET);
     }
 
   else {

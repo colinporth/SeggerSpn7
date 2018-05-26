@@ -23,8 +23,8 @@
 #define KI_DIV                            4096    // Ki parameter divider for PI regulator
 #define LOWER_OUT_LIMIT                    120    // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000    // High Out value of PI regulator
-#define MAX_POT_SPEED                    10000    // Maximum Speed regulated by potentiometer
-#define MIN_POT_SPEED                     1000    // Minimum Speed regulated by potentiometer
+#define MAX_POT_SPEED                     5000    // Maximum Speed regulated by potentiometer
+#define MIN_POT_SPEED                     2000    // Minimum Speed regulated by potentiometer
 #define VAL_POT_SPEED_DIV                    2    // Validation potentiometer speed divider
 #define INITIAL_DEMAGN_DELAY                10    // Initial value for delay time during startup for Bemf detection
 
@@ -40,14 +40,6 @@
 // Motor stall detection parameters
 #define BEMF_CONSEC_DOWN_MAX                10   // Maximum value of BEMF Consecutive Threshold Falling Crossings Counter in closed loop
 #define BEMF_CNT_EVENT_MAX                 100   // Maximum number of BEMF Counter in open loop
-
-// Debug pin
-#define GPIO_ZERO_CROSS                      1   // Enable (1) the GPIO toggling for zero crossing detection
-#define GPIO_COMM                            1   // Enable (1) the GPIO toggling for commutation
-
-// Demo mode parameters
-#define DEMO_START_TIME                   5000   // Time (msec) to keep the motor in run mode
-#define DEMO_STOP_TIME                    2000   // Time (msec) to keep the motor in stop mode
 
 // Look UP table for dynamic demagn control of speed
 #define DEMAGN_VAL_1                         1   // Look UP table for dynamic demagn control for speed into (10000,12000] or [-12000,-10000) range
