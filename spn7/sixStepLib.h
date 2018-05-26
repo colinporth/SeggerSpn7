@@ -36,8 +36,8 @@ typedef struct {
   uint32_t HF_TIMx_ARR;                // ARR variable for high frequency timer
   uint32_t HF_TIMx_CCR;                // CCR variable for high frequency timer
 
-  uint8_t step_position;               // Step number variable for SixStep algorithm
-  uint8_t status_prev;                 // Previous status variable for SixStep algorithm
+  uint8_t step_position;               // Step number for SixStep algorithm
+  uint8_t prev_step_position;          // Previous step number for SixStep algorithm
   uint16_t pulse_value;                // CCR value for SixStep algorithm
   uint16_t ARR_value;                  // ARR vector for Accell compute
   uint32_t Regular_channel[4];         // Buffer for ADC regular channel

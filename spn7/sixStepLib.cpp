@@ -279,27 +279,27 @@ void nextStep() {
   if (sixStep.ALIGN_OK) {
     sixStep.speed_fdbk = MC_GetMechSpeedRPM();
     sixStep.demagn_counter = 1;
-    if (sixStep.status_prev != sixStep.step_position)
+    if (sixStep.prev_step_position != sixStep.step_position)
       n_zcr_startup = 0;
 
     if (PI_parameters.Reference >= 0) {
       sixStep.step_position++;
-      if (sixStep.CL_READY)
-        sixStep.VALIDATION_OK = true;
       if (sixStep.step_position > 6)
         sixStep.step_position = 1;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
       }
     else {
       sixStep.step_position--;
-      if (sixStep.CL_READY)
-        sixStep.VALIDATION_OK = true;
       if (sixStep.step_position < 1)
         sixStep.step_position = 6;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
       }
     }
 
   if (sixStep.VALIDATION_OK) {
-    // Motor Stall condition detection and Speed-Feedback error generation
+    // motorStall detection and speedFeedback error generation
     sixStep.BEMF_Tdown_count++;
     if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
       speed_fdbk_error = true;
@@ -312,12 +312,18 @@ void nextStep() {
   // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
   if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
     switch (sixStep.step_position) {
-      case 1: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; break;
-      case 2: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; break;
-      case 3: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; break;
-      case 4: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; break;
-      case 5: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; break;
-      case 6: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; break;
+      case 1: 
+      case 4: 
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; 
+        break;
+      case 2: 
+      case 5: 
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; 
+        break;
+      case 3: 
+      case 6: 
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; 
+        break;
       }
 
     MC_ADC_Channel (sixStep.CurrentRegular_BEMF_ch);
@@ -385,7 +391,7 @@ void arrStep() {
 //{{{
 void arrBemf (bool up_bemf) {
 
-  if (sixStep.status_prev != sixStep.step_position) {
+  if (sixStep.prev_step_position != sixStep.step_position) {
     if (sixStep.SPEED_VALIDATED) {
        if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
         startup_bemf_failure = true;
@@ -403,7 +409,7 @@ void arrBemf (bool up_bemf) {
         }
       }
 
-    sixStep.status_prev = sixStep.step_position;
+    sixStep.prev_step_position = sixStep.step_position;
 
     if (sixStep.VALIDATION_OK) {
       counter_ARR_Bemf = __HAL_TIM_GetCounter (&LF_TIMx);
@@ -761,7 +767,7 @@ void MC_Reset() {
   sixStep.demagn_value = INITIAL_DEMAGN_DELAY;
 
   sixStep.CurrentRegular_BEMF_ch = 0;
-  sixStep.status_prev = 0;
+  sixStep.prev_step_position = 0;
   sixStep.step_position = 0;
 
   LF_TIMx.Init.Prescaler = sixStep.LF_TIMx_PSC;
