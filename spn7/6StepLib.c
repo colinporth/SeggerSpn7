@@ -535,8 +535,9 @@ static void MC_Task_Speed() {
   }
 //}}}
 
+// callback interface
 //{{{
-static void MC_SixStep_ARR_Bemf (uint8_t up_bemf) {
+void MC_SixStep_ARR_Bemf (uint8_t up_bemf) {
 
   if (SIXSTEP_parameters.status_prev != SIXSTEP_parameters.step_position) {
     if (SIXSTEP_parameters.SPEED_VALIDATED == TRUE) {
@@ -568,7 +569,7 @@ static void MC_SixStep_ARR_Bemf (uint8_t up_bemf) {
   }
 //}}}
 //{{{
-static void MC_ADCx_SixStep_Bemf() {
+void MC_ADCx_SixStep_Bemf() {
 
   if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
     HAL_GPIO_WritePin (GPIO_PORT_COMM,GPIO_CH_COMM,GPIO_PIN_SET);
@@ -720,7 +721,7 @@ static void MC_ADCx_SixStep_Bemf() {
   }
 //}}}
 //{{{
-static void MC_TIMx_SixStep_timebase() {
+void MC_TIMx_SixStep_timebase() {
 
   MC_SixStep_NEXT_step();
 
@@ -744,19 +745,6 @@ static void MC_SysTick_SixStep_MediumFrequencyTask() {
       UART_Communication_Task();
   #endif
 
-  #ifdef DEMOMODE
-    index_motor_run++;
-    if (index_motor_run >= DEMO_START_TIME && test_motor_run == 0) {
-      MC_StopMotor();
-      index_motor_run=0;
-      test_motor_run=1;
-      }
-    if (index_motor_run >= DEMO_STOP_TIME && test_motor_run == 1) {
-      MC_StartMotor();
-      test_motor_run = 0;
-      index_motor_run=0;
-      }
-  #endif
 
   if (SIXSTEP_parameters.VALIDATION_OK == TRUE && SIXSTEP_parameters.Potentiometer  == TRUE)
     MC_SixStep_Speed_Potentiometer();
