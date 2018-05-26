@@ -101,8 +101,8 @@ typedef struct {
 //}}}
 
 // external interface
-void MC_INIT();
-void MC_RESET();
+void MC_Init();
+void MC_Reset();
 
 int32_t MC_GetElSpeedHz();
 int32_t MC_GetMechSpeedRPM();
@@ -110,8 +110,8 @@ int32_t MC_GetMechSpeedRPM();
 void MC_StartMotor();
 void MC_StopMotor();
 
-void MC_Set_Speed (uint16_t);
-void MC_EXT_button_SixStep();
+void MC_SetSpeed (uint16_t);
+void MC_EXTbutton();
 
 //{{{
 #ifdef __cplusplus

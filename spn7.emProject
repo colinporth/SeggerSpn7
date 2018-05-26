@@ -44,16 +44,18 @@
       <file file_name="system/thumb_crt0.s" />
       <file file_name="system/SEGGER_HardFaultHandler.c" />
       <file file_name="system/system_stm32f3xx.c" />
+      <folder Name="inc">
+        <file file_name="system/stm32f303xe.h" />
+        <file file_name="system/stm32f3xx.h" />
+        <file file_name="system/system_stm32f3xx.h" />
+        <file file_name="system/stm32f3xx_hal_conf.h" />
+        <file file_name="system/stm32f3xx_nucleo.h" />
+      </folder>
     </folder>
     <folder Name="inc">
       <file file_name="spn7/6StepLib.h" />
       <file file_name="spn7/6StepParam.h" />
       <file file_name="spn7/ihm07m1.h" />
-      <file file_name="spn7/stm32f3xx.h" />
-      <file file_name="spn7/stm32f3xx_hal_conf.h" />
-      <file file_name="spn7/stm32f3xx_nucleo.h" />
-      <file file_name="spn7/stm32f303xe.h" />
-      <file file_name="spn7/system_stm32f3xx.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">

@@ -7,10 +7,12 @@ SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;  // SixStep PI regulator structure
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor */
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate */
 uint32_t constant_k = 0;                  //  1/3*mech_accel_hz */
+
 uint32_t Time_vector_tmp = 0;             //  Startup variable  */
 uint32_t Time_vector_prev_tmp = 0 ;       //  Startup variable  */
 uint32_t T_single_step = 0;               //  Startup variable  */
 uint32_t T_single_step_first_value = 0;   //  Startup variable  */
+
 int32_t  delta = 0;                       //  Startup variable  */
 uint16_t index_array = 1;                 //  Speed filter variable */
 int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable */
@@ -19,26 +21,34 @@ uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Fil
 uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index */
 uint8_t  array_completed = FALSE;         //  Speed filter variable */
 uint8_t  buffer_completed = FALSE;        //  Potentiometer filter variable */
+
 uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable */
 int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed */
 int32_t El_Speed_Hz = 0;                  //  Electrical motor speed */
+
 uint16_t index_adc_chn = 0;               //  Index of ADC channel selector for measuring */
 uint16_t index_motor_run = 0;             //  Tmp variable for DEMO mode */
+
 uint16_t test_motor_run = 1;              //  Tmp variable for DEMO mode */
 uint8_t Enable_start_button = TRUE;       //  Start/stop button filter to avoid double command */
+
 uint16_t index_ARR_step = 1;
 uint32_t n_zcr_startup = 0;
 uint16_t index_startup_motor = 1;
 uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop control */
 uint16_t shift_n_sqrt = 14;
+
 uint16_t cnt_bemf_event = 0;
 uint8_t startup_bemf_failure = 0;
+
 uint8_t speed_fdbk_error = 0;
+
 uint16_t index_align = 1;
 int32_t speed_sum_sp_filt = 0;
 int32_t speed_sum_pot_filt = 0;
 uint16_t index_pot_filt = 1;
 int16_t potent_filtered = 0;
+
 uint32_t Tick_cnt = 0;
 uint32_t counter_ARR_Bemf = 0;
 uint64_t constant_multiplier_tmp = 0;
@@ -654,7 +664,7 @@ void MC_Timebase() {
   }
 //}}}
 //{{{
-void MC_SysTickTask() {
+void MC_SysTick() {
 
   if ((SIXSTEP_parameters.ALIGNMENT == TRUE) && (SIXSTEP_parameters.ALIGN_OK == FALSE)) {
     //{{{  align motor
@@ -693,7 +703,7 @@ void MC_SysTickTask() {
 
     SIXSTEP_parameters.MediumFrequencyTask_flag = TRUE;
     if (SIXSTEP_parameters.VALIDATION_OK == TRUE)
-      MC_Set_Speed (0);
+      MC_SetSpeed (0);
     Tick_cnt = 0;
     }
   else
@@ -717,7 +727,7 @@ void MC_SysTickTask() {
 
 // external interface
 //{{{
-void MC_INIT() {
+void MC_Init() {
 
   MC_Nucleo_Init();
 
@@ -738,11 +748,11 @@ void MC_INIT() {
   SIXSTEP_parameters.CW_CCW = DIRECTION;
   SIXSTEP_parameters.Button_ready = TRUE;
 
-  MC_RESET();
+  MC_Reset();
   }
 //}}}
 //{{{
-void MC_RESET() {
+void MC_Reset() {
 
   SIXSTEP_parameters.CMD = TRUE;
   SIXSTEP_parameters.numberofitemArr = NUMBER_OF_STEPS;
@@ -907,12 +917,12 @@ void MC_StopMotor() {
 
   MC_Current_Reference_Stop();
   NUCLEO_LED_OFF();
-  MC_RESET();
+  MC_Reset();
   }
 //}}}
 
 //{{{
-void MC_Set_Speed (uint16_t speed_value) {
+void MC_SetSpeed (uint16_t speed_value) {
 
   uint8_t change_target_speed = 0;
   int16_t reference_tmp = 0;
@@ -945,7 +955,7 @@ void MC_Set_Speed (uint16_t speed_value) {
   }
 //}}}
 //{{{
-void MC_EXT_button_SixStep() {
+void MC_EXTbutton() {
 
   if (Enable_start_button == TRUE) {
     if ((SIXSTEP_parameters.RUN_Motor == 0) && (SIXSTEP_parameters.Button_ready == TRUE)) {
@@ -972,9 +982,9 @@ void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
   }
 
 void HAL_SYSTICK_Callback() {
-  MC_SysTickTask();
+  MC_SysTick();
   }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin) {
-  MC_EXT_button_SixStep();
+  MC_EXTbutton();
   }

@@ -110,73 +110,6 @@ void _Error_Handler (const char* file, int line) {
 //}}}
 
 //{{{
-void HAL_MspInit() {
-
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-  HAL_NVIC_SetPriorityGrouping (NVIC_PRIORITYGROUP_4);
-
-  // MemoryManagement_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (MemoryManagement_IRQn, 0, 0);
-
-  // BusFault_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (BusFault_IRQn, 0, 0);
-
-  // UsageFault_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (UsageFault_IRQn, 0, 0);
-
-  // SVCall_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (SVCall_IRQn, 0, 0);
-
-  // DebugMonitor_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (DebugMonitor_IRQn, 0, 0);
-
-  // PendSV_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (PendSV_IRQn, 0, 0);
-
-  // SysTick_IRQn interrupt configuration
-  HAL_NVIC_SetPriority (SysTick_IRQn, 2, 0);
-  }
-//}}}
-//{{{
-void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
-// ADC1 GPIO Configuration
-// PC1 > ADC1_IN7
-// PC2 > ADC1_IN8
-// PC3 > ADC1_IN9
-// PA1 > ADC1_IN2
-// PA7 > ADC1_IN15
-// PB0 > ADC1_IN11
-// PB1 > ADC1_IN12
-
-  if (hadc->Instance == ADC1) {
-    __HAL_RCC_ADC1_CLK_ENABLE();
-
-    // config GPIO C adc inputs
-    GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init (GPIOC, &GPIO_InitStruct);
-
-    // config GPIO A adc inputs
-    GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_7;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
-
-    // config GPIO B adc inputs
-    GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init (GPIOB, &GPIO_InitStruct);
-
-    // ADC1 interrupt Init
-    HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ (ADC1_IRQn);
-    }
-  }
-//}}}
-//{{{
 void HAL_TIM_Base_MspInit (TIM_HandleTypeDef* htim_base) {
 
   if (htim_base->Instance == TIM1) {
@@ -261,26 +194,6 @@ void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim) {
     }
   }
 //}}}
-//{{{
-void HAL_DAC_MspInit (DAC_HandleTypeDef* hdac) {
-// DAC GPIO Configuration
-// PA4 > DAC_OUT1
-
-  if (hdac->Instance==DAC) {
-    __HAL_RCC_DAC1_CLK_ENABLE();
-
-    GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = GPIO_PIN_4;
-    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
-
-    // DAC interrupt Init
-    HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
-    HAL_NVIC_EnableIRQ (TIM6_DAC_IRQn);
-    }
-  }
-//}}}
 
 //{{{
 void SystemClock_Config() {
@@ -333,7 +246,7 @@ void SystemClock_Config() {
   }
 //}}}
 //{{{
-static void MX_GPIO_Init() {
+static void GPIO_Init() {
 
   // GPIO Ports Clock Enable
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -370,7 +283,40 @@ static void MX_GPIO_Init() {
   }
 //}}}
 //{{{
-static void MX_ADC1_Init() {
+static void ADC1_Init() {
+// ADC1 GPIO Configuration
+// PC1 > ADC1_IN7
+// PC2 > ADC1_IN8
+// PC3 > ADC1_IN9
+// PA1 > ADC1_IN2
+// PA7 > ADC1_IN15
+// PB0 > ADC1_IN11
+// PB1 > ADC1_IN12
+
+  __HAL_RCC_ADC1_CLK_ENABLE();
+
+  // config GPIO C adc inputs
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOC, &GPIO_InitStruct);
+
+  // config GPIO A adc inputs
+  GPIO_InitStruct.Pin = GPIO_PIN_1 | GPIO_PIN_7;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
+
+  // config GPIO B adc inputs
+  GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOB, &GPIO_InitStruct);
+
+  // ADC1 interrupt Init
+  HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ (ADC1_IRQn);
 
   ADC_ChannelConfTypeDef sConfig;
   hadc1.Instance = ADC1;
@@ -401,7 +347,7 @@ static void MX_ADC1_Init() {
   }
 //}}}
 //{{{
-static void MX_TIM1_Init() {
+static void TIM1_Init() {
 
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
@@ -474,7 +420,7 @@ static void MX_TIM1_Init() {
   }
 //}}}
 //{{{
-static void MX_TIM2_Init() {
+static void TIM2_Init() {
 
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 719;
@@ -510,7 +456,7 @@ static void MX_TIM2_Init() {
   }
 //}}}
 //{{{
-static void MX_TIM6_Init() {
+static void TIM6_Init() {
 
   htim6.Instance = TIM6;
   htim6.Init.Prescaler = 11;
@@ -528,7 +474,7 @@ static void MX_TIM6_Init() {
   }
 //}}}
 //{{{
-static void MX_TIM16_Init() {
+static void TIM16_Init() {
 
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 0;
@@ -569,7 +515,21 @@ static void MX_TIM16_Init() {
   }
 //}}}
 //{{{
-static void MX_DAC_Init() {
+static void DAC_Init() {
+// DAC GPIO Configuration
+// PA4 > DAC_OUT1
+
+  __HAL_RCC_DAC1_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
+
+  // DAC interrupt Init
+  HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ (TIM6_DAC_IRQn);
 
   hdac.Instance = DAC;
   if (HAL_DAC_Init (&hdac) != HAL_OK)
@@ -589,15 +549,25 @@ static void MX_DAC_Init() {
   HAL_Init();
   SystemClock_Config();
 
-  MX_GPIO_Init();
-  MX_ADC1_Init();
-  MX_TIM1_Init();
-  MX_TIM2_Init();
-  MX_TIM6_Init();
-  MX_TIM16_Init();
-  MX_DAC_Init();
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+  HAL_NVIC_SetPriorityGrouping (NVIC_PRIORITYGROUP_4);
+  HAL_NVIC_SetPriority (MemoryManagement_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (BusFault_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (UsageFault_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (SVCall_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (DebugMonitor_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (PendSV_IRQn, 0, 0);
+  HAL_NVIC_SetPriority (SysTick_IRQn, 2, 0);
 
-  MC_INIT();
+  GPIO_Init();
+  ADC1_Init();
+  TIM1_Init();
+  TIM2_Init();
+  TIM6_Init();
+  TIM16_Init();
+  DAC_Init();
+
+  MC_Init();
 
   int loop = 0;
   while (1) {
@@ -606,4 +576,3 @@ static void MX_DAC_Init() {
     }
   }
 //}}}
-
