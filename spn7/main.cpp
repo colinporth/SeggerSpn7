@@ -51,7 +51,6 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim16;
-UART_HandleTypeDef huart2;
 
 extern SIXSTEP_Base_InitTypeDef SIXSTEP_parameters;
 //}}}
@@ -70,16 +69,6 @@ extern "C" {
 
     //printf ("ADC1_IRQHandler\n");
     HAL_ADC_IRQHandler (&hadc1);
-    }
-  //}}}
-  //{{{
-  void USART2_IRQHandler() {
-
-    HAL_UART_IRQHandler (&huart2);
-
-    #ifdef UART_COMM
-      UART_Set_Value();
-    #endif
     }
   //}}}
   //{{{
@@ -188,18 +177,6 @@ void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
   }
 //}}}
 //{{{
-void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc) {
-
-  if (hadc->Instance==ADC1) {
-    __HAL_RCC_ADC1_CLK_DISABLE();
-    HAL_GPIO_DeInit (GPIOC, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
-    HAL_GPIO_DeInit (GPIOA, GPIO_PIN_1 | GPIO_PIN_7);
-    HAL_GPIO_DeInit (GPIOB, GPIO_PIN_0 | GPIO_PIN_1);
-    HAL_NVIC_DisableIRQ (ADC1_IRQn);
-    }
-  }
-//}}}
-//{{{
 void HAL_TIM_Base_MspInit (TIM_HandleTypeDef* htim_base) {
 
   if (htim_base->Instance == TIM1) {
@@ -285,29 +262,6 @@ void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim) {
   }
 //}}}
 //{{{
-void HAL_TIM_Base_MspDeInit (TIM_HandleTypeDef* htim_base) {
-
-  if (htim_base->Instance==TIM1) {
-    __HAL_RCC_TIM1_CLK_DISABLE();
-    HAL_GPIO_DeInit (GPIOA, GPIO_PIN_6 | GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_12);
-    }
-
-  else if (htim_base->Instance==TIM2) {
-    __HAL_RCC_TIM2_CLK_DISABLE();
-    HAL_GPIO_DeInit (GPIOA, GPIO_PIN_5);
-    HAL_GPIO_DeInit (GPIOB, GPIO_PIN_10|GPIO_PIN_3);
-    }
-
-  else if(htim_base->Instance==TIM6) {
-    __HAL_RCC_TIM6_CLK_DISABLE();
-    /* HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn); */
-    }
-
-  else if(htim_base->Instance==TIM16)
-    __HAL_RCC_TIM16_CLK_DISABLE();
-  }
-//}}}
-//{{{
 void HAL_DAC_MspInit (DAC_HandleTypeDef* hdac) {
 // DAC GPIO Configuration
 // PA4 > DAC_OUT1
@@ -324,49 +278,6 @@ void HAL_DAC_MspInit (DAC_HandleTypeDef* hdac) {
     // DAC interrupt Init
     HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ (TIM6_DAC_IRQn);
-    }
-  }
-//}}}
-//{{{
-void HAL_DAC_MspDeInit (DAC_HandleTypeDef* hdac) {
-
-  if (hdac->Instance == DAC) {
-    __HAL_RCC_DAC1_CLK_DISABLE();
-    HAL_GPIO_DeInit (GPIOA, GPIO_PIN_4);
-    /* HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn); */
-    }
-  }
-//}}}
-//{{{
-void HAL_UART_MspInit (UART_HandleTypeDef* huart) {
-// USART2 GPIO Configuration
-// PA2 > USART2_TX
-// PA3 > USART2_RX
-
-  if (huart->Instance == USART2) {
-    __HAL_RCC_USART2_CLK_ENABLE();
-
-    GPIO_InitTypeDef GPIO_InitStruct;
-    GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF7_USART2;
-    HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
-
-    // USART2 interrupt Init
-    HAL_NVIC_SetPriority (USART2_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ (USART2_IRQn);
-    }
-  }
-//}}}
-//{{{
-void HAL_UART_MspDeInit (UART_HandleTypeDef* huart) {
-
-  if (huart->Instance == USART2) {
-    __HAL_RCC_USART2_CLK_DISABLE();
-    HAL_GPIO_DeInit (GPIOA, GPIO_PIN_2 | GPIO_PIN_3);
-    HAL_NVIC_DisableIRQ (USART2_IRQn);
     }
   }
 //}}}
@@ -675,34 +586,12 @@ static void MX_DAC_Init() {
     _Error_Handler(__FILE__, __LINE__);
   }
 //}}}
-//{{{
-static void MX_USART2_UART_Init() {
-
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 19200;
-  huart2.Init.WordLength = UART_WORDLENGTH_9B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_ODD;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init (&huart2) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
-  }
-//}}}
 
 //{{{
-int main() {
+ int main() {
 
   HAL_Init();
   SystemClock_Config();
-
-  //BSP_LED_Init (LED2);
-  //BSP_LED_On (LED2);
-  //BSP_LED_Off (LED2);
-  //BSP_LED_On (LED2);
 
   MX_GPIO_Init();
   MX_ADC1_Init();
@@ -711,17 +600,14 @@ int main() {
   MX_TIM6_Init();
   MX_TIM16_Init();
   MX_DAC_Init();
-  MX_USART2_UART_Init();
 
   MC_SixStep_INIT();
 
   int loop = 0;
   while (1) {
     HAL_Delay (1000);
-    //BSP_LED_Off (LED2);
-    HAL_Delay (1000);
-    //BSP_LED_On (LED2);
-    printf ("loop %d\n", loop++);
+    //printf ("loop %d\n", loop++);
     }
   }
 //}}}
+

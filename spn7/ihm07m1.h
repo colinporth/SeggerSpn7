@@ -109,8 +109,6 @@ void MC_SixStep_Current_Reference_Start();
 void MC_SixStep_Current_Reference_Stop();
 void MC_SixStep_Current_Reference_Setvalue (uint16_t);
 
-uint32_t Get_UART_Data();
-
 void BSP_X_NUCLEO_FAULT_LED_ON();
 void BSP_X_NUCLEO_FAULT_LED_OFF();
 

@@ -21,6 +21,8 @@
       gcc_c_language_standard="c11"
       gcc_cplusplus_language_standard="c++14"
       linker_output_format="hex"
+      linker_printf_fp_enabled="Float"
+      linker_printf_width_precision_supported="Yes"
       linker_section_placement_file="$(ProjectDir)/flash_placement.xml"
       linker_section_placements_segments="FLASH RX 0x08000000 0x00080000;SRAM RWX 0x20000000 0x00010000"
       macros="STLport=No"
@@ -195,7 +197,6 @@
     <file file_name="spn7/6StepLib.c" />
     <file file_name="spn7/ihm07m1.c" />
     <file file_name="spn7/stm32f3xx_nucleo.c" />
-    <file file_name="spn7/UART_UI.c" />
     <file file_name="spn7/main.cpp" />
   </project>
   <configuration

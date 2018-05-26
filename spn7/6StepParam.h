@@ -1,7 +1,7 @@
 #pragma once
 
 // BASIC PARAMETERS
-#define NUM_POLE_PAIRS                       6    // Number of Motor Pole pairs
+#define NUM_POLE_PAIRS                       4    // Number of Motor Pole pairs
 #define DIRECTION                            0    // Set motor direction CW = 0 and CCW = 1
 #define TARGET_SPEED                      1000    // Target speed in closed loop control
 #define POTENTIOMETER                        1    // Enable (1)/Disable (0) the potentiometer

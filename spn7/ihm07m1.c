@@ -214,70 +214,77 @@ void Bemf_delay_calc() {
 //}}}
 
 //{{{
-void MC_SixStep_ADC_Channel (uint32_t adc_ch) {
-
-  ADCx.Instance->CR |= ADC_CR_ADSTP;
-  while (ADCx.Instance->CR & ADC_CR_ADSTP);
-
-  /* Clear the old SQx bits for the selected rank */
-  ADCx.Instance->SQR1 &= ~__HAL_ADC_SQR1_RK(ADC_SQR2_SQ5, 1);
-
-  /* Set the SQx bits for the selected rank */
-  ADCx.Instance->SQR1 |= __HAL_ADC_SQR1_RK(adc_ch, 1);
-  ADCx.Instance->CR |= ADC_CR_ADSTART;
-  }
-//}}}
-//{{{
 void MC_SixStep_Nucleo_Init() {
 
+  // TIM ETR CONFIGURATION
   TIM_ClearInputConfigTypeDef sClearInputConfig;
-  ADC_ChannelConfTypeDef sConfig;
-
-  /******************** ETR CONFIGURATION ************************************/
   sClearInputConfig.ClearInputState = 1;
   sClearInputConfig.ClearInputSource = TIM_CLEARINPUTSOURCE_ETR;
   sClearInputConfig.ClearInputPolarity = TIM_CLEARINPUTPOLARITY_NONINVERTED;
   sClearInputConfig.ClearInputPrescaler = TIM_CLEARINPUTPRESCALER_DIV1;
   sClearInputConfig.ClearInputFilter = 0;
-  HAL_TIM_ConfigOCrefClear(&HF_TIMx, &sClearInputConfig, HF_TIMx_CH1);
-  HAL_TIM_ConfigOCrefClear(&HF_TIMx, &sClearInputConfig, HF_TIMx_CH2);
-  HAL_TIM_ConfigOCrefClear(&HF_TIMx, &sClearInputConfig, HF_TIMx_CH3);
+  HAL_TIM_ConfigOCrefClear (&HF_TIMx, &sClearInputConfig, HF_TIMx_CH1);
+  HAL_TIM_ConfigOCrefClear (&HF_TIMx, &sClearInputConfig, HF_TIMx_CH2);
+  HAL_TIM_ConfigOCrefClear (&HF_TIMx, &sClearInputConfig, HF_TIMx_CH3);
 
-  __HAL_FREEZE_TIM1_DBGMCU();  /* Stop TIM during Breakpoint*/
-  __HAL_TIM_ENABLE_IT(&htim1, TIM_IT_BREAK); /* Enable the TIM Break interrupt */
+  // stop TIM during Breakpoint
+  __HAL_FREEZE_TIM1_DBGMCU();
+  __HAL_TIM_ENABLE_IT (&htim1, TIM_IT_BREAK);
 
-  /******************** REGULAR CHANNELS CONFIGURATION *************************/
-  sConfig.Channel = ADC_CH_1; /* Current feedabck */
+  // REGULAR CHANNELS CONFIGURATION
+  // Current feedabck
+  ADC_ChannelConfTypeDef sConfig;
+  sConfig.Channel = ADC_CH_1;
   sConfig.Rank = 1;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
   sConfig.SamplingTime = ADC_CH_1_ST;
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_CH_3; /* Bus voltage */
+  // Bus voltage
+  sConfig.Channel = ADC_CH_3;
   sConfig.SamplingTime = ADC_CH_3_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_CH_4; /* Temperature feedback */
+  // Temperature feedback
+  sConfig.Channel = ADC_CH_4;
   sConfig.SamplingTime = ADC_CH_4_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_Bemf_CH1; /* BEMF feedback phase A */
+  // BEMF feedback phase A
+  sConfig.Channel = ADC_Bemf_CH1;
   sConfig.SamplingTime = ADC_Bemf_CH1_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_Bemf_CH2; /* BEMF feedback phase B */
+  // BEMF feedback phase B
+  sConfig.Channel = ADC_Bemf_CH2;
   sConfig.SamplingTime = ADC_Bemf_CH2_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_Bemf_CH3; /* BEMF feedback phase C */
+  // BEMF feedback phase C
+  sConfig.Channel = ADC_Bemf_CH3;
   sConfig.SamplingTime = ADC_Bemf_CH3_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
 
-  sConfig.Channel = ADC_CH_2; /* Potentiometer */
+  // Potentiometer
+  sConfig.Channel = ADC_CH_2;
   sConfig.SamplingTime = ADC_CH_2_ST;
-  HAL_ADC_ConfigChannel(&hadc1, &sConfig);
+  HAL_ADC_ConfigChannel (&hadc1, &sConfig);
+  }
+//}}}
+//{{{
+void MC_SixStep_ADC_Channel (uint32_t adc_ch) {
+
+  ADCx.Instance->CR |= ADC_CR_ADSTP;
+  while (ADCx.Instance->CR & ADC_CR_ADSTP);
+
+  // Clear the old SQx bits for the selected rank
+  ADCx.Instance->SQR1 &= ~__HAL_ADC_SQR1_RK (ADC_SQR2_SQ5, 1);
+
+  // Set the SQx bits for the selected rank
+  ADCx.Instance->SQR1 |= __HAL_ADC_SQR1_RK (adc_ch, 1);
+  ADCx.Instance->CR |= ADC_CR_ADSTART;
   }
 //}}}
 
@@ -342,12 +349,6 @@ void MC_SixStep_Current_Reference_Stop() {
 //{{{
 void MC_SixStep_Current_Reference_Setvalue (uint16_t Iref) {
   L6230MotorDriver.Current_Reference_Setvalue (Iref);
-  }
-//}}}
-
-//{{{
-uint32_t Get_UART_Data() { 
-  return (UART.Instance->RDR); 
   }
 //}}}
 
