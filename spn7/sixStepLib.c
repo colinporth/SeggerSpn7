@@ -4,38 +4,38 @@
 SIXSTEP_Base_InitTypeDef sixStep;  // Main SixStep structure
 SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters; // SixStep PI regulator structure
 //{{{  vars
-uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor */
-uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate */
-uint32_t constant_k = 0;                  //  1/3*mech_accel_hz */
+uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
+uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
+uint32_t constant_k = 0;                  //  1/3*mech_accel_hz
 
-uint32_t Time_vector_tmp = 0;             //  Startup variable  */
-uint32_t Time_vector_prev_tmp = 0 ;       //  Startup variable  */
-uint32_t T_single_step = 0;               //  Startup variable  */
-uint32_t T_single_step_first_value = 0;   //  Startup variable  */
+uint32_t Time_vector_tmp = 0;             //  Startup variable
+uint32_t Time_vector_prev_tmp = 0 ;       //  Startup variable
+uint32_t T_single_step = 0;               //  Startup variable
+uint32_t T_single_step_first_value = 0;   //  Startup variable
 
-int32_t  delta = 0;                       //  Startup variable  */
-uint16_t index_array = 1;                 //  Speed filter variable */
-int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable */
-uint16_t speed_tmp_buffer[FILTER_DEEP];   //  Potentiometer filter variable */
-uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion */
-uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index */
-uint8_t  array_completed = FALSE;         //  Speed filter variable */
-uint8_t  buffer_completed = FALSE;        //  Potentiometer filter variable */
+int32_t  delta = 0;                       //  Startup variable
+uint16_t index_array = 1;                 //  Speed filter variable
+int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable
+uint16_t speed_tmp_buffer[FILTER_DEEP];   //  Potentiometer filter variable
+uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
+uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index
+uint8_t  array_completed = FALSE;         //  Speed filter variable
+uint8_t  buffer_completed = FALSE;        //  Potentiometer filter variable
 
-uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable */
-int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed */
-int32_t El_Speed_Hz = 0;                  //  Electrical motor speed */
+uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable
+int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed
+int32_t El_Speed_Hz = 0;                  //  Electrical motor speed
 
-uint16_t index_adc_chn = 0;               //  Index of ADC channel selector for measuring */
-uint16_t index_motor_run = 0;             //  Tmp variable for DEMO mode */
+uint16_t index_adc_chn = 0;               //  Index of ADC channel selector for measuring
+uint16_t index_motor_run = 0;             //  Tmp variable for DEMO mode
 
-uint16_t test_motor_run = 1;              //  Tmp variable for DEMO mode */
-uint8_t Enable_start_button = TRUE;       //  Start/stop button filter to avoid double command */
+uint16_t test_motor_run = 1;              //  Tmp variable for DEMO mode
+uint8_t Enable_start_button = TRUE;       //  Start/stop button filter to avoid double command
 
 uint16_t index_ARR_step = 1;
 uint32_t n_zcr_startup = 0;
 uint16_t index_startup_motor = 1;
-uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop control */
+uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop control
 uint16_t shift_n_sqrt = 14;
 
 uint16_t cnt_bemf_event = 0;
@@ -459,7 +459,7 @@ static int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t s
 
   // WARNING: the below instruction is not MISRA compliant, user should verify
   //          that Cortex-M3 assembly instruction ASR (arithmetic shift right)
-  //          is used by the compiler to perform the shifts (instead of LSR logical shift right)*/
+  //          is used by the compiler to perform the shifts (instead of LSR logical shift right)
   int32_t wOutput_32 = (wProportional_Term / KP_DIV) + (sixStep.Integral_Term_sum / KI_DIV);
 
   if (PI_PARAM->Reference > 0) {
@@ -784,13 +784,13 @@ void MC_Reset() {
   MC_HF_TIMx_SetDutyCycle_CH2(0);
   MC_HF_TIMx_SetDutyCycle_CH3(0);
 
-  sixStep.Regular_channel[1] = ADC_Bemf_CH1;   /*BEMF1*/
-  sixStep.Regular_channel[2] = ADC_Bemf_CH2;   /*BEMF2*/
-  sixStep.Regular_channel[3] = ADC_Bemf_CH3;   /*BEMF3*/
-  sixStep.ADC_SEQ_CHANNEL[0] = ADC_CH_1;       /*CURRENT*/
-  sixStep.ADC_SEQ_CHANNEL[1] = ADC_CH_2;       /*SPEED*/
-  sixStep.ADC_SEQ_CHANNEL[2] = ADC_CH_3;       /*VBUS*/
-  sixStep.ADC_SEQ_CHANNEL[3] = ADC_CH_4;       /*TEMP*/
+  sixStep.Regular_channel[1] = ADC_Bemf_CH1;   //BEMF1
+  sixStep.Regular_channel[2] = ADC_Bemf_CH2;   //BEMF2
+  sixStep.Regular_channel[3] = ADC_Bemf_CH3;   //BEMF3
+  sixStep.ADC_SEQ_CHANNEL[0] = ADC_CH_1;       //CURRENT
+  sixStep.ADC_SEQ_CHANNEL[1] = ADC_CH_2;       //SPEED
+  sixStep.ADC_SEQ_CHANNEL[2] = ADC_CH_3;       //VBUS
+  sixStep.ADC_SEQ_CHANNEL[3] = ADC_CH_4;       //TEMP
 
   sixStep.step_position = 0;
   sixStep.demagn_counter = 0;
@@ -806,7 +806,7 @@ void MC_Reset() {
   sixStep.BEMF_OK = FALSE;
   sixStep.CL_READY = FALSE;
   sixStep.SPEED_VALIDATED = FALSE;
-  sixStep.BEMF_Tdown_count = 0;   /* Reset of the Counter to detect Stop motor condition when a stall condition occurs*/
+  sixStep.BEMF_Tdown_count = 0;   // Reset of the Counter to detect Stop motor condition when a stall condition occurs
 
   index_motor_run = 0;
   test_motor_run = 1;
