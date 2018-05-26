@@ -504,7 +504,7 @@ static void taskSpeed() {
     MC_Current_Reference_Setvalue (sixStep.Current_Reference);
     }
 
-  bemfDelayCalc();
+  MC_bemfDelayCalc();
   }
 //}}}
 

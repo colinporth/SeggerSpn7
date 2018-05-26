@@ -58,7 +58,7 @@ extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim16;
 
-void bemfDelayCalc();
+void MC_bemfDelayCalc();
 
 void MC_ADC_Channel (uint32_t);
 void MC_Nucleo_Init();
