@@ -104,8 +104,13 @@ typedef struct {
 // external interface
 void MC_SixStep_INIT();
 void MC_SixStep_RESET();
+
+int32_t MC_GetElSpeedHz();
+int32_t MC_GetMechSpeedRPM();
+
 void MC_StartMotor();
 void MC_StopMotor();
+
 void MC_Set_Speed (uint16_t);
 void MC_EXT_button_SixStep();
 

@@ -88,7 +88,7 @@ void START_DAC();
 void STOP_DAC();
 void SET_DAC_value (uint16_t);
 
-void Bemf_delay_calc();
+void bemfDelayCalc();
 
 void MC_SixStep_ADC_Channel (uint32_t);
 void MC_SixStep_Nucleo_Init();

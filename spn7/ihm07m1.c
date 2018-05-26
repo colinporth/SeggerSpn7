@@ -148,7 +148,7 @@ void SET_DAC_value (uint16_t dac_value) {
   }
 //}}}
 //{{{
-void Bemf_delay_calc() {
+void bemfDelayCalc() {
 
  if (PI_parameters.Reference >= 0) {
    if(SIXSTEP_parameters.speed_fdbk_filtered<=12000 && SIXSTEP_parameters.speed_fdbk_filtered>10000)
