@@ -2,6 +2,18 @@
 #include "ihm07m1.h"
 #include "sixStepLib.h"
 
+#define GPIO_CH1  GPIO_PIN_10
+#define GPIO_CH2  GPIO_PIN_11
+#define GPIO_CH3  GPIO_PIN_12
+
+#define ADC_CH_1_ST       ADC_SAMPLETIME_1CYCLE_5    // CURRENT sampling time
+#define ADC_CH_2_ST       ADC_SAMPLETIME_181CYCLES_5 // SPEED sampling time
+#define ADC_CH_3_ST       ADC_SAMPLETIME_181CYCLES_5 // VBUS sampling time
+#define ADC_CH_4_ST       ADC_SAMPLETIME_181CYCLES_5 // TEMP sampling time
+#define ADC_Bemf_CH1_ST   ADC_SAMPLETIME_61CYCLES_5  // BEMF1 sampling time
+#define ADC_Bemf_CH2_ST   ADC_SAMPLETIME_61CYCLES_5  // BEMF2 sampling time
+#define ADC_Bemf_CH3_ST   ADC_SAMPLETIME_61CYCLES_5  // BEMF3 sampling time
+
 ADC_HandleTypeDef hadc1;
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
@@ -13,7 +25,7 @@ extern SIXSTEP_Base_InitTypeDef sixStep;
 extern SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;
 
 // irq handlers
-//extern "C" {
+extern "C" {
   //{{{
   void SysTick_Handler() {
 
@@ -56,7 +68,7 @@ extern SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;
     HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13);
     }
   //}}}
-  //}
+  }
 
 //{{{
 void _Error_Handler (const char* file, int line) {
@@ -67,7 +79,7 @@ void _Error_Handler (const char* file, int line) {
 //}}}
 
 //{{{
-static void GPIO_Init() {
+void GPIO_Init() {
 
   // GPIO Ports Clock Enable
   __HAL_RCC_GPIOC_CLK_ENABLE();
@@ -104,7 +116,7 @@ static void GPIO_Init() {
   }
 //}}}
 //{{{
-static void ADC1_Init() {
+void ADC1_Init() {
 // ADC1 GPIO Configuration
 // PC1 > ADC1_IN7
 // PC2 > ADC1_IN8
@@ -168,7 +180,7 @@ static void ADC1_Init() {
   }
 //}}}
 //{{{
-static void TIM1_Init() {
+void TIM1_Init() {
 
   __HAL_RCC_TIM1_CLK_ENABLE();
 
@@ -266,7 +278,7 @@ static void TIM1_Init() {
   }
 //}}}
 //{{{
-static void TIM2_Init() {
+void TIM2_Init() {
 
   __HAL_RCC_TIM2_CLK_ENABLE();
 
@@ -321,7 +333,7 @@ static void TIM2_Init() {
   }
 //}}}
 //{{{
-static void TIM6_Init() {
+void TIM6_Init() {
 
   // config TIM6 interrupt
   __HAL_RCC_TIM6_CLK_ENABLE();
@@ -344,7 +356,7 @@ static void TIM6_Init() {
   }
 //}}}
 //{{{
-static void TIM16_Init() {
+void TIM16_Init() {
 
   __HAL_RCC_TIM16_CLK_ENABLE();
 
@@ -394,7 +406,7 @@ static void TIM16_Init() {
   }
 //}}}
 //{{{
-static void DAC_Init() {
+void DAC_Init() {
 // DAC GPIO Configuration
 // PA4 > DAC_OUT1
 
@@ -504,30 +516,30 @@ void MC_bemfDelayCalc() {
 
 //{{{
 void MC_EnableInput_CH1_E_CH2_E_CH3_D() {
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH1, GPIO_SET);    // EN1 ENABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH2, GPIO_SET);    // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH3, GPIO_RESET);  // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);    // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);    // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 ENABLE
   }
 //}}}
 //{{{
 void MC_EnableInput_CH1_E_CH2_D_CH3_E() {
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH1, GPIO_SET);   // EN1 ENABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH2, GPIO_RESET); // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH3, GPIO_SET);   // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);   // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET); // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
   }
 //}}}
 //{{{
 void MC_EnableInput_CH1_D_CH2_E_CH3_E() {
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH1, GPIO_RESET); // EN1 DISABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH2, GPIO_SET);   // EN2 ENABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH3, GPIO_SET);   // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET); // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);   // EN2 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
   }
 //}}}
 //{{{
 void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH1, GPIO_RESET);  // EN1 DISABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH2, GPIO_RESET);  // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIO_PORT_1, GPIO_CH3, GPIO_RESET);  // EN3 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET);  // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET);  // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 DISABLE
   }
 //}}}
 

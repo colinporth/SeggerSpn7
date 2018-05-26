@@ -14,31 +14,6 @@
 #define REFx               htim16
 #define ADCx               hadc1
 
-#define GPIO_PORT_1        GPIOC
-#define GPIO_CH1           GPIO_PIN_10
-#define GPIO_PORT_2        GPIOC
-#define GPIO_CH2           GPIO_PIN_11
-#define GPIO_PORT_3        GPIOC
-#define GPIO_CH3           GPIO_PIN_12
-#define GPIO_SET           GPIO_PIN_SET
-#define GPIO_RESET         GPIO_PIN_RESET
-
-#define ADC_CH_1           ADC_CHANNEL_7   // CURRENT
-#define ADC_CH_2           ADC_CHANNEL_12  // SPEED
-#define ADC_CH_3           ADC_CHANNEL_2   // VBUS
-#define ADC_CH_4           ADC_CHANNEL_8   // TEMP
-#define ADC_Bemf_CH1       ADC_CHANNEL_9   // BEMF1
-#define ADC_Bemf_CH2       ADC_CHANNEL_11  // BEMF2
-#define ADC_Bemf_CH3       ADC_CHANNEL_15  // BEMF3
-
-#define ADC_CH_1_ST        ADC_SAMPLETIME_1CYCLE_5    // CURRENT sampling time
-#define ADC_CH_2_ST        ADC_SAMPLETIME_181CYCLES_5 // SPEED sampling time
-#define ADC_CH_3_ST        ADC_SAMPLETIME_181CYCLES_5 // VBUS sampling time
-#define ADC_CH_4_ST        ADC_SAMPLETIME_181CYCLES_5 // TEMP sampling time
-#define ADC_Bemf_CH1_ST    ADC_SAMPLETIME_61CYCLES_5  // BEMF1 sampling time
-#define ADC_Bemf_CH2_ST    ADC_SAMPLETIME_61CYCLES_5  // BEMF2 sampling time
-#define ADC_Bemf_CH3_ST    ADC_SAMPLETIME_61CYCLES_5  // BEMF3 sampling time
-
 #define HF_TIMx_CH1        TIM_CHANNEL_1
 #define HF_TIMx_CH2        TIM_CHANNEL_2
 #define HF_TIMx_CH3        TIM_CHANNEL_3
@@ -46,6 +21,14 @@
 #define HF_TIMx_CCR2       CCR2            // Channel 2
 #define HF_TIMx_CCR3       CCR3            // Channel 3
 
+#define ADC_Bemf_CH1       ADC_CHANNEL_9   // BEMF1
+#define ADC_Bemf_CH2       ADC_CHANNEL_11  // BEMF2
+#define ADC_Bemf_CH3       ADC_CHANNEL_15  // BEMF3
+
+#define ADC_CH_1           ADC_CHANNEL_7   // CURRENT
+#define ADC_CH_2           ADC_CHANNEL_12  // SPEED
+#define ADC_CH_3           ADC_CHANNEL_2   // VBUS
+#define ADC_CH_4           ADC_CHANNEL_8   // TEMP
 #define DAC_ENABLE         1               // Enable DAC peripheral
 #define DACx               hdac
 #define DACx_CH            DAC1_CHANNEL_1  // DAC Channel

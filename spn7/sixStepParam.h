@@ -1,7 +1,7 @@
 #pragma once
 
 #define NUM_POLE_PAIRS                       4    // Number of Motor Pole pairs
-#define DIRECTION                            0    // Set motor direction CW = 0 and CCW = 1
+#define DIRECTION                        false    // Set motor direction CW = false and CCW = true
 #define TARGET_SPEED                      2000    // Target speed in closed loop control
 
 #define STARTUP_CURRENT_REFERENCE         1500    // StartUP Currente Reference (2000 = 2.2A)
@@ -52,6 +52,3 @@
 #define DEMAGN_VAL_12                       12   // Look UP table for dynamic demagn control for speed into ( 1300, 1500] or [- 1500,- 1300) range
 #define DEMAGN_VAL_13                       13   // Look UP table for dynamic demagn control for speed into ( 1000, 1300] or [- 1300,- 1000) range
 #define DEMAGN_VAL_14                       14   // Look UP table for dynamic demagn control for speed into [  500, 1000] or [- 1000,-  500] range
-
-#define TRUE                                 1   // Define TRUE */
-#define FALSE                                0   // Define FALSE */

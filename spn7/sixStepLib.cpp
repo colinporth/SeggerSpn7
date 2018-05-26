@@ -1,4 +1,5 @@
 // 6StepLib.c
+#include <string.h>
 #include "sixStepLib.h"
 
 SIXSTEP_Base_InitTypeDef sixStep;  // Main SixStep structure
@@ -13,24 +14,21 @@ uint32_t Time_vector_prev_tmp = 0 ;       //  Startup variable
 uint32_t T_single_step = 0;               //  Startup variable
 uint32_t T_single_step_first_value = 0;   //  Startup variable
 
-int32_t  delta = 0;                       //  Startup variable
+int32_t delta = 0;                        //  Startup variable
 uint16_t index_array = 1;                 //  Speed filter variable
 int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable
 uint16_t speed_tmp_buffer[FILTER_DEEP];   //  Potentiometer filter variable
 uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
 uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index
-uint8_t  array_completed = FALSE;         //  Speed filter variable
-uint8_t  buffer_completed = FALSE;        //  Potentiometer filter variable
+bool array_completed = false;             //  Speed filter variable
+bool buffer_completed = false;            //  Potentiometer filter variable
 
 uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable
 int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed
 int32_t El_Speed_Hz = 0;                  //  Electrical motor speed
 
 uint16_t index_adc_chn = 0;               //  Index of ADC channel selector for measuring
-uint16_t index_motor_run = 0;             //  Tmp variable for DEMO mode
-
-uint16_t test_motor_run = 1;              //  Tmp variable for DEMO mode
-uint8_t Enable_start_button = TRUE;       //  Start/stop button filter to avoid double command
+bool Enable_start_button = true;          //  Start/stop button filter to avoid double command
 
 uint16_t index_ARR_step = 1;
 uint32_t n_zcr_startup = 0;
@@ -39,7 +37,7 @@ uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop contr
 uint16_t shift_n_sqrt = 14;
 
 uint16_t cnt_bemf_event = 0;
-uint8_t startup_bemf_failure = 0;
+bool startup_bemf_failure = 0;
 
 uint8_t speed_fdbk_error = 0;
 
@@ -55,7 +53,7 @@ uint64_t constant_multiplier_tmp = 0;
 //}}}
 
 //{{{
-static uint64_t fastSqrt (uint64_t wInput) {
+uint64_t fastSqrt (uint64_t wInput) {
 
   uint64_t tempRoot;
   if (wInput <= (uint64_t)((uint64_t)2097152 << shift_n_sqrt))
@@ -80,7 +78,7 @@ static uint64_t fastSqrt (uint64_t wInput) {
 //}}}
 
 //{{{
-static void potSpeedTarget() {
+void potSpeedTarget() {
 
   target_speed = sixStep.ADC_Regular_Buffer[1] * MAX_POT_SPEED / 4096;
 
@@ -91,7 +89,7 @@ static void potSpeedTarget() {
   }
 //}}}
 //{{{
-static void potSpeed() {
+void potSpeed() {
 
   uint32_t sum = 0;
   uint16_t max = 0;
@@ -105,7 +103,7 @@ static void potSpeed() {
   sum -= max;
   uint16_t potMean = sum / (HFBUFFERSIZE - 1);
 
-  if (buffer_completed == FALSE) {
+  if (!buffer_completed) {
     speed_tmp_buffer[index_pot_filt] = potMean;
     speed_sum_pot_filt = 0;
     for (uint16_t i = 1; i <= index_pot_filt;i++)
@@ -115,8 +113,8 @@ static void potSpeed() {
 
     if (index_pot_filt >= FILTER_DEEP) {
       index_pot_filt = 1;
-      buffer_completed = TRUE;
-       }
+      buffer_completed = true;
+      }
     }
 
   else {
@@ -144,9 +142,9 @@ static void potSpeed() {
   }
 //}}}
 //{{{
-static void speedFilter() {
+void speedFilter() {
 
-  if (array_completed == FALSE) {
+  if (!array_completed) {
     speed_tmp_array[index_array] = sixStep.speed_fdbk;
     speed_sum_sp_filt = 0;
     for (uint16_t i = 1; i <= index_array;i++)
@@ -156,7 +154,7 @@ static void speedFilter() {
 
     if (index_array >= FILTER_DEEP) {
      index_array = 1;
-     array_completed = TRUE;
+     array_completed = true;
      }
     }
 
@@ -175,7 +173,7 @@ static void speedFilter() {
 //}}}
 
 //{{{
-static void sixStepTable (uint8_t step_number) {
+void sixStepTable (uint8_t step_number) {
 
   switch (step_number) {
     case 1:
@@ -229,12 +227,12 @@ static void sixStepTable (uint8_t step_number) {
   }
 //}}}
 //{{{
-static void rampMotorCalc() {
+void rampMotorCalc() {
 
   uint32_t constant_multiplier = 100;
   uint32_t constant_multiplier_2 = 4000000000;
 
-  if (index_startup_motor == 1) {
+  if (index_startup_motor) {
     mech_accel_hz = sixStep.ACCEL * Rotor_poles_pairs / 60;
     constant_multiplier_tmp = (uint64_t)constant_multiplier * (uint64_t)constant_multiplier_2;
     constant_k = constant_multiplier_tmp / (3 * mech_accel_hz);
@@ -245,7 +243,7 @@ static void rampMotorCalc() {
   if (index_startup_motor < NUMBER_OF_STEPS) {
     Time_vector_tmp = ((uint64_t)1000 * (uint64_t)1000 * (uint64_t) fastSqrt(((uint64_t)index_startup_motor * (uint64_t)constant_k)))/632455;
     delta = Time_vector_tmp - Time_vector_prev_tmp;
-    if (index_startup_motor == 1) {
+    if (index_startup_motor) {
       T_single_step_first_value = (2 * 3141) * delta / 1000;
       sixStep.ARR_value = (uint32_t)(65535);
       }
@@ -257,7 +255,7 @@ static void rampMotorCalc() {
   else
     index_startup_motor = 1;
 
-  if (index_startup_motor == 1)
+  if (index_startup_motor)
     sixStep.prescaler_value = (((sixStep.SYSCLK_frequency / 1000000) * T_single_step_first_value)/65535) - 1;
 
   if ((sixStep.STATUS != ALIGNMENT) && (sixStep.STATUS != START))
@@ -270,41 +268,41 @@ static void rampMotorCalc() {
 //}}}
 
 //{{{
-static void nextStep() {
+void nextStep() {
 
-  if (sixStep.CMD == TRUE) {
-    sixStep.CMD = FALSE;
+  if (sixStep.CMD) {
+    sixStep.CMD = false;
     MC_Start_PWM();
     }
   ARR_LF = __HAL_TIM_GetAutoreload (&LF_TIMx);
 
-  if (sixStep.ALIGN_OK == TRUE) {
+  if (sixStep.ALIGN_OK) {
     sixStep.speed_fdbk = MC_GetMechSpeedRPM();
     sixStep.demagn_counter = 1;
     if (sixStep.status_prev != sixStep.step_position)
       n_zcr_startup = 0;
 
-    if (PI_parameters.Reference>=0) {
+    if (PI_parameters.Reference >= 0) {
       sixStep.step_position++;
-      if (sixStep.CL_READY == TRUE)
-        sixStep.VALIDATION_OK = TRUE;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
       if (sixStep.step_position > 6)
         sixStep.step_position = 1;
       }
     else {
       sixStep.step_position--;
-      if (sixStep.CL_READY == TRUE)
-        sixStep.VALIDATION_OK = TRUE;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
       if (sixStep.step_position < 1)
         sixStep.step_position = 6;
       }
     }
 
-  if (sixStep.VALIDATION_OK == 1) {
+  if (sixStep.VALIDATION_OK) {
     // Motor Stall condition detection and Speed-Feedback error generation
     sixStep.BEMF_Tdown_count++;
     if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
-      speed_fdbk_error = 1;
+      speed_fdbk_error = true;
     else
       __HAL_TIM_SetAutoreload (&LF_TIMx, 0xFFFF);
     }
@@ -327,14 +325,14 @@ static void nextStep() {
   }
 //}}}
 //{{{
-static void arrStep() {
+void arrStep() {
 
-  if (sixStep.ALIGNMENT == FALSE)
-    sixStep.ALIGNMENT = TRUE;
+  if (!sixStep.ALIGNMENT)
+    sixStep.ALIGNMENT = true;
 
-  if (sixStep.ALIGN_OK == TRUE) {
+  if (sixStep.ALIGN_OK) {
     if (PI_parameters.Reference >= 0) {
-      if (sixStep.VALIDATION_OK != TRUE) {
+      if (sixStep.VALIDATION_OK != true) {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
         if (index_ARR_step < sixStep.numberofitemArr) {
@@ -342,7 +340,7 @@ static void arrStep() {
           LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
           index_ARR_step++;
           }
-        else if (sixStep.ARR_OK == 0) {
+        else if (!sixStep.ARR_OK) {
           index_ARR_step = 1;
           sixStep.ACCEL >>= 1;
           if (sixStep.ACCEL < MINIMUM_ACC)
@@ -352,13 +350,13 @@ static void arrStep() {
           }
         }
       else {
-        sixStep.ARR_OK = 1;
+        sixStep.ARR_OK = true;
         index_startup_motor = 1;
         index_ARR_step = 1;
         }
       }
     else {
-      if (sixStep.VALIDATION_OK != TRUE) {
+      if (!sixStep.VALIDATION_OK) {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
         if (index_ARR_step < sixStep.numberofitemArr) {
@@ -366,7 +364,7 @@ static void arrStep() {
           LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
           index_ARR_step++;
           }
-        else if(sixStep.ARR_OK == 0) {
+        else if (!sixStep.ARR_OK) {
           index_ARR_step = 1;
           sixStep.ACCEL >>= 1;
           if (sixStep.ACCEL < MINIMUM_ACC)
@@ -376,7 +374,7 @@ static void arrStep() {
           }
         }
       else {
-        sixStep.ARR_OK = 1;
+        sixStep.ARR_OK = true;
         index_startup_motor = 1;
         index_ARR_step = 1;
         }
@@ -385,29 +383,29 @@ static void arrStep() {
   }
 //}}}
 //{{{
-void arrBemf (uint8_t up_bemf) {
+void arrBemf (bool up_bemf) {
 
   if (sixStep.status_prev != sixStep.step_position) {
-    if (sixStep.SPEED_VALIDATED == TRUE) {
-       if (cnt_bemf_event> BEMF_CNT_EVENT_MAX)
-        startup_bemf_failure = 1;
+    if (sixStep.SPEED_VALIDATED) {
+       if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
+        startup_bemf_failure = true;
 
-      if ((up_bemf == 1) && (sixStep.BEMF_OK != TRUE)) {
+      if (up_bemf && !sixStep.BEMF_OK) {
         n_zcr_startup++;
         cnt_bemf_event = 0;
         }
-      else if (sixStep.BEMF_OK != TRUE)
+      else if (!sixStep.BEMF_OK)
         cnt_bemf_event++;
 
-      if ((n_zcr_startup >= NUMBER_ZCR) && (sixStep.BEMF_OK != TRUE)) {
-        sixStep.BEMF_OK = TRUE;
+      if ((n_zcr_startup >= NUMBER_ZCR) && !sixStep.BEMF_OK) {
+        sixStep.BEMF_OK = true;
         n_zcr_startup = 0;
         }
       }
 
     sixStep.status_prev = sixStep.step_position;
 
-    if (sixStep.VALIDATION_OK == 1) {
+    if (sixStep.VALIDATION_OK) {
       counter_ARR_Bemf = __HAL_TIM_GetCounter (&LF_TIMx);
       __HAL_TIM_SetAutoreload (&LF_TIMx, counter_ARR_Bemf + ARR_LF / 2);
       }
@@ -416,9 +414,9 @@ void arrBemf (uint8_t up_bemf) {
 //}}}
 
 //{{{
-static void setPiParam (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM) {
+void setPiParam (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM) {
 
-  if (sixStep.CW_CCW == 0)
+  if (!sixStep.CW_CCW)
     PI_PARAM->Reference = target_speed;
   else
     PI_PARAM->Reference = -target_speed;
@@ -428,12 +426,12 @@ static void setPiParam (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM) {
 
   PI_PARAM->Lower_Limit_Output = LOWER_OUT_LIMIT;
   PI_PARAM->Upper_Limit_Output = UPPER_OUT_LIMIT;
-  PI_PARAM->Max_PID_Output = FALSE;
-  PI_PARAM->Min_PID_Output = FALSE;
+  PI_PARAM->Max_PID_Output = false;
+  PI_PARAM->Min_PID_Output = false;
   }
 //}}}
 //{{{
-static int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t speed_fdb) {
+int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t speed_fdb) {
 
   int32_t Error = (PI_PARAM->Reference - speed_fdb);
 
@@ -480,21 +478,19 @@ static int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t s
 //}}}
 
 //{{{
-static void taskSpeed() {
+void taskSpeed() {
 
   if ((sixStep.speed_fdbk_filtered > (target_speed) ||
        sixStep.speed_fdbk_filtered < (-target_speed)) &&
-       sixStep.VALIDATION_OK != TRUE) {
+       !sixStep.VALIDATION_OK) {
     sixStep.STATUS = VALIDATION;
-    sixStep.SPEED_VALIDATED = TRUE;
+    sixStep.SPEED_VALIDATED = true;
     }
 
-  if (sixStep.SPEED_VALIDATED == TRUE &&
-      sixStep.BEMF_OK == TRUE &&
-      sixStep.CL_READY != TRUE)
-    sixStep.CL_READY = TRUE;
+  if (sixStep.SPEED_VALIDATED && sixStep.BEMF_OK && !sixStep.CL_READY)
+    sixStep.CL_READY = true;
 
-  if (sixStep.VALIDATION_OK == TRUE) {
+  if (sixStep.VALIDATION_OK) {
     sixStep.STATUS = RUN;
     if (PI_parameters.Reference >= 0)
       sixStep.Current_Reference = (uint16_t)piController (&PI_parameters,(int16_t)sixStep.speed_fdbk_filtered);
@@ -657,7 +653,7 @@ void MC_Timebase() {
   nextStep();
 
   // BASE TIMER - ARR modification for STEP frequency changing
-  if (sixStep.ARR_OK == 0)
+  if (!sixStep.ARR_OK)
     arrStep();
 
   speedFilter();
@@ -666,7 +662,7 @@ void MC_Timebase() {
 //{{{
 void MC_SysTick() {
 
-  if ((sixStep.ALIGNMENT == TRUE) && (sixStep.ALIGN_OK == FALSE)) {
+  if (sixStep.ALIGNMENT && !sixStep.ALIGN_OK) {
     //{{{  align motor
     sixStep.step_position = 6;
     LF_TIMx.Init.Period = sixStep.ARR_value;
@@ -678,7 +674,7 @@ void MC_SysTick() {
     index_align++;
     if (index_align >= TIME_FOR_ALIGN + 1) {
       printf ("%d aligned\n", HAL_GetTick());
-      sixStep.ALIGN_OK = TRUE;
+      sixStep.ALIGN_OK = true;
       sixStep.STATUS = STARTUP;
       index_startup_motor = 1;
       rampMotorCalc();
@@ -689,27 +685,27 @@ void MC_SysTick() {
     }
     //}}}
 
-  if (sixStep.VALIDATION_OK == TRUE)
+  if (sixStep.VALIDATION_OK)
     potSpeed();
 
   // Push button delay time to avoid double command
-  if (HAL_GetTick() == BUTTON_DELAY && Enable_start_button != TRUE)
-    Enable_start_button = TRUE;
+  if (HAL_GetTick() == BUTTON_DELAY && !Enable_start_button)
+    Enable_start_button = true;
 
   // sixStep.Speed_Loop_Time x 1msec
   if (Tick_cnt >= sixStep.Speed_Loop_Time) {
     if (sixStep.STATUS != SPEEDFBKERROR)
       taskSpeed();
 
-    sixStep.MediumFrequencyTask_flag = TRUE;
-    if (sixStep.VALIDATION_OK == TRUE)
+    sixStep.MediumFrequencyTask_flag = true;
+    if (sixStep.VALIDATION_OK)
       MC_SetSpeed (0);
     Tick_cnt = 0;
     }
   else
     Tick_cnt++;
 
-  if (startup_bemf_failure == 1) {
+  if (startup_bemf_failure) {
     sixStep.ACCEL >>= 1;
     if (sixStep.ACCEL < MINIMUM_ACC)
       sixStep.ACCEL = MINIMUM_ACC;
@@ -718,7 +714,7 @@ void MC_SysTick() {
     sixStep.STATUS = STARTUP_BEMF_FAILURE;
     }
 
-  if (speed_fdbk_error == 1) {
+  if (speed_fdbk_error) {
     MC_StopMotor();
     sixStep.STATUS = SPEEDFBKERROR;
     }
@@ -731,6 +727,7 @@ void MC_Init() {
 
   MC_Nucleo_Init();
 
+  memset (&sixStep,0, sizeof (sixStep));
   sixStep.HF_TIMx_CCR = HF_TIMx.Instance->HF_TIMx_CCR1;
   sixStep.HF_TIMx_ARR = HF_TIMx.Instance->ARR;
   sixStep.HF_TIMx_PSC = HF_TIMx.Instance->PSC;
@@ -743,7 +740,7 @@ void MC_Init() {
   sixStep.KP = KP_GAIN;
   sixStep.KI = KI_GAIN;
   sixStep.CW_CCW = DIRECTION;
-  sixStep.Button_ready = TRUE;
+  sixStep.Button_ready = true;
 
   MC_Reset();
   }
@@ -751,7 +748,7 @@ void MC_Init() {
 //{{{
 void MC_Reset() {
 
-  sixStep.CMD = TRUE;
+  sixStep.CMD = true;
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
@@ -759,7 +756,7 @@ void MC_Reset() {
   sixStep.Speed_Loop_Time = SPEED_LOOP_TIME;
   sixStep.pulse_value = sixStep.HF_TIMx_CCR;
   sixStep.Speed_target_ramp = MAX_POT_SPEED;
-  sixStep.ALIGNMENT = FALSE;
+  sixStep.ALIGNMENT = false;
   sixStep.Speed_Ref_filtered = 0;
   sixStep.demagn_value = INITIAL_DEMAGN_DELAY;
 
@@ -794,22 +791,20 @@ void MC_Reset() {
 
   sixStep.step_position = 0;
   sixStep.demagn_counter = 0;
-  sixStep.ALIGN_OK = FALSE;
-  sixStep.VALIDATION_OK = 0;
-  sixStep.ARR_OK = 0;
   sixStep.speed_fdbk_filtered = 0;
   sixStep.Integral_Term_sum = 0;
   sixStep.Current_Reference = 0;
   sixStep.Ramp_Start = 0;
-  sixStep.RUN_Motor = 0;
+  sixStep.RUN_Motor = false;
   sixStep.speed_fdbk = 0;
-  sixStep.BEMF_OK = FALSE;
-  sixStep.CL_READY = FALSE;
-  sixStep.SPEED_VALIDATED = FALSE;
+  sixStep.ALIGN_OK = false;
+  sixStep.VALIDATION_OK = false;
+  sixStep.ARR_OK = false;
+  sixStep.BEMF_OK = false;
+  sixStep.CL_READY = false;
+  sixStep.SPEED_VALIDATED = false;
   sixStep.BEMF_Tdown_count = 0;   // Reset of the Counter to detect Stop motor condition when a stall condition occurs
 
-  index_motor_run = 0;
-  test_motor_run = 1;
   T_single_step = 0;
   T_single_step_first_value = 0;
   delta = 0;
@@ -822,12 +817,14 @@ void MC_Reset() {
   constant_k = 0;
   ARR_LF = 0;
   index_array = 1;
-  Enable_start_button = TRUE;
+
+  Enable_start_button = true;
+  startup_bemf_failure = false;
+  speed_fdbk_error = false;
+
   index_ARR_step = 1;
   n_zcr_startup = 0;
   cnt_bemf_event = 0;
-  startup_bemf_failure = 0;
-  speed_fdbk_error = 0;
 
   index_align = 1;
   speed_sum_sp_filt = 0;
@@ -846,8 +843,8 @@ void MC_Reset() {
     speed_tmp_array[i] = 0;
     speed_tmp_buffer[i]= 0;
     }
-  array_completed = FALSE;
-  buffer_completed = FALSE;
+  array_completed = false;
+  buffer_completed = false;
 
   if (PI_parameters.Reference < 0)
     sixStep.step_position = 1;
@@ -892,7 +889,7 @@ int32_t MC_GetMechSpeedRPM() {
 void MC_StartMotor() {
 
   sixStep.STATUS = START;
-  sixStep.RUN_Motor = 1;
+  sixStep.RUN_Motor = true;
 
   HAL_TIM_Base_Start_IT (&LF_TIMx);
   HAL_ADC_Start_IT (&ADCx);
@@ -904,7 +901,7 @@ void MC_StartMotor() {
 void MC_StopMotor() {
 
   sixStep.STATUS = STOP;
-  sixStep.RUN_Motor = 0;
+  sixStep.RUN_Motor = false;
   MC_Stop_PWM();
 
   HF_TIMx.Instance->CR1 &= ~(TIM_CR1_CEN);
@@ -935,7 +932,7 @@ void MC_SetSpeed (uint16_t speed_value) {
   if (change_target_speed == 1) {
     sixStep.Speed_target_ramp = sixStep.Speed_Ref_filtered;
 
-    if (sixStep.CW_CCW == 0) {
+    if (!sixStep.CW_CCW) {
       reference_tmp = sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096;
        if (reference_tmp <= MIN_POT_SPEED)
          PI_parameters.Reference = MIN_POT_SPEED;
@@ -955,16 +952,16 @@ void MC_SetSpeed (uint16_t speed_value) {
 //{{{
 void MC_EXTbutton() {
 
-  if (Enable_start_button == TRUE) {
-    if ((sixStep.RUN_Motor == 0) && (sixStep.Button_ready == TRUE)) {
+  if (Enable_start_button) {
+    if (!sixStep.RUN_Motor && sixStep.Button_ready) {
       printf ("StartMotor\n");
       MC_StartMotor();
-      Enable_start_button = FALSE;
+      Enable_start_button = false;
       }
     else {
       printf ("StopMotor\n");
       MC_StopMotor();
-      Enable_start_button = FALSE;
+      Enable_start_button = false;
       }
     }
   }
