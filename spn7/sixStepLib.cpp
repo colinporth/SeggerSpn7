@@ -1,5 +1,4 @@
 // 6StepLib.c
-#include <string.h>
 #include "sixStepLib.h"
 
 struct sSixStep sixStep;
@@ -729,7 +728,6 @@ void MC_Init() {
 
   MC_Nucleo_Init();
 
-  memset (&sixStep,0, sizeof (sixStep));
   sixStep.HF_TIMx_CCR = HF_TIMx.Instance->HF_TIMx_CCR1;
   sixStep.HF_TIMx_ARR = HF_TIMx.Instance->ARR;
   sixStep.HF_TIMx_PSC = HF_TIMx.Instance->PSC;
