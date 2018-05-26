@@ -42,7 +42,7 @@
 //}}}
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
-#include "6StepLib.h"
+#include "sixStepLib.h"
 //}}}
 //{{{  globals
 ADC_HandleTypeDef hadc1;
@@ -52,7 +52,7 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim16;
 
-extern SIXSTEP_Base_InitTypeDef SIXSTEP_parameters;
+extern SIXSTEP_Base_InitTypeDef sixStep;
 //}}}
 
 // irq handlers
@@ -78,7 +78,7 @@ extern "C" {
 
     if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET) {
       MC_StopMotor();
-      SIXSTEP_parameters.STATUS = OVERCURRENT;
+      sixStep.STATUS = OVERCURRENT;
       }
 
     HAL_TIM_IRQHandler (&htim1);

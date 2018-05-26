@@ -4,7 +4,7 @@
 //{{{
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
 //}}}
 
 //{{{  defines
@@ -13,7 +13,6 @@
 #define LF_TIMx            htim6
 #define REFx               htim16
 #define ADCx               hadc1
-#define UART               huart2
 
 #define GPIO_PORT_1        GPIOC
 #define GPIO_CH1           GPIO_PIN_10
@@ -51,20 +50,6 @@
 #define DACx               hdac
 #define DACx_CH            DAC1_CHANNEL_1  // DAC Channel
 #define DACx_ALIGN         DAC_ALIGN_12B_L // DAC Aligment value
-
-#define STARTM_CMD  0     // Start Motor command received
-#define STOPMT_CMD  1     // Stop Motor command received
-#define SETSPD_CMD  2     // Set the new speed value command received
-#define GETSPD_CMD  3     // Get Mechanical Motor Speed command received
-#define INIREF_CMD  4     // Set the new STARUP_CURRENT_REFERENCE value command received
-#define POLESP_CMD  5     // Set the Pole Pairs value command received
-#define ACCELE_CMD  6     // Set the Accelleration for Start-up of the motor command received
-#define KP_PRM_CMD  7     // Set the KP PI param command received
-#define KI_PRM_CMD  8     // Set the KI PI param command received
-#define POTENZ_CMD  9     // Enable Potentiometer command received
-#define HELP_CMD    10    // Help command received
-#define STATUS_CMD  11    // Get the Status of the system command received
-#define DIRECT_CMD  12    // Get the motor direction
 //}}}
 
 extern ADC_HandleTypeDef hadc1;
@@ -72,7 +57,6 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim16;
-extern UART_HandleTypeDef huart2;
 
 void bemfDelayCalc();
 
@@ -84,8 +68,8 @@ void MC_EnableInput_CH1_E_CH2_D_CH3_E();
 void MC_EnableInput_CH1_D_CH2_E_CH3_E();
 void MC_DisableInput_CH1_D_CH2_D_CH3_D();
 
-void MC_Start_PWM_driving();
-void MC_Stop_PWM_driving();
+void MC_Start_PWM();
+void MC_Stop_PWM();
 
 void MC_HF_TIMx_SetDutyCycle_CH1 (uint16_t value);
 void MC_HF_TIMx_SetDutyCycle_CH2 (uint16_t value);

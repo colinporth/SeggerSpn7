@@ -1,72 +1,72 @@
 // ihm07m1.c
 #include "ihm07m1.h"
-#include "6StepLib.h"
+#include "sixStepLib.h"
 
-extern SIXSTEP_Base_InitTypeDef SIXSTEP_parameters;
+extern SIXSTEP_Base_InitTypeDef sixStep;
 extern SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;
 
 //{{{
 void bemfDelayCalc() {
 
  if (PI_parameters.Reference >= 0) {
-   if(SIXSTEP_parameters.speed_fdbk_filtered<=12000 && SIXSTEP_parameters.speed_fdbk_filtered>10000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=10000 && SIXSTEP_parameters.speed_fdbk_filtered>7800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=7800 && SIXSTEP_parameters.speed_fdbk_filtered>6400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=6400 && SIXSTEP_parameters.speed_fdbk_filtered>5400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=5400 && SIXSTEP_parameters.speed_fdbk_filtered>4650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4650 && SIXSTEP_parameters.speed_fdbk_filtered>4100)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=4100 && SIXSTEP_parameters.speed_fdbk_filtered>3650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3650 && SIXSTEP_parameters.speed_fdbk_filtered>3300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=3300 && SIXSTEP_parameters.speed_fdbk_filtered>2600)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=2600 && SIXSTEP_parameters.speed_fdbk_filtered>1800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1800 && SIXSTEP_parameters.speed_fdbk_filtered>1500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1500 && SIXSTEP_parameters.speed_fdbk_filtered>1300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1300 && SIXSTEP_parameters.speed_fdbk_filtered>1000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered<=1000 && SIXSTEP_parameters.speed_fdbk_filtered>500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
+   if (sixStep.speed_fdbk_filtered <= 12000 && sixStep.speed_fdbk_filtered>10000)
+      sixStep.demagn_value = DEMAGN_VAL_1;
+    else if (sixStep.speed_fdbk_filtered <= 10000 && sixStep.speed_fdbk_filtered > 7800)
+      sixStep.demagn_value = DEMAGN_VAL_2;
+    else if (sixStep.speed_fdbk_filtered <= 7800 && sixStep.speed_fdbk_filtered > 6400)
+      sixStep.demagn_value = DEMAGN_VAL_3;
+    else if (sixStep.speed_fdbk_filtered <= 6400 && sixStep.speed_fdbk_filtered > 5400)
+      sixStep.demagn_value = DEMAGN_VAL_4;
+    else if (sixStep.speed_fdbk_filtered <= 5400 && sixStep.speed_fdbk_filtered > 4650)
+      sixStep.demagn_value = DEMAGN_VAL_5;
+    else if (sixStep.speed_fdbk_filtered <= 4650 && sixStep.speed_fdbk_filtered > 4100)
+      sixStep.demagn_value = DEMAGN_VAL_6;
+    else if(sixStep.speed_fdbk_filtered <= 4100 && sixStep.speed_fdbk_filtered > 3650)
+      sixStep.demagn_value = DEMAGN_VAL_7;
+    else if (sixStep.speed_fdbk_filtered <= 3650 && sixStep.speed_fdbk_filtered>3300)
+      sixStep.demagn_value = DEMAGN_VAL_8;
+    else if (sixStep.speed_fdbk_filtered <= 3300 && sixStep.speed_fdbk_filtered>2600)
+      sixStep.demagn_value = DEMAGN_VAL_9;
+    else if (sixStep.speed_fdbk_filtered <= 2600 && sixStep.speed_fdbk_filtered > 1800)
+      sixStep.demagn_value = DEMAGN_VAL_10;
+    else if (sixStep.speed_fdbk_filtered <= 1800 && sixStep.speed_fdbk_filtered > 1500)
+      sixStep.demagn_value = DEMAGN_VAL_11;
+    else if(sixStep.speed_fdbk_filtered <= 1500 && sixStep.speed_fdbk_filtered > 1300)
+      sixStep.demagn_value = DEMAGN_VAL_12;
+    else if (sixStep.speed_fdbk_filtered <= 1300 && sixStep.speed_fdbk_filtered > 1000)
+      sixStep.demagn_value = DEMAGN_VAL_13;
+    else if (sixStep.speed_fdbk_filtered <= 1000 && sixStep.speed_fdbk_filtered > 500)
+      sixStep.demagn_value = DEMAGN_VAL_14;
      }
    else {
-    if(SIXSTEP_parameters.speed_fdbk_filtered>=-12000 && SIXSTEP_parameters.speed_fdbk_filtered<-10000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_1;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-10000 && SIXSTEP_parameters.speed_fdbk_filtered<-7800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_2;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-7800 && SIXSTEP_parameters.speed_fdbk_filtered<-6400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_3;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-6400 && SIXSTEP_parameters.speed_fdbk_filtered<-5400)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_4;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-5400 && SIXSTEP_parameters.speed_fdbk_filtered<-4650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_5;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4650 && SIXSTEP_parameters.speed_fdbk_filtered<-4100)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_6;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-4100 && SIXSTEP_parameters.speed_fdbk_filtered<-3650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_7;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3650 && SIXSTEP_parameters.speed_fdbk_filtered<-3300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_8;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-3300 && SIXSTEP_parameters.speed_fdbk_filtered<-2650)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_9;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-2600 && SIXSTEP_parameters.speed_fdbk_filtered<-1800)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_10;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1800 && SIXSTEP_parameters.speed_fdbk_filtered<-1500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_11;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1500 && SIXSTEP_parameters.speed_fdbk_filtered<-1300)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_12;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1300 && SIXSTEP_parameters.speed_fdbk_filtered<-1000)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_13;
-    else if(SIXSTEP_parameters.speed_fdbk_filtered>=-1000 && SIXSTEP_parameters.speed_fdbk_filtered<-500)
-      SIXSTEP_parameters.demagn_value = DEMAGN_VAL_14;
+    if (sixStep.speed_fdbk_filtered >= -12000 && sixStep.speed_fdbk_filtered < -10000)
+      sixStep.demagn_value = DEMAGN_VAL_1;
+    else if (sixStep.speed_fdbk_filtered >= -10000 && sixStep.speed_fdbk_filtered < -7800)
+      sixStep.demagn_value = DEMAGN_VAL_2;
+    else if (sixStep.speed_fdbk_filtered >= -7800 && sixStep.speed_fdbk_filtered < -6400)
+      sixStep.demagn_value = DEMAGN_VAL_3;
+    else if (sixStep.speed_fdbk_filtered >= -6400 && sixStep.speed_fdbk_filtered < -5400)
+      sixStep.demagn_value = DEMAGN_VAL_4;
+    else if (sixStep.speed_fdbk_filtered >= -5400 && sixStep.speed_fdbk_filtered < -4650)
+      sixStep.demagn_value = DEMAGN_VAL_5;
+    else if (sixStep.speed_fdbk_filtered >= -4650 && sixStep.speed_fdbk_filtered < -4100)
+      sixStep.demagn_value = DEMAGN_VAL_6;
+    else if (sixStep.speed_fdbk_filtered >= -4100 && sixStep.speed_fdbk_filtered < -3650)
+      sixStep.demagn_value = DEMAGN_VAL_7;
+    else if(sixStep.speed_fdbk_filtered >= -3650 && sixStep.speed_fdbk_filtered < -3300)
+      sixStep.demagn_value = DEMAGN_VAL_8;
+    else if (sixStep.speed_fdbk_filtered >= -3300 && sixStep.speed_fdbk_filtered < -2650)
+      sixStep.demagn_value = DEMAGN_VAL_9;
+    else if (sixStep.speed_fdbk_filtered >= -2600 && sixStep.speed_fdbk_filtered<-1800)
+      sixStep.demagn_value = DEMAGN_VAL_10;
+    else if (sixStep.speed_fdbk_filtered >= -1800 && sixStep.speed_fdbk_filtered < -1500)
+      sixStep.demagn_value = DEMAGN_VAL_11;
+    else if (sixStep.speed_fdbk_filtered >= -1500 && sixStep.speed_fdbk_filtered < -1300)
+      sixStep.demagn_value = DEMAGN_VAL_12;
+    else if (sixStep.speed_fdbk_filtered >= -1300 && sixStep.speed_fdbk_filtered < -1000)
+      sixStep.demagn_value = DEMAGN_VAL_13;
+    else if (sixStep.speed_fdbk_filtered >= -1000 && sixStep.speed_fdbk_filtered < -500)
+      sixStep.demagn_value = DEMAGN_VAL_14;
     }
   }
 //}}}
@@ -176,14 +176,14 @@ void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
 //}}}
 
 //{{{
-void MC_Start_PWM_driving() {
+void MC_Start_PWM() {
   HAL_TIM_PWM_Start (&HF_TIMx, HF_TIMx_CH1); // TIM1_CH1 ENABLE
   HAL_TIM_PWM_Start (&HF_TIMx, HF_TIMx_CH2); // TIM1_CH2 ENABLE
   HAL_TIM_PWM_Start (&HF_TIMx, HF_TIMx_CH3); // TIM1_CH3 ENABLE
   }
 //}}}
 //{{{
-void MC_Stop_PWM_driving() {
+void MC_Stop_PWM() {
   HAL_TIM_PWM_Stop (&HF_TIMx, HF_TIMx_CH1); // TIM1_CH1 DISABLE
   HAL_TIM_PWM_Stop (&HF_TIMx, HF_TIMx_CH2); // TIM1_CH2 DISABLE
   HAL_TIM_PWM_Stop (&HF_TIMx, HF_TIMx_CH3); // TIM1_CH3 DISABLE

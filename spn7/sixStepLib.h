@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ihm07m1.h"
-#include "6StepParam.h"
+#include "sixStepParam.h"
 //{{{
 #ifdef __cplusplus
  extern "C" {
