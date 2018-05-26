@@ -4,7 +4,7 @@
 #define DIRECTION                        false    // Set motor direction CW = false and CCW = true
 #define TARGET_SPEED                      2000    // Target speed in closed loop control
 
-#define STARTUP_CURRENT_REFERENCE         1500    // StartUP Currente Reference (2000 = 2.2A)
+#define STARTUP_CURRENT_REFERENCE         1500    // StartUP CurrentReference (2000 = 2.2A)
 #define ACC                             600000    // Mechanical acceleration rate (setting available in manual mode, LOAD_TYPE = 0)
 #define MINIMUM_ACC                        500    // Mechanical acceleration rate for BIG load application
 #define NUMBER_OF_STEPS                  20000    // Number of elements for motor start-UP (max value 65535)
@@ -19,8 +19,8 @@
 #define KI_DIV                            4096    // Ki parameter divider for PI regulator
 #define LOWER_OUT_LIMIT                    120    // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000    // High Out value of PI regulator
-#define MAX_POT_SPEED                     5000    // Maximum Speed regulated by potentiometer
-#define MIN_POT_SPEED                     2000    // Minimum Speed regulated by potentiometer
+#define MAX_POT_SPEED                     6000    // Maximum Speed regulated by potentiometer
+#define MIN_POT_SPEED                     1000    // Minimum Speed regulated by potentiometer
 #define VAL_POT_SPEED_DIV                    2    // Validation potentiometer speed divider
 #define INITIAL_DEMAGN_DELAY                10    // Initial value for delay time during startup for Bemf detection
 

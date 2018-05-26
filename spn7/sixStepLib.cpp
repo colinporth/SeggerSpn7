@@ -312,17 +312,17 @@ void nextStep() {
   // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
   if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
     switch (sixStep.step_position) {
-      case 1: 
-      case 4: 
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; 
+      case 1:
+      case 4:
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
         break;
-      case 2: 
-      case 5: 
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; 
+      case 2:
+      case 5:
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
         break;
-      case 3: 
-      case 6: 
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; 
+      case 3:
+      case 6:
+        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
         break;
       }
 
@@ -338,7 +338,7 @@ void arrStep() {
 
   if (sixStep.ALIGN_OK) {
     if (PI_parameters.Reference >= 0) {
-      if (sixStep.VALIDATION_OK != true) {
+      if (!sixStep.VALIDATION_OK) {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
         if (index_ARR_step < sixStep.numberofitemArr) {
@@ -506,7 +506,7 @@ void taskSpeed() {
     MC_Current_Reference_Setvalue (sixStep.Current_Reference);
     }
 
-  MC_bemfDelayCalc();
+  MC_BemfDelayCalc();
   }
 //}}}
 

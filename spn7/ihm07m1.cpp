@@ -449,10 +449,10 @@ void MC_ADC_Channel (uint32_t adc_ch) {
   }
 //}}}
 //{{{
-void MC_bemfDelayCalc() {
+void MC_BemfDelayCalc() {
 
  if (PI_parameters.Reference >= 0) {
-   if (sixStep.speed_fdbk_filtered <= 12000 && sixStep.speed_fdbk_filtered>10000)
+   if (sixStep.speed_fdbk_filtered <= 12000 && sixStep.speed_fdbk_filtered > 10000)
       sixStep.demagn_value = DEMAGN_VAL_1;
     else if (sixStep.speed_fdbk_filtered <= 10000 && sixStep.speed_fdbk_filtered > 7800)
       sixStep.demagn_value = DEMAGN_VAL_2;
@@ -464,17 +464,17 @@ void MC_bemfDelayCalc() {
       sixStep.demagn_value = DEMAGN_VAL_5;
     else if (sixStep.speed_fdbk_filtered <= 4650 && sixStep.speed_fdbk_filtered > 4100)
       sixStep.demagn_value = DEMAGN_VAL_6;
-    else if(sixStep.speed_fdbk_filtered <= 4100 && sixStep.speed_fdbk_filtered > 3650)
+    else if (sixStep.speed_fdbk_filtered <= 4100 && sixStep.speed_fdbk_filtered > 3650)
       sixStep.demagn_value = DEMAGN_VAL_7;
-    else if (sixStep.speed_fdbk_filtered <= 3650 && sixStep.speed_fdbk_filtered>3300)
+    else if (sixStep.speed_fdbk_filtered <= 3650 && sixStep.speed_fdbk_filtered > 3300)
       sixStep.demagn_value = DEMAGN_VAL_8;
-    else if (sixStep.speed_fdbk_filtered <= 3300 && sixStep.speed_fdbk_filtered>2600)
+    else if (sixStep.speed_fdbk_filtered <= 3300 && sixStep.speed_fdbk_filtered > 2600)
       sixStep.demagn_value = DEMAGN_VAL_9;
     else if (sixStep.speed_fdbk_filtered <= 2600 && sixStep.speed_fdbk_filtered > 1800)
       sixStep.demagn_value = DEMAGN_VAL_10;
     else if (sixStep.speed_fdbk_filtered <= 1800 && sixStep.speed_fdbk_filtered > 1500)
       sixStep.demagn_value = DEMAGN_VAL_11;
-    else if(sixStep.speed_fdbk_filtered <= 1500 && sixStep.speed_fdbk_filtered > 1300)
+    else if (sixStep.speed_fdbk_filtered <= 1500 && sixStep.speed_fdbk_filtered > 1300)
       sixStep.demagn_value = DEMAGN_VAL_12;
     else if (sixStep.speed_fdbk_filtered <= 1300 && sixStep.speed_fdbk_filtered > 1000)
       sixStep.demagn_value = DEMAGN_VAL_13;
@@ -496,11 +496,11 @@ void MC_bemfDelayCalc() {
       sixStep.demagn_value = DEMAGN_VAL_6;
     else if (sixStep.speed_fdbk_filtered >= -4100 && sixStep.speed_fdbk_filtered < -3650)
       sixStep.demagn_value = DEMAGN_VAL_7;
-    else if(sixStep.speed_fdbk_filtered >= -3650 && sixStep.speed_fdbk_filtered < -3300)
+    else if (sixStep.speed_fdbk_filtered >= -3650 && sixStep.speed_fdbk_filtered < -3300)
       sixStep.demagn_value = DEMAGN_VAL_8;
     else if (sixStep.speed_fdbk_filtered >= -3300 && sixStep.speed_fdbk_filtered < -2650)
       sixStep.demagn_value = DEMAGN_VAL_9;
-    else if (sixStep.speed_fdbk_filtered >= -2600 && sixStep.speed_fdbk_filtered<-1800)
+    else if (sixStep.speed_fdbk_filtered >= -2600 && sixStep.speed_fdbk_filtered <-1800)
       sixStep.demagn_value = DEMAGN_VAL_10;
     else if (sixStep.speed_fdbk_filtered >= -1800 && sixStep.speed_fdbk_filtered < -1500)
       sixStep.demagn_value = DEMAGN_VAL_11;
