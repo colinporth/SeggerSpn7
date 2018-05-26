@@ -5,47 +5,22 @@
 #endif
 //}}}
 
-//{{{  module include defines
 #define HAL_MODULE_ENABLED
 #define HAL_ADC_MODULE_ENABLED
-/*#define HAL_CRYP_MODULE_ENABLED   */
-/*#define HAL_CAN_MODULE_ENABLED   */
-/*#define HAL_CEC_MODULE_ENABLED   */
-/*#define HAL_NAND_MODULE_ENABLED   */
-/*#define HAL_NOR_MODULE_ENABLED   */
-/*#define HAL_PCCARD_MODULE_ENABLED   */
-/*#define HAL_SRAM_MODULE_ENABLED   */
-/*#define HAL_HRTIM_MODULE_ENABLED   */
-/*#define HAL_OPAMP_MODULE_ENABLED   */
-/*#define HAL_SDADC_MODULE_ENABLED   */
-/*#define HAL_TSC_MODULE_ENABLED   */
-/*#define HAL_COMP_MODULE_ENABLED   */
 #define HAL_CRC_MODULE_ENABLED
-/*#define HAL_CRYP_MODULE_ENABLED   */
 #define HAL_DAC_MODULE_ENABLED
-/*#define HAL_I2S_MODULE_ENABLED   */
-/*#define HAL_IWDG_MODULE_ENABLED   */
-/*#define HAL_LCD_MODULE_ENABLED   */
-/*#define HAL_LPTIM_MODULE_ENABLED   */
-/*#define HAL_RNG_MODULE_ENABLED   */
-/*#define HAL_RTC_MODULE_ENABLED   */
+#define HAL_DMA_MODULE_ENABLED
+#define HAL_GPIO_MODULE_ENABLED
+#define HAL_FLASH_MODULE_ENABLED
+#define HAL_I2C_MODULE_ENABLED
+#define HAL_PWR_MODULE_ENABLED
+#define HAL_RCC_MODULE_ENABLED
 #define HAL_SPI_MODULE_ENABLED
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
-/*#define HAL_USART_MODULE_ENABLED   */
-/*#define HAL_IRDA_MODULE_ENABLED   */
-/*#define HAL_SMARTCARD_MODULE_ENABLED   */
-/*#define HAL_SMBUS_MODULE_ENABLED   */
-/*#define HAL_WWDG_MODULE_ENABLED   */
-/*#define HAL_PCD_MODULE_ENABLED   */
-#define HAL_GPIO_MODULE_ENABLED
-#define HAL_DMA_MODULE_ENABLED
-#define HAL_RCC_MODULE_ENABLED
-#define HAL_FLASH_MODULE_ENABLED
-#define HAL_PWR_MODULE_ENABLED
 #define HAL_CORTEX_MODULE_ENABLED
-#define HAL_I2C_MODULE_ENABLED
-//}}}
+//#define HAL_RTC_MODULE_ENABLED
+//#define HAL_USART_MODULE_ENABLED
 
 #define HSE_VALUE  ((uint32_t)8000000)
 #define HSI_VALUE  ((uint32_t)8000000)
@@ -57,14 +32,14 @@
 #define HSI_STARTUP_TIMEOUT  ((uint32_t)5000)
 #define LSE_STARTUP_TIMEOUT  ((uint32_t)5000)
 
-#define VDD_VALUE                 ((uint32_t)3300)
-#define TICK_INT_PRIORITY          ((uint32_t)2)
-#define USE_RTOS                   0
-#define PREFETCH_ENABLE            1
-#define INSTRUCTION_CACHE_ENABLE   0
-#define DATA_CACHE_ENABLE          0
+#define VDD_VALUE                ((uint32_t)3300)
+#define TICK_INT_PRIORITY         ((uint32_t)4)
+#define USE_RTOS                  0
+#define PREFETCH_ENABLE           1
+#define INSTRUCTION_CACHE_ENABLE  0
+#define DATA_CACHE_ENABLE         0
 
-#define USE_SPI_CRC                0U
+#define USE_SPI_CRC               0U
 
 //{{{  module includes
 #ifdef HAL_RCC_MODULE_ENABLED

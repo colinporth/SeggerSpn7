@@ -190,18 +190,18 @@ void MC_Stop_PWM_driving() {
   }
 //}}}
 //{{{
-void MC_HF_TIMx_SetDutyCycle_CH1 (uint16_t CCR_value) {
-  HF_TIMx.Instance->HF_TIMx_CCR1 = CCR_value;
+void MC_HF_TIMx_SetDutyCycle_CH1 (uint16_t value) {
+  HF_TIMx.Instance->HF_TIMx_CCR1 = value;
   }
 //}}}
 //{{{
-void MC_HF_TIMx_SetDutyCycle_CH2 (uint16_t CCR_value) {
-  HF_TIMx.Instance->HF_TIMx_CCR2 = CCR_value;
+void MC_HF_TIMx_SetDutyCycle_CH2 (uint16_t value) {
+  HF_TIMx.Instance->HF_TIMx_CCR2 = value;
   }
 //}}}
 //{{{
-void MC_HF_TIMx_SetDutyCycle_CH3 (uint16_t CCR_value) {
-  HF_TIMx.Instance->HF_TIMx_CCR3 = CCR_value;
+void MC_HF_TIMx_SetDutyCycle_CH3 (uint16_t value) {
+  HF_TIMx.Instance->HF_TIMx_CCR3 = value;
   }
 //}}}
 
@@ -220,8 +220,8 @@ void MC_Current_Reference_Stop() {
   }
 //}}}
 //{{{
-void MC_Current_Reference_Setvalue (uint16_t Iref) {
-  REFx.Instance->CCR1 = (uint32_t)(Iref * REFx.Instance->ARR) / 4096;
+void MC_Current_Reference_Setvalue (uint16_t value) {
+  REFx.Instance->CCR1 = (uint32_t)(value * REFx.Instance->ARR) / 4096;
   }
 //}}}
 

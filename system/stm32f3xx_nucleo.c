@@ -144,7 +144,7 @@ uint32_t BSP_PB_GetState (Button_TypeDef Button) {
 
 // spi
 //{{{
-static void SPIx_MspInit (SPI_HandleTypeDef *hspi)
+void SPIx_MspInit (SPI_HandleTypeDef *hspi)
 {
   GPIO_InitTypeDef  GPIO_InitStruct;
 
@@ -176,7 +176,7 @@ static void SPIx_MspInit (SPI_HandleTypeDef *hspi)
 }
 //}}}
 //{{{
-static void SPIx_Init()
+void SPIx_Init()
 {
   if(HAL_SPI_GetState(&hnucleo_Spi) == HAL_SPI_STATE_RESET)
   {
@@ -211,7 +211,7 @@ static void SPIx_Init()
 }
 //}}}
 //{{{
-static void SPIx_Error()
+void SPIx_Error()
 {
   /* De-initialize the SPI communication BUS */
   HAL_SPI_DeInit(&hnucleo_Spi);
@@ -221,7 +221,7 @@ static void SPIx_Error()
 }
 //}}}
 //{{{
-static void SPIx_WriteReadData (const uint8_t *DataIn, uint8_t *DataOut, uint16_t DataLegnth)
+void SPIx_WriteReadData (const uint8_t *DataIn, uint8_t *DataOut, uint16_t DataLegnth)
 {
   HAL_StatusTypeDef status = HAL_OK;
 
@@ -236,7 +236,7 @@ static void SPIx_WriteReadData (const uint8_t *DataIn, uint8_t *DataOut, uint16_
 }
 //}}}
 //{{{
-static uint32_t SPIx_Read()
+uint32_t SPIx_Read()
 {
   HAL_StatusTypeDef status = HAL_OK;
   uint32_t readvalue = 0;
@@ -255,7 +255,7 @@ static uint32_t SPIx_Read()
 }
 //}}}
 //{{{
-static void SPIx_Write (uint8_t Value)
+void SPIx_Write (uint8_t Value)
 {
   HAL_StatusTypeDef status = HAL_OK;
   uint8_t data;

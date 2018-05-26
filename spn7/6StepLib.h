@@ -86,7 +86,6 @@ typedef struct {
   uint16_t KP;                           /*!< KP parameter for PI regulator */
   uint16_t KI;                           /*!< KI parameter for PI regulator */
   uint8_t CW_CCW;                        /*!< Set the motor direction */
-  uint8_t Potentiometer;                 /*!< Enable/Disable potentiometer for speed control */
   } SIXSTEP_Base_InitTypeDef;             /*!< Six Step Data Structure */
 //}}}
 //{{{  struct SIXSTEP_PI_PARAM_InitTypeDef_t

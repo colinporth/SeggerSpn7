@@ -54,7 +54,6 @@
       <file file_name="spn7/stm32f3xx_nucleo.h" />
       <file file_name="spn7/stm32f303xe.h" />
       <file file_name="spn7/system_stm32f3xx.h" />
-      <file file_name="spn7/UART_UI.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">
@@ -196,8 +195,8 @@
     </folder>
     <file file_name="spn7/6StepLib.c" />
     <file file_name="spn7/ihm07m1.c" />
-    <file file_name="spn7/stm32f3xx_nucleo.c" />
     <file file_name="spn7/main.cpp" />
+    <file file_name="system/stm32f3xx_nucleo.c" />
   </project>
   <configuration
     Name="Debug"

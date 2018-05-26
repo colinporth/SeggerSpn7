@@ -25,6 +25,11 @@ void BSP_PB_Init (Button_TypeDef Button, ButtonMode_TypeDef ButtonMode);
 void BSP_PB_DeInit (Button_TypeDef Button);
 uint32_t BSP_PB_GetState (Button_TypeDef Button);
 
+void SPIx_Init();
+void SPIx_WriteReadData (const uint8_t *DataIn, uint8_t *DataOut, uint16_t DataLegnth);
+uint32_t SPIx_Read();
+void SPIx_Write (uint8_t Value);
+
 //{{{
 #ifdef __cplusplus
 }

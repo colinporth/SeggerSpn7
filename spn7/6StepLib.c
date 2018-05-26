@@ -71,14 +71,37 @@ static uint64_t fastSqrt (uint64_t wInput) {
 //}}}
 
 //{{{
-static uint16_t potFilter (uint16_t potentiometer_value) {
+static void potSpeedTarget() {
+
+  target_speed = SIXSTEP_parameters.ADC_Regular_Buffer[1] * MAX_POT_SPEED / 4096;
+
+  if (target_speed < MIN_POT_SPEED)
+    target_speed = MIN_POT_SPEED;
+  if (target_speed > (MAX_POT_SPEED / VAL_POT_SPEED_DIV))
+    target_speed = (MAX_POT_SPEED/VAL_POT_SPEED_DIV);
+  }
+//}}}
+//{{{
+static void potSpeed() {
+
+  uint32_t sum = 0;
+  uint16_t max = 0;
+  for (uint16_t i = 0; i < HFBUFFERSIZE; i++) {
+    uint16_t val = HFBuffer[i];
+    sum += val;
+    if (val > max)
+      max = val;
+    }
+
+  sum -= max;
+  uint16_t potMean = sum / (HFBUFFERSIZE - 1);
 
   if (buffer_completed == FALSE) {
-    speed_tmp_buffer[index_pot_filt] = potentiometer_value;
+    speed_tmp_buffer[index_pot_filt] = potMean;
     speed_sum_pot_filt = 0;
     for (uint16_t i = 1; i <= index_pot_filt;i++)
       speed_sum_pot_filt = speed_sum_pot_filt + speed_tmp_buffer[i];
-    potent_filtered = speed_sum_pot_filt/index_pot_filt;
+    potent_filtered = speed_sum_pot_filt / index_pot_filt;
     index_pot_filt++;
 
     if (index_pot_filt >= FILTER_DEEP) {
@@ -93,7 +116,7 @@ static uint16_t potFilter (uint16_t potentiometer_value) {
        index_pot_filt = 1;
 
      speed_sum_pot_filt = 0;
-     speed_tmp_buffer[index_pot_filt] = potentiometer_value;
+     speed_tmp_buffer[index_pot_filt] = potMean;
      uint16_t speed_max = 0;
      for (uint16_t i = 1; i < FILTER_DEEP;i++) {
        uint16_t val = speed_tmp_buffer[i];
@@ -102,45 +125,43 @@ static uint16_t potFilter (uint16_t potentiometer_value) {
        speed_sum_pot_filt += val;
        }
      speed_sum_pot_filt -= speed_max;
-     potent_filtered = speed_sum_pot_filt/(FILTER_DEEP-2);
+     potent_filtered = speed_sum_pot_filt / (FILTER_DEEP-2);
     }
 
   if (potent_filtered==0)
     potent_filtered = 1;
 
-  return(potent_filtered);
+  SIXSTEP_parameters.Speed_Ref_filtered = potent_filtered;
   }
 //}}}
 //{{{
-static void potSpeedTarget() {
+static void speedFilter() {
 
-  target_speed = SIXSTEP_parameters.ADC_Regular_Buffer[1] * MAX_POT_SPEED/ 4096;
+  if (array_completed == FALSE) {
+    speed_tmp_array[index_array] = SIXSTEP_parameters.speed_fdbk;
+    speed_sum_sp_filt = 0;
+    for (uint16_t i = 1; i <= index_array;i++)
+      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
+    SIXSTEP_parameters.speed_fdbk_filtered = speed_sum_sp_filt / index_array;
+    index_array++;
 
-  if (target_speed < MIN_POT_SPEED)
-    target_speed = MIN_POT_SPEED;
-
-  if (target_speed > (MAX_POT_SPEED/VAL_POT_SPEED_DIV))
-    target_speed = (MAX_POT_SPEED/VAL_POT_SPEED_DIV);
-  }
-//}}}
-//{{{
-static void potSpeed() {
-
-  uint16_t i=0;
-  uint32_t sum = 0;
-  uint16_t mean = 0;
-  uint16_t max = 0;
-  for (i = 0; i < HFBUFFERSIZE; i++) {
-    uint16_t val = HFBuffer[i];
-    sum += val;
-    if (val > max)
-      max = val;
+    if (index_array >= FILTER_DEEP) {
+     index_array = 1;
+     array_completed = TRUE;
+     }
     }
 
-  sum -= max;
-  mean = sum / (HFBUFFERSIZE - 1);
+  else {
+    index_array++;
+    if (index_array >= FILTER_DEEP)
+      index_array = 1;
 
-  SIXSTEP_parameters.Speed_Ref_filtered = potFilter (mean);
+    speed_sum_sp_filt = 0;
+    speed_tmp_array[index_array] = SIXSTEP_parameters.speed_fdbk;
+    for (uint16_t i = 1; i < FILTER_DEEP;i++)
+      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
+    SIXSTEP_parameters.speed_fdbk_filtered = speed_sum_sp_filt / (FILTER_DEEP-1);
+    }
   }
 //}}}
 
@@ -237,60 +258,7 @@ static void rampMotorCalc() {
   Time_vector_prev_tmp =  Time_vector_tmp;
   }
 //}}}
-//{{{
-static void speedFilter() {
 
-  if (array_completed == FALSE) {
-    speed_tmp_array[index_array] = SIXSTEP_parameters.speed_fdbk;
-    speed_sum_sp_filt = 0;
-    for (uint16_t i = 1; i <= index_array;i++)
-      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
-    SIXSTEP_parameters.speed_fdbk_filtered = speed_sum_sp_filt/index_array;
-    index_array++;
-
-    if (index_array >= FILTER_DEEP) {
-     index_array = 1;
-     array_completed = TRUE;
-     }
-    }
-
-  else {
-    index_array++;
-    if (index_array >= FILTER_DEEP)
-      index_array = 1;
-
-    speed_sum_sp_filt = 0;
-    speed_tmp_array[index_array] = SIXSTEP_parameters.speed_fdbk;
-    for (uint16_t i = 1; i < FILTER_DEEP;i++)
-      speed_sum_sp_filt = speed_sum_sp_filt + speed_tmp_array[i];
-    SIXSTEP_parameters.speed_fdbk_filtered = speed_sum_sp_filt/(FILTER_DEEP-1);
-    }
-  }
-//}}}
-
-//{{{
-static void alignMotor() {
-
-  SIXSTEP_parameters.step_position = 6;
-  LF_TIMx.Init.Period = SIXSTEP_parameters.ARR_value;
-  LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
-  SIXSTEP_parameters.STATUS = ALIGNMENT;
-
-  potSpeedTarget();
-
-  index_align++;
-  if (index_align >= TIME_FOR_ALIGN + 1) {
-    printf ("%d aligned\n", HAL_GetTick());
-    SIXSTEP_parameters.ALIGN_OK = TRUE;
-    SIXSTEP_parameters.STATUS = STARTUP;
-    index_startup_motor = 1;
-    rampMotorCalc();
-    LF_TIMx.Init.Prescaler = SIXSTEP_parameters.prescaler_value;
-    LF_TIMx.Instance->PSC = LF_TIMx.Init.Prescaler;
-    index_align = 0;
-    }
-  }
-//}}}
 //{{{
 static void nextStep() {
 
@@ -344,7 +312,7 @@ static void nextStep() {
       case 6: SIXSTEP_parameters.CurrentRegular_BEMF_ch = SIXSTEP_parameters.Regular_channel[1]; break;
       }
 
-    MC_ADC_Channel(SIXSTEP_parameters.CurrentRegular_BEMF_ch);
+    MC_ADC_Channel (SIXSTEP_parameters.CurrentRegular_BEMF_ch);
     }
   }
 //}}}
@@ -388,7 +356,7 @@ static void arrStep() {
           LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
           index_ARR_step++;
           }
-        else if(SIXSTEP_parameters.ARR_OK==0) {
+        else if(SIXSTEP_parameters.ARR_OK == 0) {
           index_ARR_step = 1;
           SIXSTEP_parameters.ACCEL>>=1;
           if (SIXSTEP_parameters.ACCEL < MINIMUM_ACC)
@@ -418,10 +386,10 @@ void arrBemf (uint8_t up_bemf) {
         n_zcr_startup++;
         cnt_bemf_event = 0;
         }
-      else if(SIXSTEP_parameters.BEMF_OK != TRUE)
+      else if (SIXSTEP_parameters.BEMF_OK != TRUE)
         cnt_bemf_event++;
 
-      if ((n_zcr_startup >= NUMBER_ZCR) && (SIXSTEP_parameters.BEMF_OK !=TRUE)) {
+      if ((n_zcr_startup >= NUMBER_ZCR) && (SIXSTEP_parameters.BEMF_OK != TRUE)) {
         SIXSTEP_parameters.BEMF_OK = TRUE;
         n_zcr_startup = 0;
         }
@@ -646,7 +614,7 @@ void MC_ADC() {
           break;
         //}}}
         }
-      printf ("%d adcU %d\n", HAL_GetTick(), SIXSTEP_parameters.step_position);
+      //printf ("%d adcU %d\n", HAL_GetTick(), SIXSTEP_parameters.step_position);
       }
 
     // SET ADC CHANNEL FOR SPEED/CURRENT/VBUS
@@ -663,7 +631,7 @@ void MC_ADC() {
         HFBufferIndex = 0;
       }
 
-    printf ("%d adcD %d\n", HAL_GetTick(), index_adc_chn);
+    //printf ("%d adcD %d\n", HAL_GetTick(), index_adc_chn);
 
     index_adc_chn++;
     if (index_adc_chn > 3)
@@ -674,7 +642,7 @@ void MC_ADC() {
   }
 //}}}
 //{{{
-void MC_TIMxTimebase() {
+void MC_Timebase() {
 
   nextStep();
 
@@ -686,12 +654,32 @@ void MC_TIMxTimebase() {
   }
 //}}}
 //{{{
-void MC_SysTickMediumFrequencyTask() {
+void MC_SysTickTask() {
 
-  if ((SIXSTEP_parameters.ALIGNMENT == TRUE) && (SIXSTEP_parameters.ALIGN_OK == FALSE))
-    alignMotor();
+  if ((SIXSTEP_parameters.ALIGNMENT == TRUE) && (SIXSTEP_parameters.ALIGN_OK == FALSE)) {
+    //{{{  align motor
+    SIXSTEP_parameters.step_position = 6;
+    LF_TIMx.Init.Period = SIXSTEP_parameters.ARR_value;
+    LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
+    SIXSTEP_parameters.STATUS = ALIGNMENT;
 
-  if ((SIXSTEP_parameters.VALIDATION_OK == TRUE) && (SIXSTEP_parameters.Potentiometer == TRUE))
+    potSpeedTarget();
+
+    index_align++;
+    if (index_align >= TIME_FOR_ALIGN + 1) {
+      printf ("%d aligned\n", HAL_GetTick());
+      SIXSTEP_parameters.ALIGN_OK = TRUE;
+      SIXSTEP_parameters.STATUS = STARTUP;
+      index_startup_motor = 1;
+      rampMotorCalc();
+      LF_TIMx.Init.Prescaler = SIXSTEP_parameters.prescaler_value;
+      LF_TIMx.Instance->PSC = LF_TIMx.Init.Prescaler;
+      index_align = 0;
+      }
+    }
+    //}}}
+
+  if (SIXSTEP_parameters.VALIDATION_OK == TRUE)
     potSpeed();
 
   // Push button delay time to avoid double command
@@ -748,7 +736,6 @@ void MC_INIT() {
   SIXSTEP_parameters.KP = KP_GAIN;
   SIXSTEP_parameters.KI = KI_GAIN;
   SIXSTEP_parameters.CW_CCW = DIRECTION;
-  SIXSTEP_parameters.Potentiometer = POTENTIOMETER;
   SIXSTEP_parameters.Button_ready = TRUE;
 
   MC_RESET();
@@ -897,11 +884,10 @@ int32_t MC_GetMechSpeedRPM() {
 void MC_StartMotor() {
 
   SIXSTEP_parameters.STATUS = START;
+  SIXSTEP_parameters.RUN_Motor = 1;
 
   HAL_TIM_Base_Start_IT (&LF_TIMx);
   HAL_ADC_Start_IT (&ADCx);
-
-  SIXSTEP_parameters.RUN_Motor = 1;
 
   NUCLEO_LED_ON();
   }
@@ -928,47 +914,34 @@ void MC_StopMotor() {
 //{{{
 void MC_Set_Speed (uint16_t speed_value) {
 
-#if (POTENTIOMETER == 1)
   uint8_t change_target_speed = 0;
   int16_t reference_tmp = 0;
 
   if (SIXSTEP_parameters.Speed_Ref_filtered > SIXSTEP_parameters.Speed_target_ramp) {
     if ((SIXSTEP_parameters.Speed_Ref_filtered - SIXSTEP_parameters.Speed_target_ramp) > ADC_SPEED_TH)
       change_target_speed = 1;
-    else {
-      /* Not change target speed because less than threshold */
-      }
     }
-  else {
-    if ((SIXSTEP_parameters.Speed_target_ramp - SIXSTEP_parameters.Speed_Ref_filtered) > ADC_SPEED_TH)
-      change_target_speed = 1;
-    else {
-      /* Not change target speed because less than threshold */
-      }
-    }
+  else if ((SIXSTEP_parameters.Speed_target_ramp - SIXSTEP_parameters.Speed_Ref_filtered) > ADC_SPEED_TH)
+    change_target_speed = 1;
 
   if (change_target_speed == 1) {
     SIXSTEP_parameters.Speed_target_ramp = SIXSTEP_parameters.Speed_Ref_filtered;
 
     if (SIXSTEP_parameters.CW_CCW == 0) {
       reference_tmp = SIXSTEP_parameters.Speed_Ref_filtered * MAX_POT_SPEED / 4096;
-       if(reference_tmp <= MIN_POT_SPEED)
+       if (reference_tmp <= MIN_POT_SPEED)
          PI_parameters.Reference = MIN_POT_SPEED;
        else
          PI_parameters.Reference =  reference_tmp;
       }
     else {
       reference_tmp = -(SIXSTEP_parameters.Speed_Ref_filtered * MAX_POT_SPEED / 4096);
-       if(reference_tmp >=- MIN_POT_SPEED)
-         PI_parameters.Reference = -MIN_POT_SPEED;
-       else
-         PI_parameters.Reference=  reference_tmp;
+      if (reference_tmp >=- MIN_POT_SPEED)
+        PI_parameters.Reference = -MIN_POT_SPEED;
+      else
+        PI_parameters.Reference=  reference_tmp;
       }
     }
-#else
-  if (speed_value != 0)
-    PI_parameters.Reference = speed_value;
-#endif
   }
 //}}}
 //{{{
@@ -995,11 +968,11 @@ void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
   }
 
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
-  MC_TIMxTimebase();
+  MC_Timebase();
   }
 
 void HAL_SYSTICK_Callback() {
-  MC_SysTickMediumFrequencyTask();
+  MC_SysTickTask();
   }
 
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin) {
