@@ -8,14 +8,13 @@
 #endif
 //}}}
 
-//enum SIXSTEP_Base_SystStatus_t;
-typedef enum {
+enum eSixStepStatus {
   IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
-  SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE } SIXSTEP_Base_SystStatus_t;
+  SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
 
-//{{{  struct SIXSTEP_Base_InitTypeDef
-typedef struct {
-  SIXSTEP_Base_SystStatus_t STATUS;    // Status variable for SixStep algorithm
+//{{{
+struct sSixStep {
+  eSixStepStatus STATUS;               // Status variable for SixStep algorithm
 
   bool Button_ready;                   //
   bool CMD;                            // Flag control for Motor Start/Stop
@@ -75,7 +74,6 @@ typedef struct {
 
   uint16_t Ramp_Start;                 // Ramp time start
   uint16_t Bemf_delay_start;           // Bemf variable
-  uint16_t MediumFrequencyTask_flag;   // Flag for Medium Task Frequency
 
   uint32_t SYSCLK_frequency;           // System clock main frequency
   uint8_t BEMF_Tdown_count;            // BEMF Consecutive Threshold Falling Crossings Counter
@@ -84,18 +82,18 @@ typedef struct {
   uint32_t ACCEL;                      // Acceleration start-up parameter
   uint16_t KP;                         // KP parameter for PI regulator
   uint16_t KI;                         // KI parameter for PI regulator
-  } SIXSTEP_Base_InitTypeDef;          // Six Step Data Structure
+  };
 //}}}
-//{{{  struct SIXSTEP_PI_PARAM_InitTypeDef_t
-typedef struct {
-  int16_t Reference;                    // Refence value for PI regulator
-  int16_t Kp_Gain;                      // Kp value for PI regulator
-  int16_t Ki_Gain;                      // Ki value for PI regulator
-  int16_t Lower_Limit_Output;           // Min output value for PI regulator
-  int16_t Upper_Limit_Output;           // Max output value for PI regulator
-  bool Max_PID_Output;                // Max Saturation indicator flag
-  bool Min_PID_Output;                // Min Saturation indicator flag
-  } SIXSTEP_PI_PARAM_InitTypeDef_t, *SIXSTEP_pi_PARAM_InitTypeDef_t;  // PI Data Structure
+//{{{
+struct sPiParam {
+  int16_t Reference;          // Refence value for PI regulator
+  int16_t Kp_Gain;            // Kp value for PI regulator
+  int16_t Ki_Gain;            // Ki value for PI regulator
+  int16_t Lower_Limit_Output; // Min output value for PI regulator
+  int16_t Upper_Limit_Output; // Max output value for PI regulator
+  bool Max_PID_Output;        // Max Saturation indicator flag
+  bool Min_PID_Output;        // Min Saturation indicator flag
+  };
 //}}}
 
 // external interface
@@ -108,7 +106,7 @@ int32_t MC_GetMechSpeedRPM();
 void MC_StartMotor();
 void MC_StopMotor();
 
-void MC_SetSpeed (uint16_t);
+void MC_SetSpeed();
 void MC_EXTbutton();
 
 //{{{

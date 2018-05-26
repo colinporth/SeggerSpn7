@@ -21,8 +21,8 @@ TIM_HandleTypeDef htim6;
 TIM_HandleTypeDef htim16;
 DAC_HandleTypeDef hdac;
 
-extern SIXSTEP_Base_InitTypeDef sixStep;
-extern SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters;
+extern struct sSixStep sixStep;
+extern struct sPiParam PI_parameters;
 
 // irq handlers
 extern "C" {

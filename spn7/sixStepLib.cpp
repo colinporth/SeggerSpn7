@@ -2,8 +2,8 @@
 #include <string.h>
 #include "sixStepLib.h"
 
-SIXSTEP_Base_InitTypeDef sixStep;  // Main SixStep structure
-SIXSTEP_PI_PARAM_InitTypeDef_t PI_parameters; // SixStep PI regulator structure
+struct sSixStep sixStep;
+struct sPiParam PI_parameters; // SixStep PI regulator structure
 //{{{  vars
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
@@ -420,26 +420,24 @@ void arrBemf (bool up_bemf) {
 //}}}
 
 //{{{
-void setPiParam (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM) {
+void setPiParam (sPiParam* PI_PARAM) {
 
-  if (!sixStep.CW_CCW)
-    PI_PARAM->Reference = target_speed;
-  else
-    PI_PARAM->Reference = -target_speed;
+  PI_PARAM->Reference = sixStep.CW_CCW ? -target_speed : target_speed;
 
   PI_PARAM->Kp_Gain = sixStep.KP;
   PI_PARAM->Ki_Gain = sixStep.KI;
 
   PI_PARAM->Lower_Limit_Output = LOWER_OUT_LIMIT;
   PI_PARAM->Upper_Limit_Output = UPPER_OUT_LIMIT;
+
   PI_PARAM->Max_PID_Output = false;
   PI_PARAM->Min_PID_Output = false;
   }
 //}}}
 //{{{
-int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t speed_fdb) {
+int16_t piController (sPiParam* PI_PARAM, int16_t speed_fdb) {
 
-  int32_t Error = (PI_PARAM->Reference - speed_fdb);
+  int32_t Error = PI_PARAM->Reference - speed_fdb;
 
   // Proportional term computation
   int32_t wProportional_Term = PI_PARAM->Kp_Gain * Error;
@@ -456,10 +454,10 @@ int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t speed_fd
     }
 
   if (sixStep.Integral_Term_sum > KI_DIV * PI_PARAM->Upper_Limit_Output)
-    sixStep.Integral_Term_sum = KI_DIV* PI_PARAM->Upper_Limit_Output;
+    sixStep.Integral_Term_sum = KI_DIV * PI_PARAM->Upper_Limit_Output;
 
-  if (sixStep.Integral_Term_sum < -KI_DIV* PI_PARAM->Upper_Limit_Output)
-    sixStep.Integral_Term_sum = -KI_DIV* PI_PARAM->Upper_Limit_Output;
+  if (sixStep.Integral_Term_sum < -KI_DIV * PI_PARAM->Upper_Limit_Output)
+    sixStep.Integral_Term_sum = -KI_DIV * PI_PARAM->Upper_Limit_Output;
 
   // WARNING: the below instruction is not MISRA compliant, user should verify
   //          that Cortex-M3 assembly instruction ASR (arithmetic shift right)
@@ -473,13 +471,13 @@ int16_t piController (SIXSTEP_PI_PARAM_InitTypeDef_t *PI_PARAM, int16_t speed_fd
       wOutput_32 = PI_PARAM->Lower_Limit_Output;
     }
   else {
-    if (wOutput_32 < (- PI_PARAM->Upper_Limit_Output) )
-      wOutput_32 = - (PI_PARAM->Upper_Limit_Output);
-    else if (wOutput_32 > (-PI_PARAM->Lower_Limit_Output))
-      wOutput_32 = (-PI_PARAM->Lower_Limit_Output);
+    if (wOutput_32 < -PI_PARAM->Upper_Limit_Output)
+      wOutput_32 = -PI_PARAM->Upper_Limit_Output;
+    else if (wOutput_32 > -PI_PARAM->Lower_Limit_Output)
+      wOutput_32 = -PI_PARAM->Lower_Limit_Output;
     }
 
-  return ((int16_t)(wOutput_32));
+  return (int16_t)wOutput_32;
   }
 //}}}
 
@@ -702,10 +700,8 @@ void MC_SysTick() {
   if (Tick_cnt >= sixStep.Speed_Loop_Time) {
     if (sixStep.STATUS != SPEEDFBKERROR)
       taskSpeed();
-
-    sixStep.MediumFrequencyTask_flag = true;
     if (sixStep.VALIDATION_OK)
-      MC_SetSpeed (0);
+      MC_SetSpeed();
     Tick_cnt = 0;
     }
   else
@@ -921,36 +917,29 @@ void MC_StopMotor() {
   MC_Reset();
   }
 //}}}
-
 //{{{
-void MC_SetSpeed (uint16_t speed_value) {
+void MC_SetSpeed() {
 
-  uint8_t change_target_speed = 0;
   int16_t reference_tmp = 0;
 
+  bool change_target_speed = false;
   if (sixStep.Speed_Ref_filtered > sixStep.Speed_target_ramp) {
     if ((sixStep.Speed_Ref_filtered - sixStep.Speed_target_ramp) > ADC_SPEED_TH)
-      change_target_speed = 1;
+      change_target_speed = true;
     }
   else if ((sixStep.Speed_target_ramp - sixStep.Speed_Ref_filtered) > ADC_SPEED_TH)
-    change_target_speed = 1;
+    change_target_speed = true;
 
-  if (change_target_speed == 1) {
+  if (change_target_speed) {
     sixStep.Speed_target_ramp = sixStep.Speed_Ref_filtered;
 
-    if (!sixStep.CW_CCW) {
-      reference_tmp = sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096;
-       if (reference_tmp <= MIN_POT_SPEED)
-         PI_parameters.Reference = MIN_POT_SPEED;
-       else
-         PI_parameters.Reference =  reference_tmp;
+    if (sixStep.CW_CCW) {
+      reference_tmp = -(sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096);
+      PI_parameters.Reference = (reference_tmp >=- MIN_POT_SPEED) ? -MIN_POT_SPEED : reference_tmp;
       }
     else {
-      reference_tmp = -(sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096);
-      if (reference_tmp >=- MIN_POT_SPEED)
-        PI_parameters.Reference = -MIN_POT_SPEED;
-      else
-        PI_parameters.Reference=  reference_tmp;
+      reference_tmp = sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096;
+      PI_parameters.Reference = (reference_tmp <= MIN_POT_SPEED) ? MIN_POT_SPEED : reference_tmp;
       }
     }
   }
