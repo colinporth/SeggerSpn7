@@ -77,40 +77,31 @@ extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim16;
-extern DAC_HandleTypeDef hdac;
 extern UART_HandleTypeDef huart2;
-
-void START_Ref_Generation();
-void STOP_Ref_Generation();
-void Set_Ref_Generation (uint16_t);
-
-void START_DAC();
-void STOP_DAC();
-void SET_DAC_value (uint16_t);
 
 void bemfDelayCalc();
 
-void MC_SixStep_ADC_Channel (uint32_t);
-void MC_SixStep_Nucleo_Init();
+void MC_ADC_Channel (uint32_t);
+void MC_Nucleo_Init();
 
-void MC_SixStep_EnableInput_CH1_E_CH2_E_CH3_D();
-void MC_SixStep_EnableInput_CH1_E_CH2_D_CH3_E();
-void MC_SixStep_EnableInput_CH1_D_CH2_E_CH3_E();
-void MC_SixStep_DisableInput_CH1_D_CH2_D_CH3_D();
+void MC_EnableInput_CH1_E_CH2_E_CH3_D();
+void MC_EnableInput_CH1_E_CH2_D_CH3_E();
+void MC_EnableInput_CH1_D_CH2_E_CH3_E();
+void MC_DisableInput_CH1_D_CH2_D_CH3_D();
 
-void MC_SixStep_Start_PWM_driving();
-void MC_SixStep_Stop_PWM_driving();
+void MC_Start_PWM_driving();
+void MC_Stop_PWM_driving();
 
-void MC_SixStep_HF_TIMx_SetDutyCycle_CH1 (uint16_t);
-void MC_SixStep_HF_TIMx_SetDutyCycle_CH2 (uint16_t);
-void MC_SixStep_HF_TIMx_SetDutyCycle_CH3 (uint16_t);
+void MC_HF_TIMx_SetDutyCycle_CH1 (uint16_t);
+void MC_HF_TIMx_SetDutyCycle_CH2 (uint16_t);
+void MC_HF_TIMx_SetDutyCycle_CH3 (uint16_t);
 
-void MC_SixStep_Current_Reference_Start();
-void MC_SixStep_Current_Reference_Stop();
-void MC_SixStep_Current_Reference_Setvalue (uint16_t);
+void MC_Current_Reference_Start();
+void MC_Current_Reference_Stop();
+void MC_Current_Reference_Setvalue (uint16_t);
 
-void BSP_X_NUCLEO_FAULT_LED_ON();
-void BSP_X_NUCLEO_FAULT_LED_OFF();
+void NUCLEO_LED_ON();
+void NUCLEO_LED_OFF();
 
 //{{{
 #ifdef __cplusplus

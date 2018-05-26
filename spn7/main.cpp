@@ -601,7 +601,7 @@ static void MX_DAC_Init() {
   MX_TIM16_Init();
   MX_DAC_Init();
 
-  MC_SixStep_INIT();
+  MC_INIT();
 
   int loop = 0;
   while (1) {
