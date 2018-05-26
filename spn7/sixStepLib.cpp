@@ -2,7 +2,7 @@
 #include "sixStepLib.h"
 
 struct sSixStep sixStep;
-struct sPiParam PI_parameters; // SixStep PI regulator structure
+struct sPiParam piParam; // SixStep PI regulator structure
 //{{{  vars
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
@@ -83,8 +83,11 @@ void potSpeedTarget() {
 
   if (target_speed < MIN_POT_SPEED)
     target_speed = MIN_POT_SPEED;
+
   if (target_speed > (MAX_POT_SPEED / VAL_POT_SPEED_DIV))
     target_speed = (MAX_POT_SPEED/VAL_POT_SPEED_DIV);
+
+  printf ("potSpeedTarget %d\n", target_speed);
   }
 //}}}
 //{{{
@@ -138,6 +141,8 @@ void potSpeed() {
     potent_filtered = 1;
 
   sixStep.Speed_Ref_filtered = potent_filtered;
+
+  printf ("potSpeed %d\n", potent_filtered);
   }
 //}}}
 //{{{
@@ -281,7 +286,7 @@ void nextStep() {
     if (sixStep.prev_step_position != sixStep.step_position)
       n_zcr_startup = 0;
 
-    if (PI_parameters.Reference >= 0) {
+    if (piParam.Reference >= 0) {
       sixStep.step_position++;
       if (sixStep.step_position > 6)
         sixStep.step_position = 1;
@@ -311,18 +316,12 @@ void nextStep() {
   // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
   if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
     switch (sixStep.step_position) {
-      case 1:
-      case 4:
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
-        break;
-      case 2:
-      case 5:
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
-        break;
       case 3:
-      case 6:
-        sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
-        break;
+      case 6: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; break;
+      case 2:
+      case 5: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; break;
+      case 1:
+      case 4: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; break;
       }
 
     MC_ADC_Channel (sixStep.CurrentRegular_BEMF_ch);
@@ -336,7 +335,7 @@ void arrStep() {
     sixStep.ALIGNMENT = true;
 
   if (sixStep.ALIGN_OK) {
-    if (PI_parameters.Reference >= 0) {
+    if (piParam.Reference >= 0) {
       if (!sixStep.VALIDATION_OK) {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
@@ -483,9 +482,9 @@ int16_t piController (sPiParam* PI_PARAM, int16_t speed_fdb) {
 //{{{
 void taskSpeed() {
 
-  if ((sixStep.speed_fdbk_filtered > (target_speed) ||
-       sixStep.speed_fdbk_filtered < (-target_speed)) &&
-       !sixStep.VALIDATION_OK) {
+  if (!sixStep.VALIDATION_OK && 
+      (sixStep.speed_fdbk_filtered > (target_speed) || sixStep.speed_fdbk_filtered < (-target_speed))) {
+    printf ("taskSpeed SPEED_VALIDATED\n");
     sixStep.STATUS = VALIDATION;
     sixStep.SPEED_VALIDATED = true;
     }
@@ -494,12 +493,13 @@ void taskSpeed() {
     sixStep.CL_READY = true;
 
   if (sixStep.VALIDATION_OK) {
+    printf ("taskSpeed VALIDATION_OK\n");
     sixStep.STATUS = RUN;
-    if (PI_parameters.Reference >= 0)
-      sixStep.Current_Reference = (uint16_t)piController (&PI_parameters,(int16_t)sixStep.speed_fdbk_filtered);
-    else
-      sixStep.Current_Reference = (uint16_t)(-piController (&PI_parameters,(int16_t)sixStep.speed_fdbk_filtered));
-
+    uint16_t ref = (uint16_t)piController (&piParam,(int16_t)sixStep.speed_fdbk_filtered);
+    if (piParam.Reference < 0)
+      ref = -ref;
+    printf ("ref %d\n", ref);
+    sixStep.Current_Reference = ref;
     MC_Current_Reference_Setvalue (sixStep.Current_Reference);
     }
 
@@ -519,7 +519,7 @@ void MC_ADC() {
         case 1:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&ADCx);
-            if (PI_parameters.Reference >= 0) {
+            if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[3] < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
               }
@@ -537,7 +537,7 @@ void MC_ADC() {
         case 2:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&ADCx);
-            if (PI_parameters.Reference >= 0) {
+            if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[2] > sixStep.ADC_BEMF_threshold_UP) {
                 arrBemf (1);
                 sixStep.BEMF_Tdown_count = 0;
@@ -555,7 +555,7 @@ void MC_ADC() {
         case 3:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&ADCx);
-            if (PI_parameters.Reference >= 0) {
+            if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[1] < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
               }
@@ -573,7 +573,7 @@ void MC_ADC() {
         case 4:
          if (sixStep.demagn_counter >= sixStep.demagn_value) {
            sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&ADCx);
-           if (PI_parameters.Reference >= 0) {
+           if (piParam.Reference >= 0) {
              if (sixStep.ADC_BUFFER[3] > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
                sixStep.BEMF_Tdown_count = 0;
@@ -591,7 +591,7 @@ void MC_ADC() {
         case 5:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
            sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&ADCx);
-           if (PI_parameters.Reference >= 0) {
+           if (piParam.Reference >= 0) {
              if (sixStep.ADC_BUFFER[2] < sixStep.ADC_BEMF_threshold_DOWN)
                arrBemf (0);
              }
@@ -609,7 +609,7 @@ void MC_ADC() {
         case 6:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue(&ADCx);
-            if (PI_parameters.Reference>=0) {
+            if (piParam.Reference>=0) {
              if (sixStep.ADC_BUFFER[1] > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
                sixStep.BEMF_Tdown_count = 0;
@@ -846,11 +846,11 @@ void MC_Reset() {
   array_completed = false;
   buffer_completed = false;
 
-  if (PI_parameters.Reference < 0)
+  if (piParam.Reference < 0)
     sixStep.step_position = 1;
 
   target_speed = TARGET_SPEED;
-  setPiParam (&PI_parameters);
+  setPiParam (&piParam);
 
   MC_Current_Reference_Start();
   MC_Current_Reference_Setvalue (sixStep.Ireference);
@@ -863,18 +863,12 @@ void MC_Reset() {
 //{{{
 int32_t MC_GetElSpeedHz() {
 
-  if (__HAL_TIM_GetAutoreload (&LF_TIMx) != 0xFFFF) {
-    uint16_t prsc = LF_TIMx.Instance->PSC;
-    El_Speed_Hz = (int32_t)((sixStep.SYSCLK_frequency) / (prsc)) /
-                            (__HAL_TIM_GetAutoreload (&LF_TIMx) * 6);
-    }
+  if (__HAL_TIM_GetAutoreload (&LF_TIMx) != 0xFFFF)
+    El_Speed_Hz = (int32_t)((sixStep.SYSCLK_frequency) / LF_TIMx.Instance->PSC) / (__HAL_TIM_GetAutoreload (&LF_TIMx) * 6);
   else
     El_Speed_Hz = 0;
 
-  if (PI_parameters.Reference < 0)
-    return (-El_Speed_Hz);
-  else
-    return (El_Speed_Hz);
+  return piParam.Reference < 0 ? -El_Speed_Hz : El_Speed_Hz;
   }
 //}}}
 //{{{
@@ -933,11 +927,11 @@ void MC_SetSpeed() {
 
     if (sixStep.CW_CCW) {
       reference_tmp = -(sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096);
-      PI_parameters.Reference = (reference_tmp >=- MIN_POT_SPEED) ? -MIN_POT_SPEED : reference_tmp;
+      piParam.Reference = (reference_tmp >=- MIN_POT_SPEED) ? -MIN_POT_SPEED : reference_tmp;
       }
     else {
       reference_tmp = sixStep.Speed_Ref_filtered * MAX_POT_SPEED / 4096;
-      PI_parameters.Reference = (reference_tmp <= MIN_POT_SPEED) ? MIN_POT_SPEED : reference_tmp;
+      piParam.Reference = (reference_tmp <= MIN_POT_SPEED) ? MIN_POT_SPEED : reference_tmp;
       }
     }
   }

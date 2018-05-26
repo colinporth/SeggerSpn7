@@ -22,7 +22,7 @@ TIM_HandleTypeDef htim16;
 DAC_HandleTypeDef hdac;
 
 extern struct sSixStep sixStep;
-extern struct sPiParam PI_parameters;
+extern struct sPiParam piParam;
 
 // irq handlers
 extern "C" {
@@ -69,14 +69,6 @@ extern "C" {
     }
   //}}}
   }
-
-//{{{
-void _Error_Handler (const char* file, int line) {
-  printf ("Error %s %n\n", file, line);
-  while(1) {
-    }
-  }
-//}}}
 
 //{{{
 void GPIO_Init() {
@@ -167,7 +159,7 @@ void ADC1_Init() {
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
   if (HAL_ADC_Init (&hadc1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_ADC_Init failed\n");
 
   sConfig.Channel = ADC_CHANNEL_12;
   sConfig.Rank = 1;
@@ -176,7 +168,7 @@ void ADC1_Init() {
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   if (HAL_ADC_ConfigChannel (&hadc1, &sConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_ADC_ConfigChannel failed\n");
   }
 //}}}
 //{{{
@@ -209,14 +201,14 @@ void TIM1_Init() {
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init (&htim1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_Base_Init failed\n");
 
   TIM_ClockConfigTypeDef sClockSourceConfig;
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
   if (HAL_TIM_ConfigClockSource (&htim1, &sClockSourceConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_ConfigClockSource failed\n");
   if (HAL_TIM_PWM_Init (&htim1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_Init failed\n");
 
   TIM_ClearInputConfigTypeDef sClearInputConfig;
   sClearInputConfig.ClearInputState = ENABLE;
@@ -225,18 +217,18 @@ void TIM1_Init() {
   sClearInputConfig.ClearInputPrescaler = TIM_CLEARINPUTPRESCALER_DIV1;
   sClearInputConfig.ClearInputFilter = 0;
   if (HAL_TIM_ConfigOCrefClear (&htim1, &sClearInputConfig, TIM_CHANNEL_1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_ConfigOCrefClear1 failed\n");
   if (HAL_TIM_ConfigOCrefClear (&htim1, &sClearInputConfig, TIM_CHANNEL_2) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_ConfigOCrefClear2 failed\n");
   if (HAL_TIM_ConfigOCrefClear (&htim1, &sClearInputConfig, TIM_CHANNEL_3) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_ConfigOCrefClear3 failed\n");
 
   TIM_MasterConfigTypeDef sMasterConfig;
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
   if (HAL_TIMEx_MasterConfigSynchronization (&htim1, &sMasterConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
 
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
@@ -247,11 +239,11 @@ void TIM1_Init() {
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel (&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_ConfigChannel1 failed\n");
   if (HAL_TIM_PWM_ConfigChannel (&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_ConfigChannel2 failed\n");
   if (HAL_TIM_PWM_ConfigChannel (&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_ConfigChannel3 failed\n");
 
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
@@ -266,7 +258,7 @@ void TIM1_Init() {
   sBreakDeadTimeConfig.Break2Filter = 0;
   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
   if (HAL_TIMEx_ConfigBreakDeadTime (&htim1, &sBreakDeadTimeConfig) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_TIMEx_ConfigBreakDeadTime failed\n");
 
   // config PA8 PA9 PA10 PWM YUW out
   GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10;
@@ -300,20 +292,20 @@ void TIM2_Init() {
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init (&htim2) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_TIM_Base_Init failed\n");
 
   TIM_ClockConfigTypeDef sClockSourceConfig;
   sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
   if (HAL_TIM_ConfigClockSource (&htim2, &sClockSourceConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_ConfigClockSource failed\n");
   if (HAL_TIM_PWM_Init (&htim2) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_Init failed\n");
 
   TIM_MasterConfigTypeDef sMasterConfig;
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization (&htim2, &sMasterConfig) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
 
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
@@ -321,7 +313,7 @@ void TIM2_Init() {
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel (&htim2, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_ConfigChannel failed\n");
 
   // config PA5
   GPIO_InitStruct.Pin = GPIO_PIN_5;
@@ -346,13 +338,13 @@ void TIM6_Init() {
   htim6.Init.Period = 24000;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init (&htim6) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_Base_Init failed\n");
 
   TIM_MasterConfigTypeDef sMasterConfig;
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization (&htim6, &sMasterConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
   }
 //}}}
 //{{{
@@ -368,9 +360,9 @@ void TIM16_Init() {
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init (&htim16) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_Base_Init failed\n");
   if (HAL_TIM_PWM_Init (&htim16) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_Init failed\n");
 
   TIM_OC_InitTypeDef sConfigOC;
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
@@ -381,7 +373,7 @@ void TIM16_Init() {
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel (&htim16, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIM_PWM_ConfigChannel failed\n");
 
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig;
   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
@@ -393,7 +385,7 @@ void TIM16_Init() {
   sBreakDeadTimeConfig.BreakFilter = 0;
   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
   if (HAL_TIMEx_ConfigBreakDeadTime (&htim16, &sBreakDeadTimeConfig) != HAL_OK)
-    _Error_Handler (__FILE__, __LINE__);
+    printf ("HAL_TIMEx_ConfigBreakDeadTime failed\n");
 
   // config PB4 - current Ref
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -424,13 +416,13 @@ void DAC_Init() {
 
   hdac.Instance = DAC;
   if (HAL_DAC_Init (&hdac) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_DAC_Init failed\n");
 
   DAC_ChannelConfTypeDef sConfig;
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel (&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("HAL_DAC_ConfigChannel failed\n");
   }
 //}}}
 
@@ -451,7 +443,7 @@ void MC_ADC_Channel (uint32_t adc_ch) {
 //{{{
 void MC_BemfDelayCalc() {
 
- if (PI_parameters.Reference >= 0) {
+ if (piParam.Reference >= 0) {
    if (sixStep.speed_fdbk_filtered <= 12000 && sixStep.speed_fdbk_filtered > 10000)
       sixStep.demagn_value = DEMAGN_VAL_1;
     else if (sixStep.speed_fdbk_filtered <= 10000 && sixStep.speed_fdbk_filtered > 7800)
@@ -589,6 +581,7 @@ void MC_Current_Reference_Stop() {
 //}}}
 //{{{
 void MC_Current_Reference_Setvalue (uint16_t value) {
+  printf ("MC_Current_Reference_Setvalue %d\n", value);
   REFx.Instance->CCR1 = (uint32_t)(value * REFx.Instance->ARR) / 4096;
   }
 //}}}
