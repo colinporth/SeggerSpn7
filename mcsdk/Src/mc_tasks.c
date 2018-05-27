@@ -645,7 +645,7 @@ __attribute__((section ("ccmram")))
 	* @retval int16_t It returns MC_NO_FAULTS if the FOC has been ended before
 	*         next PWM Update event, MC_FOC_DURATION otherwise
 	*/
-#pragma inline 
+#pragma inline
 uint16_t FOC_CurrController(uint8_t bMotor)
 {
 	Curr_Components Iab, Ialphabeta, Iqd;
