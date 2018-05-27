@@ -12,16 +12,17 @@ MCI_Handle_t* pMCI[MC_NUM];
 MCT_Handle_t* pMCT[MC_NUM];
 uint32_t wConfig[MC_NUM] = {UI_CONFIG_M1,UI_CONFIG_M2};
 
+
 void MX_MotorControl_Init() {
   /* Reconfigure the SysTick interrupt to fire every 2 ms. */
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/2000);
 
   /* Initialize the Motor Control Subsystem */
-  MCboot(pMCI,pMCT);
+  MCboot (pMCI,pMCT);
   mc_lock_pins();
 
   /* Initialize the MC User Interface */
-  UI_TaskInit(UI_INIT_CFG,wConfig,MC_NUM,pMCI,pMCT,s_fwVer);
+  UI_TaskInit (UI_INIT_CFG,wConfig,MC_NUM,pMCI,pMCT,s_fwVer);
 }
 
 void MC_HandleStartStopButton(void)

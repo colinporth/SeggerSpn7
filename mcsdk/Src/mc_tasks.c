@@ -81,10 +81,6 @@ uint8_t bMCBootCompleted = 0;
 	*/
 static void FOC_Clear (uint8_t bMotor)
 {
-	/* USER CODE BEGIN FOC_Clear 0 */
-
-	/* USER CODE END FOC_Clear 0 */
-
 	Curr_Components Inull = {(int16_t)0, (int16_t)0};
 	Volt_Components Vnull = {(int16_t)0, (int16_t)0};
 
@@ -97,120 +93,61 @@ static void FOC_Clear (uint8_t bMotor)
 	FOCVars[bMotor].Valphabeta = Vnull;
 	FOCVars[bMotor].hElAngle = (int16_t)0;
 
-	PID_SetIntegralTerm(pPIDIq[bMotor], (int32_t)0);
-	PID_SetIntegralTerm(pPIDId[bMotor], (int32_t)0);
+	PID_SetIntegralTerm (pPIDIq[bMotor], (int32_t)0);
+	PID_SetIntegralTerm (pPIDId[bMotor], (int32_t)0);
 
 	STC_Clear(pSTC[bMotor]);
 
-	PWMC_SwitchOffPWM(pwmcHandle[bMotor]);
-
-	/* USER CODE BEGIN FOC_Clear 1 */
-
-	/* USER CODE END FOC_Clear 1 */
-}
-//}}}
-//{{{
-/**
-	* @brief  Use this method to initialize additional methods (if any) in
-	*         START_TO_RUN state
-	* @param  bMotor related motor it can be M1 or M2
-	* @retval none
-	*/
-static void FOC_InitAdditionalMethods (uint8_t bMotor)
-{
-	/* USER CODE BEGIN FOC_InitAdditionalMethods 0 */
-
-	/* USER CODE END FOC_InitAdditionalMethods 0 */
-}
-//}}}
-//{{{
-/**
-	* @brief  It computes the new values of Iqdref (current references on qd
-	*         reference frame) based on the required electrical torque information
-	*         provided by oTSC object (internally clocked).
-	*         If implemented in the derived class it executes flux weakening and/or
-	*         MTPA algorithm(s). It must be called with the periodicity specified
-	*         in oTSC parameters
-	* @param  bMotor related motor it can be M1 or M2
-	* @retval none
-	*/
-static void FOC_CalcCurrRef (uint8_t bMotor)
-{
-	/* USER CODE BEGIN FOC_CalcCurrRef 0 */
-
-	/* USER CODE END FOC_CalcCurrRef 0 */
-	if(FOCVars[bMotor].bDriveInput == INTERNAL)
-	{
-		FOCVars[bMotor].hTeref = STC_CalcTorqueReference(pSTC[bMotor]);
-		FOCVars[bMotor].Iqdref.qI_Component1 = FOCVars[bMotor].hTeref;
+	PWMC_SwitchOffPWM (pwmcHandle[bMotor]);
 	}
-	/* USER CODE BEGIN FOC_CalcCurrRef 1 */
+//}}}
+//{{{
+static void FOC_InitAdditionalMethods (uint8_t bMotor) {
+	}
+//}}}
+//{{{
+static void FOC_CalcCurrRef (uint8_t bMotor) {
 
-	/* USER CODE END FOC_CalcCurrRef 1 */
-}
+	if (FOCVars[bMotor].bDriveInput == INTERNAL) {
+		FOCVars[bMotor].hTeref = STC_CalcTorqueReference (pSTC[bMotor]);
+		FOCVars[bMotor].Iqdref.qI_Component1 = FOCVars[bMotor].hTeref;
+		}
+	}
 //}}}
 
 //{{{
-/**
-	* @brief  It set a counter intended to be used for counting the delay required
-	*         for drivers boot capacitors charging of motor 1
-	* @param  hTickCount number of ticks to be counted
-	* @retval void
-	*/
 static void TSK_SetChargeBootCapDelayM1 (uint16_t hTickCount)
 {
 	 hBootCapDelayCounterM1 = hTickCount;
 }
 //}}}
 //{{{
-/**
-	* @brief  Use this function to know whether the time required to charge boot
-	*         capacitors of motor 1 has elapsed
-	* @param  none
-	* @retval bool true if time has elapsed, false otherwise
-	*/
 static bool TSK_ChargeBootCapDelayHasElapsedM1()
 {
 	bool retVal = false;
 	if (hBootCapDelayCounterM1 == 0)
-	{
 		retVal = true;
-	}
 	return (retVal);
 }
 //}}}
 //{{{
-/**
-	* @brief  It set a counter intended to be used for counting the permanency
-	*         time in STOP state of motor 1
-	* @param  hTickCount number of ticks to be counted
-	* @retval void
-	*/
 static void TSK_SetStopPermanencyTimeM1 (uint16_t hTickCount)
 {
 	hStopPermanencyCounterM1 = hTickCount;
 }
 //}}}
 //{{{
-/**
-	* @brief  Use this function to know whether the permanency time in STOP state
-	*         of motor 1 has elapsed
-	* @param  none
-	* @retval bool true if time is elapsed, false otherwise
-	*/
 static bool TSK_StopPermanencyTimeHasElapsedM1()
 {
 	bool retVal = false;
 	if (hStopPermanencyCounterM1 == 0)
-	{
 		retVal = true;
-	}
 	return (retVal);
 }
 //}}}
 
 //{{{
-static void TSK_MediumFrequencyTaskM1() {
+static void TSK_MediumFrequencyTask() {
 
 	int16_t wAux = 0;
 	bool IsSpeedReliable = STO_PLL_CalcAvrgMecSpeed01Hz (&STO_PLL_M1, &wAux);
@@ -254,124 +191,121 @@ static void TSK_MediumFrequencyTaskM1() {
 			RUC_Clear(&RevUpControlM1,MCI_GetImposedMotorDirection(oMCInterface[M1]));/* only for sensorless */
 			SWO_transitionStartM1 = false;                                    /* only for sensorless */
 			STO_PLL_Clear(&STO_PLL_M1);
-			if(STM_NextState(&STM[M1], START) == true)
-			{
+			if (STM_NextState(&STM[M1], START) == true) {
 				FOC_Clear(M1);
 				R3_4_F30X_SwitchOnPWM(pwmcHandle[M1]);
-			}
+				}
 
-			//printf ("CLEAR\n");
+			printf ("CLEAR\n");
 			break;
 		//}}}
 		//{{{
 		case START: {
 			/* only for sensor-less control */
-				int16_t hForcedMecSpeed01Hz;
-
-				Curr_Components IqdRef;
-				bool StartUpTransitionEnded;
-				bool StartUpDoTransition;
-
-				if (!RUC_Exec(&RevUpControlM1))
-					STM_FaultProcessing(&STM[M1], MC_START_UP, 0);  /*Time allowed for startup has ended*/
-				else {
-					if (SWO_transitionStartM1 == false) {
-						IqdRef.qI_Component1 = STC_CalcTorqueReference(pSTC[M1]);
-						IqdRef.qI_Component2 = FOCVars[M1].UserIdref;
-						FOCVars[M1].Iqdref = IqdRef;
-						}
-					}
-
-				StartUpTransitionEnded = VSS_CalcAvrgMecSpeed01Hz(&VirtualSpeedSensorM1,&hForcedMecSpeed01Hz);
-				StartUpDoTransition = VSS_SetStartTransition(&VirtualSpeedSensorM1,STO_PLL_IsObserverConverged(&STO_PLL_M1,hForcedMecSpeed01Hz));
-				if (VSS_IsTransitionOngoing(&VirtualSpeedSensorM1)) {
-					if (SWO_transitionStartM1 == false) {
-						int16_t Iq = 0;
-						Curr_Components StatorCurrent = MCM_Park(FOCVars[M1].Ialphabeta, SPD_GetElAngle(&STO_PLL_M1._Super));
-						Iq = StatorCurrent.qI_Component1;
-
-						REMNG_Init(pREMNG[M1]);
-						REMNG_ExecRamp(pREMNG[M1], FOCVars[M1].Iqdref.qI_Component1, 0);
-						REMNG_ExecRamp(pREMNG[M1], Iq, TRANSITION_DURATION);
-
-						SWO_transitionStartM1 = true;
-						}
-					}
-				else {
-					if (SWO_transitionStartM1 == true)
-						SWO_transitionStartM1 = false;
-					}
-
-				if (StartUpDoTransition == false)
-					StartUpTransitionEnded = true;
-
-				if (StartUpTransitionEnded == true) {
-					#if (PID_SPEED_INTEGRAL_INIT_DIV == 0)
-					PID_SetIntegralTerm(pPIDSpeed[M1], 0);
-					#else
-					PID_SetIntegralTerm(pPIDSpeed[M1],(int32_t)(FOCVars[M1].Iqdref.qI_Component1*PID_GetKIDivisor(pPIDSpeed[M1])/PID_SPEED_INTEGRAL_INIT_DIV));
-					#endif
-					STM_NextState(&STM[M1], START_RUN);
-					}
+			Curr_Components IqdRef;
+			if (!RUC_Exec (&RevUpControlM1))
+				/*Time allowed for startup has ended*/
+				STM_FaultProcessing (&STM[M1], MC_START_UP, 0);
+			else if (SWO_transitionStartM1 == false) {
+				IqdRef.qI_Component1 = STC_CalcTorqueReference (pSTC[M1]);
+				IqdRef.qI_Component2 = FOCVars[M1].UserIdref;
+				FOCVars[M1].Iqdref = IqdRef;
 				}
 
-			//printf ("START\n");
+			int16_t hForcedMecSpeed01Hz;
+			bool StartUpTransitionEnded = VSS_CalcAvrgMecSpeed01Hz (&VirtualSpeedSensorM1,&hForcedMecSpeed01Hz);
+			bool StartUpDoTransition = VSS_SetStartTransition (&VirtualSpeedSensorM1, STO_PLL_IsObserverConverged (&STO_PLL_M1, hForcedMecSpeed01Hz));
+			if (VSS_IsTransitionOngoing (&VirtualSpeedSensorM1)) {
+				if (SWO_transitionStartM1 == false) {
+					int16_t Iq = 0;
+					Curr_Components StatorCurrent = MCM_Park (FOCVars[M1].Ialphabeta, SPD_GetElAngle (&STO_PLL_M1._Super));
+					Iq = StatorCurrent.qI_Component1;
+
+					REMNG_Init (pREMNG[M1]);
+					REMNG_ExecRamp (pREMNG[M1], FOCVars[M1].Iqdref.qI_Component1, 0);
+					REMNG_ExecRamp (pREMNG[M1], Iq, TRANSITION_DURATION);
+					SWO_transitionStartM1 = true;
+					}
+				}
+			else if (SWO_transitionStartM1 == true)
+				SWO_transitionStartM1 = false;
+
+			if (StartUpDoTransition == false)
+				StartUpTransitionEnded = true;
+
+			if (StartUpTransitionEnded == true) {
+				#if (PID_SPEED_INTEGRAL_INIT_DIV == 0)
+					PID_SetIntegralTerm (pPIDSpeed[M1], 0);
+				#else
+					PID_SetIntegralTerm (pPIDSpeed[M1],(int32_t)(FOCVars[M1].Iqdref.qI_Component1*PID_GetKIDivisor(pPIDSpeed[M1])/PID_SPEED_INTEGRAL_INIT_DIV));
+				#endif
+
+				printf ("STARTed\n");
+				STM_NextState (&STM[M1], START_RUN);
+				}
+			}
+
 			break;
 		//}}}
 		//{{{
 		case START_RUN:
 			/* only for sensor-less control */
-			STC_SetSpeedSensor(pSTC[M1], &STO_PLL_M1._Super); /*Observer has converged*/
+			STC_SetSpeedSensor (pSTC[M1], &STO_PLL_M1._Super); /*Observer has converged*/
 
 			{
-			FOC_InitAdditionalMethods(M1);
-			FOC_CalcCurrRef(M1);
-			STM_NextState(&STM[M1], RUN);
+			FOC_InitAdditionalMethods (M1);
+			FOC_CalcCurrRef (M1);
+			STM_NextState (&STM[M1], RUN);
 			}
 
-			STC_ForceSpeedReferenceToCurrentSpeed(pSTC[M1]); /* Init the reference speed to current speed */
-			MCI_ExecBufferedCommands(oMCInterface[M1]); /* Exec the speed ramp after changing of the speed sensor */
+			STC_ForceSpeedReferenceToCurrentSpeed (pSTC[M1]); /* Init the reference speed to current speed */
+			MCI_ExecBufferedCommands (oMCInterface[M1]); /* Exec the speed ramp after changing of the speed sensor */
 
 			//printf ("IDLE_START\n");
 			break;
 		//}}}
 		//{{{
 		case RUN:
-			MCI_ExecBufferedCommands(oMCInterface[M1]);
-			FOC_CalcCurrRef(M1);
+			MCI_ExecBufferedCommands (oMCInterface[M1]);
+			FOC_CalcCurrRef (M1);
 
-			if (!IsSpeedReliable)
-				STM_FaultProcessing (&STM[M1], MC_SPEED_FDBK, 0);
-
+			if (!IsSpeedReliable) {
+				printf ("TSK_MediumFrequencyTaskM1 - unreliable speed ignored\n");
+				//STM_FaultProcessing (&STM[M1], MC_SPEED_FDBK, 0);
+				}
 			//printf ("START_RUN\n");
 			break;
 		//}}}
 		//{{{
 		case ANY_STOP:
-			R3_4_F30X_SwitchOffPWM(pwmcHandle[M1]);
-			FOC_Clear(M1);
-			MPM_Clear((MotorPowMeas_Handle_t*)pMPM[M1]);
-			TSK_SetStopPermanencyTimeM1(STOPPERMANENCY_TICKS);
-			STM_NextState(&STM[M1], STOP);
 
-			//printf ("ANY_STOP\n");
+			R3_4_F30X_SwitchOffPWM (pwmcHandle[M1]);
+			FOC_Clear (M1);
+			MPM_Clear ((MotorPowMeas_Handle_t*)pMPM[M1]);
+			TSK_SetStopPermanencyTimeM1(STOPPERMANENCY_TICKS);
+			STM_NextState (&STM[M1], STOP);
+
+			printf ("ANY_STOP\n");
 			break;
 		//}}}
 		//{{{
 		case STOP:
-			if (TSK_StopPermanencyTimeHasElapsedM1())
-				STM_NextState(&STM[M1], STOP_IDLE);
 
-			//printf ("RUN\n");
+			if (TSK_StopPermanencyTimeHasElapsedM1()) {
+				printf ("STOPed\n");
+				STM_NextState (&STM[M1], STOP_IDLE);
+				}
+
 			break;
 		//}}}
 		//{{{
 		case STOP_IDLE:
-			STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);    /*  sensor-less */
-			VSS_Clear(&VirtualSpeedSensorM1); /* Reset measured speed in IDLE */
-			STM_NextState(&STM[M1], IDLE);
 
-			//printf ("STOP_IDLE\n");
+			STC_SetSpeedSensor (pSTC[M1],&VirtualSpeedSensorM1._Super);    /*  sensor-less */
+			VSS_Clear (&VirtualSpeedSensorM1); /* Reset measured speed in IDLE */
+			STM_NextState (&STM[M1], IDLE);
+
+			printf ("STOP_IDLEd\n");
 			break;
 		//}}}
 		default:
@@ -379,50 +313,210 @@ static void TSK_MediumFrequencyTaskM1() {
 		}
 	}
 //}}}
+//{{{
+static void TSK_SafetyTask_PWMOFF (uint8_t bMotor) {
+
+	uint16_t CodeReturn = NTC_CalcAvTemp (pTemperatureSensor[bMotor]); /* Clock temperature sensor and check for fault. It returns MC_OVER_TEMP or MC_NO_ERROR */
+	CodeReturn |= PWMC_CheckOverCurrent (pwmcHandle[bMotor]); /* Clock current sensor and check for fault. It return MC_BREAK_IN or MC_NO_FAULTS (for STM32F30x can return MC_OVER_VOLT in case of HW Overvoltage) */
+	if (bMotor == M1)
+		CodeReturn |= RVBS_CalcAvVbusFilt (pBusSensorM1);
+
+	/* Update the STM according error code */
+	STM_FaultProcessing (&STM[bMotor], CodeReturn, ~CodeReturn);
+
+	/* Acts on PWM outputs in case of faults */
+	switch (STM_GetState (&STM[bMotor])) {
+		case FAULT_NOW:
+			PWMC_SwitchOffPWM (pwmcHandle[bMotor]);
+			FOC_Clear (bMotor);
+			MPM_Clear ((MotorPowMeas_Handle_t*)pMPM[bMotor]);
+			break;
+
+		case FAULT_OVER:
+			PWMC_SwitchOffPWM (pwmcHandle[bMotor]);
+			break;
+
+		default:
+			break;
+		}
+	}
+//}}}
 
 //{{{
+static uint16_t FOC_CurrController (uint8_t bMotor) {
 /**
-	* @brief  It executes MC tasks: safety task and medium frequency for all
-	*         drive instances. It have to be clocked with Systick frequnecy.
-	* @param  None
-	* @retval None
+	* @brief It executes the core of FOC drive that is the controllers for Iqd
+	*        currents regulation. Reference frame transformations are carried out
+	*        accordingly to the active speed sensor. It must be called periodically
+	*        when new motor currents have been converted
+	* @param this related object of class CFOC.
+	* @retval int16_t It returns MC_NO_FAULTS if the FOC has been ended before
+	*         next PWM Update event, MC_FOC_DURATION otherwise
 	*/
-void MC_Scheduler()
-{
-/* USER CODE BEGIN MC_Scheduler 0 */
+	Curr_Components Iab, Ialphabeta, Iqd;
+	Volt_Components Valphabeta, Vqd;
+	int16_t hElAngledpp;
+	uint16_t hCodeError;
 
-/* USER CODE END MC_Scheduler 0 */
+	hElAngledpp = SPD_GetElAngle(STC_GetSpeedSensor(pSTC[bMotor]));
+	PWMC_GetPhaseCurrents(pwmcHandle[bMotor], &Iab);
+	Ialphabeta = MCM_Clarke(Iab);
 
-	if (bMCBootCompleted == 1)
-	{
+	Iqd = MCM_Park(Ialphabeta, hElAngledpp);
+	Vqd.qV_Component1 = PI_Controller (pPIDIq[bMotor], (int32_t)(FOCVars[bMotor].Iqdref.qI_Component1) - Iqd.qI_Component1);
+	Vqd.qV_Component2 = PI_Controller (pPIDId[bMotor], (int32_t)(FOCVars[bMotor].Iqdref.qI_Component2) - Iqd.qI_Component2);
+	FOCVars[bMotor].Vqd = Vqd;
+	Vqd = Circle_Limitation (pCLM[bMotor], Vqd);
+
+	Valphabeta = MCM_Rev_Park (Vqd, hElAngledpp);
+
+	hCodeError = PWMC_SetPhaseVoltage (pwmcHandle[bMotor], Valphabeta);
+	FOCVars[bMotor].Iab = Iab;
+	FOCVars[bMotor].Ialphabeta = Ialphabeta;
+	FOCVars[bMotor].Iqd = Iqd;
+	FOCVars[bMotor].Valphabeta = Valphabeta;
+	FOCVars[bMotor].hElAngle = hElAngledpp;
+
+	return hCodeError;
+	}
+//}}}
+
+// interface
+//{{{
+/**
+* @brief  This function requests a user-defined regular conversion. All user
+*         defined conversion requests must be performed inside routines with the
+*         same priority level. If previous regular conversion request is pending
+*         this function has no effect, for this reason is better to call the
+*         MC_RegularConvState and check if the state is UDRC_STATE_IDLE before
+*         to call MC_RequestRegularConv.
+* @param  bChannel ADC channel used for the regular conversion.
+* @param  bSamplTime Sampling time selection, ADC_SampleTime_nCycles defined in
+*         stm32fxxx_adc.h see ADC_sampling_times.
+*/
+void MC_RequestRegularConv (uint8_t bChannel, uint8_t bSamplTime) {
+
+	ADConv_t ADConv_struct;
+	if (UDC_State == UDRC_STATE_IDLE) {
+		ADConv_struct.Channel = bChannel;
+		ADConv_struct.SamplTime = bSamplTime;
+		PWMC_ADC_SetSamplingTime(pwmcHandle[M1],ADConv_struct);
+		UDC_State = UDRC_STATE_REQUESTED;
+		UDC_Channel = bChannel;
+		}
+	}
+//}}}
+//{{{
+uint16_t MC_GetRegularConv() {
+
+	uint16_t hRetVal = 0xFFFFu;
+	if (UDC_State == UDRC_STATE_EOC) {
+		hRetVal = UDC_ConvertedValue;
+		UDC_State = UDRC_STATE_IDLE;
+		}
+
+	return hRetVal;
+	}
+//}}}
+//{{{
+UDRC_State_t MC_RegularConvState() {
+	return UDC_State;
+	}
+//}}}
+
+//{{{
+MCI_Handle_t* GetMCI (uint8_t bMotor) {
+
+	MCI_Handle_t* retVal = MC_NULL;
+	if ((oMCInterface != MC_NULL) && (bMotor < MC_NUM))
+		retVal = oMCInterface[bMotor];
+	return retVal;
+	}
+//}}}
+//{{{
+MCT_Handle_t* GetMCT (uint8_t bMotor) {
+
+	MCT_Handle_t* retVal = MC_NULL;
+	if (bMotor < MC_NUM)
+		retVal = &MCT[bMotor];
+	return retVal;
+	}
+//}}}
+
+//{{{
+uint8_t TSK_HighFrequencyTask() {
+
+	Observer_Inputs_t STO_Inputs;
+	STO_Inputs.Valfa_beta = FOCVars[M1].Valphabeta;
+	if (SWO_transitionStartM1 == true)
+		if (!REMNG_RampCompleted (pREMNG[M1]))
+			FOCVars[M1].Iqdref.qI_Component1 = REMNG_Calc (pREMNG[M1]);
+
+	uint16_t hFOCreturn = FOC_CurrController (M1);
+	if (hFOCreturn == MC_FOC_DURATION) {
+		//STM_FaultProcessing (&STM[M1], MC_FOC_DURATION, 0);
+		printf ("TSK_HighFrequencyTask - MC_FOC_DURATION ignored\n");
+		}
+	else {
+		bool IsAccelerationStageReached = RUC_FirstAccelerationStageReached (&RevUpControlM1);
+		STO_Inputs.Ialfa_beta = FOCVars[M1].Ialphabeta;
+		STO_Inputs.Vbus = VBS_GetAvBusVoltage_d (&(pBusSensorM1->_Super));
+		STO_PLL_CalcElAngle (&STO_PLL_M1, &STO_Inputs);
+		STO_PLL_CalcAvrgElSpeedDpp (&STO_PLL_M1);
+
+	 if (IsAccelerationStageReached == false)
+			STO_ResetPLL (&STO_PLL_M1);
+
+		uint16_t hState = STM_GetState (&STM[M1]);
+		if((hState == START) || (hState == START_RUN)) {
+			/*  only for sensor-less*/
+			int16_t hObsAngle = SPD_GetElAngle(&STO_PLL_M1._Super);
+			VSS_CalcElAngle(&VirtualSpeedSensorM1,&hObsAngle);
+			}
+		}
+
+	return 0;
+	}
+//}}}
+//{{{
+void TSK_SafetyTask() {
+
+	if (bMCBootCompleted == 1) {
+		TSK_SafetyTask_PWMOFF (M1);
+
+		if (UDC_State == UDRC_STATE_REQUESTED) {
+			UDC_ConvertedValue = PWMC_ExecRegularConv (pwmcHandle[M1], UDC_Channel);
+			UDC_State = UDRC_STATE_EOC;
+			}
+		}
+	}
+//}}}
+//{{{
+void TSK_HardwareFaultTask() {
+
+	R3_4_F30X_SwitchOffPWM (pwmcHandle[M1]);
+	STM_FaultProcessing (&STM[M1], MC_SW_ERROR, 0);
+	}
+//}}}
+
+//{{{
+void MC_Scheduler() {
+
+	if (bMCBootCompleted == 1) {
+
 		if(hMFTaskCounterM1 > 0u)
-		{
 			hMFTaskCounterM1--;
-		}
-		else
-		{
-			TSK_MediumFrequencyTaskM1();
-			/* USER CODE BEGIN MC_Scheduler 1 */
-
-			/* USER CODE END MC_Scheduler 1 */
+		else {
+			TSK_MediumFrequencyTask();
 			hMFTaskCounterM1 = MF_TASK_OCCURENCE_TICKS;
-		}
-		if(hBootCapDelayCounterM1 > 0u)
-		{
+			}
+
+		if (hBootCapDelayCounterM1 > 0u)
 			hBootCapDelayCounterM1--;
-		}
-		if(hStopPermanencyCounterM1 > 0u)
-		{
+		if (hStopPermanencyCounterM1 > 0u)
 			hStopPermanencyCounterM1--;
 		}
 	}
-	else
-	{
-	}
-	/* USER CODE BEGIN MC_Scheduler 2 */
-
-	/* USER CODE END MC_Scheduler 2 */
-}
 //}}}
 //{{{
 void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF_MOTORS] )
@@ -523,302 +617,20 @@ void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF
 }
 //}}}
 
-#pragma inline
 //{{{
-uint16_t FOC_CurrController (uint8_t bMotor)
-{
-/**
-	* @brief It executes the core of FOC drive that is the controllers for Iqd
-	*        currents regulation. Reference frame transformations are carried out
-	*        accordingly to the active speed sensor. It must be called periodically
-	*        when new motor currents have been converted
-	* @param this related object of class CFOC.
-	* @retval int16_t It returns MC_NO_FAULTS if the FOC has been ended before
-	*         next PWM Update event, MC_FOC_DURATION otherwise
-	*/
-	Curr_Components Iab, Ialphabeta, Iqd;
-	Volt_Components Valphabeta, Vqd;
-	int16_t hElAngledpp;
-	uint16_t hCodeError;
+void mc_lock_pins() {
 
-	hElAngledpp = SPD_GetElAngle(STC_GetSpeedSensor(pSTC[bMotor]));
-	PWMC_GetPhaseCurrents(pwmcHandle[bMotor], &Iab);
-	Ialphabeta = MCM_Clarke(Iab);
-	Iqd = MCM_Park(Ialphabeta, hElAngledpp);
-	Vqd.qV_Component1 = PI_Controller(pPIDIq[bMotor],
-						(int32_t)(FOCVars[bMotor].Iqdref.qI_Component1) - Iqd.qI_Component1);
-
-	Vqd.qV_Component2 = PI_Controller(pPIDId[bMotor],
-						(int32_t)(FOCVars[bMotor].Iqdref.qI_Component2) - Iqd.qI_Component2);
-	FOCVars[bMotor].Vqd = Vqd;
-	Vqd = Circle_Limitation(pCLM[bMotor], Vqd);
-	Valphabeta = MCM_Rev_Park(Vqd, hElAngledpp);
-	hCodeError = PWMC_SetPhaseVoltage(pwmcHandle[bMotor], Valphabeta);
-	FOCVars[bMotor].Iab = Iab;
-	FOCVars[bMotor].Ialphabeta = Ialphabeta;
-	FOCVars[bMotor].Iqd = Iqd;
-	FOCVars[bMotor].Valphabeta = Valphabeta;
-	FOCVars[bMotor].hElAngle = hElAngledpp;
-	return(hCodeError);
-}
-//}}}
-//{{{
-/**
-	* @brief  Accordingly with the present state(s) of the state machine(s), it
-	*         executes those motor control duties requiring a high frequency rate
-	*         and a precise timing (e.g. FOC current control loop)
-	* @param  None
-	* @retval uint8_t It return the motor instance number of last executed FOC.
-	*/
-uint8_t TSK_HighFrequencyTask()
-{
-	/* USER CODE BEGIN HighFrequencyTask 0 */
-
-	/* USER CODE END HighFrequencyTask 0 */
-
-	uint8_t bMotorNbr = 0;
-	uint16_t hFOCreturn;
-
-	uint16_t hState;  /*  only if sensorless main*/
-	Observer_Inputs_t STO_Inputs; /*  only if sensorless main*/
-
-	STO_Inputs.Valfa_beta = FOCVars[M1].Valphabeta;  /* only if sensorless*/
-	if (SWO_transitionStartM1 == true)
-	{
-		if (!REMNG_RampCompleted(pREMNG[M1]))
-		{
-			FOCVars[M1].Iqdref.qI_Component1 = REMNG_Calc(pREMNG[M1]);
-		}
+	HAL_GPIO_LockPin(M1_CURR_AMPL_W_GPIO_Port, M1_CURR_AMPL_W_Pin);
+	HAL_GPIO_LockPin(M1_PWM_UH_GPIO_Port, M1_PWM_UH_Pin);
+	HAL_GPIO_LockPin(M1_PWM_VH_GPIO_Port, M1_PWM_VH_Pin);
+	HAL_GPIO_LockPin(M1_OCP_GPIO_Port, M1_OCP_Pin);
+	HAL_GPIO_LockPin(M1_PWM_WH_GPIO_Port, M1_PWM_WH_Pin);
+	HAL_GPIO_LockPin(M1_PWM_EN_W_GPIO_Port, M1_PWM_EN_W_Pin);
+	HAL_GPIO_LockPin(M1_PWM_EN_V_GPIO_Port, M1_PWM_EN_V_Pin);
+	HAL_GPIO_LockPin(M1_PWM_EN_U_GPIO_Port, M1_PWM_EN_U_Pin);
+	HAL_GPIO_LockPin(M1_BUS_VOLTAGE_GPIO_Port, M1_BUS_VOLTAGE_Pin);
+	HAL_GPIO_LockPin(M1_CURR_AMPL_U_GPIO_Port, M1_CURR_AMPL_U_Pin);
+	HAL_GPIO_LockPin(M1_CURR_AMPL_V_GPIO_Port, M1_CURR_AMPL_V_Pin);
+	HAL_GPIO_LockPin(M1_TEMPERATURE_GPIO_Port, M1_TEMPERATURE_Pin);
 	}
-	/* USER CODE BEGIN HighFrequencyTask SINGLEDRIVE_1 */
-
-	/* USER CODE END HighFrequencyTask SINGLEDRIVE_1 */
-	hFOCreturn = FOC_CurrController(M1);
-	/* USER CODE BEGIN HighFrequencyTask SINGLEDRIVE_2 */
-
-	/* USER CODE END HighFrequencyTask SINGLEDRIVE_2 */
-	if(hFOCreturn == MC_FOC_DURATION)
-	{
-		STM_FaultProcessing(&STM[M1], MC_FOC_DURATION, 0);
-	}
-	else
-	{
-		bool IsAccelerationStageReached = RUC_FirstAccelerationStageReached(&RevUpControlM1);
-		STO_Inputs.Ialfa_beta = FOCVars[M1].Ialphabeta; /*  only if sensorless*/
-		STO_Inputs.Vbus = VBS_GetAvBusVoltage_d(&(pBusSensorM1->_Super)); /*  only for sensorless*/
-		STO_PLL_CalcElAngle (&STO_PLL_M1, &STO_Inputs);
-		STO_PLL_CalcAvrgElSpeedDpp (&STO_PLL_M1); /*  Only in case of Sensor-less */
-	 if (IsAccelerationStageReached == false)
-		{
-			STO_ResetPLL(&STO_PLL_M1);
-		}
-		hState = STM_GetState(&STM[M1]);
-		if((hState == START) || (hState == START_RUN)) /*  only for sensor-less*/
-		{
-			int16_t hObsAngle = SPD_GetElAngle(&STO_PLL_M1._Super);
-			VSS_CalcElAngle(&VirtualSpeedSensorM1,&hObsAngle);
-		}
-		/* USER CODE BEGIN HighFrequencyTask SINGLEDRIVE_3 */
-
-		/* USER CODE END HighFrequencyTask SINGLEDRIVE_3 */
-	}
-	/* USER CODE BEGIN HighFrequencyTask 1 */
-
-	/* USER CODE END HighFrequencyTask 1 */
-	return bMotorNbr;
-}
-//}}}
-
-//{{{
-/**
-* @brief  This function requests a user-defined regular conversion. All user
-*         defined conversion requests must be performed inside routines with the
-*         same priority level. If previous regular conversion request is pending
-*         this function has no effect, for this reason is better to call the
-*         MC_RegularConvState and check if the state is UDRC_STATE_IDLE before
-*         to call MC_RequestRegularConv.
-* @param  bChannel ADC channel used for the regular conversion.
-* @param  bSamplTime Sampling time selection, ADC_SampleTime_nCycles defined in
-*         stm32fxxx_adc.h see ADC_sampling_times.
-*/
-void MC_RequestRegularConv (uint8_t bChannel, uint8_t bSamplTime)
-{
-	ADConv_t ADConv_struct;
-	if (UDC_State == UDRC_STATE_IDLE)
-	{
-		ADConv_struct.Channel = bChannel;
-		ADConv_struct.SamplTime = bSamplTime;
-		PWMC_ADC_SetSamplingTime(pwmcHandle[M1],ADConv_struct);
-		UDC_State = UDRC_STATE_REQUESTED;
-		UDC_Channel = bChannel;
-	}
-}
-//}}}
-//{{{
-/**
-* @brief  Get the last user-defined regular conversion.
-* @retval uint16_t It returns converted value or oxFFFF for conversion error.
-*         This function returns a valid result if the state returned by
-*         MC_RegularConvState is UDRC_STATE_EOC.
-*/
-uint16_t MC_GetRegularConv()
-{
-	uint16_t hRetVal = 0xFFFFu;
-	if (UDC_State == UDRC_STATE_EOC)
-	{
-		hRetVal = UDC_ConvertedValue;
-		UDC_State = UDRC_STATE_IDLE;
-	}
-	return hRetVal;
-}
-//}}}
-//{{{
-/**
-* @brief  Use this function to know the status of the last requested regular
-*         conversion.
-* @retval UDRC_State_t The state of the last user-defined regular conversion.
-*         It can be one of the following values:
-*         UDRC_STATE_IDLE no regular conversion request pending.
-*         UDRC_STATE_REQUESTED regular conversion has been requested and not
-*         completed.
-*         UDRC_STATE_EOC regular conversion has been completed but not readed
-*         from the user.
-*/
-UDRC_State_t MC_RegularConvState()
-{
-	return UDC_State;
-}
-//}}}
-
-//{{{
-/**
-	* @brief  Safety task implementation if  MC.ON_OVER_VOLTAGE == TURN_OFF_PWM
-	* @param  bMotor Motor reference number defined
-	*         \link Motors_reference_number here \endlink
-	* @retval None
-	*/
-void TSK_SafetyTask_PWMOFF (uint8_t bMotor)
-{
-	/* USER CODE BEGIN TSK_SafetyTask_PWMOFF 0 */
-
-	/* USER CODE END TSK_SafetyTask_PWMOFF 0 */
-
-	uint16_t CodeReturn;
-
-	CodeReturn = NTC_CalcAvTemp(pTemperatureSensor[bMotor]); /* Clock temperature sensor and check for fault. It returns MC_OVER_TEMP or MC_NO_ERROR */
-	CodeReturn |= PWMC_CheckOverCurrent(pwmcHandle[bMotor]); /* Clock current sensor and check for fault. It return MC_BREAK_IN or MC_NO_FAULTS (for STM32F30x can return MC_OVER_VOLT in case of HW Overvoltage) */
-
-	if(bMotor == M1)
-	{
-		CodeReturn |= RVBS_CalcAvVbusFilt(pBusSensorM1);
-	}
-
-	STM_FaultProcessing(&STM[bMotor], CodeReturn, ~CodeReturn); /* Update the STM according error code */
-	switch (STM_GetState(&STM[bMotor])) /* Acts on PWM outputs in case of faults */
-	{
-	case FAULT_NOW:
-		PWMC_SwitchOffPWM(pwmcHandle[bMotor]);
-		FOC_Clear(bMotor);
-		MPM_Clear((MotorPowMeas_Handle_t*)pMPM[bMotor]);
-		/* USER CODE BEGIN TSK_SafetyTask_PWMOFF 1 */
-
-		/* USER CODE END TSK_SafetyTask_PWMOFF 1 */
-		break;
-	case FAULT_OVER:
-		PWMC_SwitchOffPWM(pwmcHandle[bMotor]);
-	/* USER CODE BEGIN TSK_SafetyTask_PWMOFF 2 */
-
-		/* USER CODE END TSK_SafetyTask_PWMOFF 2 */
-		break;
-	default:
-		break;
-	}
-	/* USER CODE BEGIN TSK_SafetyTask_PWMOFF 3 */
-
-	/* USER CODE END TSK_SafetyTask_PWMOFF 3 */
-}
-//}}}
-//{{{
-/**
-	* @brief  It executes safety checks (e.g. bus voltage and temperature) for all
-	*         drive instances. Faults flags are also here updated
-	* @param  None
-	* @retval None
-	*/
-void TSK_SafetyTask()
-{
-	/* USER CODE BEGIN TSK_SafetyTask 0 */
-
-	/* USER CODE END TSK_SafetyTask 0 */
-	if (bMCBootCompleted == 1)
-	{
-		TSK_SafetyTask_PWMOFF(M1);
-		/* User conversion execution */
-	if (UDC_State == UDRC_STATE_REQUESTED)
-	{
-		UDC_ConvertedValue = PWMC_ExecRegularConv (pwmcHandle[M1], UDC_Channel);
-		UDC_State = UDRC_STATE_EOC;
-	}
-	/* USER CODE BEGIN TSK_SafetyTask 1 */
-
-	/* USER CODE END TSK_SafetyTask 1 */
-	}
-}
-//}}}
-
-//{{{
-MCI_Handle_t* GetMCI (uint8_t bMotor)
-{
-	MCI_Handle_t * retVal = MC_NULL;
-	if ((oMCInterface != MC_NULL) && (bMotor < MC_NUM))
-	{
-		retVal = oMCInterface[bMotor];
-	}
-	return retVal;
-}
-//}}}
-//{{{
-MCT_Handle_t* GetMCT (uint8_t bMotor)
-{
-	MCT_Handle_t* retVal = MC_NULL;
-	if (bMotor < MC_NUM)
-	{
-		retVal = &MCT[bMotor];
-	}
-	return retVal;
-}
-//}}}
-
-//{{{
-void TSK_HardwareFaultTask()
-{
-	/* USER CODE BEGIN TSK_HardwareFaultTask 0 */
-
-	/* USER CODE END TSK_HardwareFaultTask 0 */
-
-	R3_4_F30X_SwitchOffPWM(pwmcHandle[M1]);
-	STM_FaultProcessing(&STM[M1], MC_SW_ERROR, 0);
-
-	/* USER CODE BEGIN TSK_HardwareFaultTask 1 */
-
-	/* USER CODE END TSK_HardwareFaultTask 1 */
-}
-//}}}
-
-//{{{
-void mc_lock_pins ()
-{
-HAL_GPIO_LockPin(M1_CURR_AMPL_W_GPIO_Port, M1_CURR_AMPL_W_Pin);
-HAL_GPIO_LockPin(M1_PWM_UH_GPIO_Port, M1_PWM_UH_Pin);
-HAL_GPIO_LockPin(M1_PWM_VH_GPIO_Port, M1_PWM_VH_Pin);
-HAL_GPIO_LockPin(M1_OCP_GPIO_Port, M1_OCP_Pin);
-HAL_GPIO_LockPin(M1_PWM_WH_GPIO_Port, M1_PWM_WH_Pin);
-HAL_GPIO_LockPin(M1_PWM_EN_W_GPIO_Port, M1_PWM_EN_W_Pin);
-HAL_GPIO_LockPin(M1_PWM_EN_V_GPIO_Port, M1_PWM_EN_V_Pin);
-HAL_GPIO_LockPin(M1_PWM_EN_U_GPIO_Port, M1_PWM_EN_U_Pin);
-HAL_GPIO_LockPin(M1_BUS_VOLTAGE_GPIO_Port, M1_BUS_VOLTAGE_Pin);
-HAL_GPIO_LockPin(M1_CURR_AMPL_U_GPIO_Port, M1_CURR_AMPL_U_Pin);
-HAL_GPIO_LockPin(M1_CURR_AMPL_V_GPIO_Port, M1_CURR_AMPL_V_Pin);
-HAL_GPIO_LockPin(M1_TEMPERATURE_GPIO_Port, M1_TEMPERATURE_Pin);
-}
 //}}}
