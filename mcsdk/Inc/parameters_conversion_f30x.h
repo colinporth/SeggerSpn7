@@ -357,7 +357,7 @@
 }
 
 /*************** PI divisor  ***************/
-#define SP_KPDIV_LOG LOG2(256)
+#define SP_KPDIV_LOG LOG2(128)
 #define SP_KIDIV_LOG LOG2(16384)
 #define SP_KDDIV_LOG LOG2(16)
 #define TF_KPDIV_LOG LOG2(4096)
@@ -369,7 +369,7 @@
 #define PLL_KPDIV_LOG LOG2(PLL_KPDIV)
 #define PLL_KIDIV     65535
 #define PLL_KIDIV_LOG LOG2(PLL_KIDIV)
-#define F1_LOG LOG2(16384)
+#define F1_LOG LOG2(8192)
 #define F2_LOG LOG2(16384)
 #define STO_FIFO_DEPTH_DPP_LOG LOG2(64)
 #define CORD_FIFO_DEPTH_DPP_LOG LOG2(64)
