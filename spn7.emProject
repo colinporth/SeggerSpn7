@@ -229,7 +229,7 @@
       debug_target_connection="J-Link"
       gcc_c_language_standard="c11"
       gcc_cplusplus_language_standard="c++14"
-      linker_additional_files="MCSDK_v5.0.3\\MotorControl\\lib\\libmc-truestudio_M4.lib"
+      linker_additional_files="MCSDK_v5.0.3\\MotorControl\\lib\\libmc-truestudio_CCMRAM_CCMRAM.lib"
       linker_output_format="hex"
       linker_section_placement_file="$(ProjectDir)/flash_placement.xml"
       linker_section_placements_segments="FLASH RX 0x08000000 0x00080000;SRAM RWX 0x20000000 0x00010000"

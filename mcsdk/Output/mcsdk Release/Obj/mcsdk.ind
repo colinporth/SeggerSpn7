@@ -108,7 +108,7 @@
 "Output/mcsdk Release/Obj/motorcontrol.o"
 "Output/mcsdk Release/Obj/stm32f3xx_hal_msp.o"
 "Output/mcsdk Release/Obj/stm32f3xx_it.o"
-"MCSDK_v5.0.3\\\\MotorControl\\\\lib\\\\libmc-truestudio_M4.lib"
+"MCSDK_v5.0.3\\\\MotorControl\\\\lib\\\\libmc-truestudio_CCMRAM_CCMRAM.lib"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libdebugio_mempoll_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libm_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libc_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
