@@ -210,183 +210,174 @@ static bool TSK_StopPermanencyTimeHasElapsedM1()
 //}}}
 
 //{{{
-/**
-	* @brief  It executes some of the control duties on Motor 1 accordingly with
-	*         the present state of its state machine. In particular, duties
-	*         requiring a specific timing (e.g. speed controller) are here
-	*         executed
-	* @param  None
-	* @retval void
-	*/
-static void TSK_MediumFrequencyTaskM1()
-{
-	/* USER CODE BEGIN MediumFrequencyTask M1 0 */
+static void TSK_MediumFrequencyTaskM1() {
 
-	/* USER CODE END MediumFrequencyTask M1 0 */
-	State_t StateM1;
 	int16_t wAux = 0;
+	bool IsSpeedReliable = STO_PLL_CalcAvrgMecSpeed01Hz (&STO_PLL_M1, &wAux);
+	PQD_CalcElMotorPower (pMPM[M1]);
 
-	bool IsSpeedReliable = STO_PLL_CalcAvrgMecSpeed01Hz(&STO_PLL_M1,&wAux);
-	PQD_CalcElMotorPower(pMPM[M1]);
-	StateM1 = STM_GetState(&STM[M1]);
-	switch(StateM1)
-	{
-	case IDLE_START:
-		R3_4_F30X_TurnOnLowSides(pwmcHandle[M1]);
-		TSK_SetChargeBootCapDelayM1(CHARGE_BOOT_CAP_TICKS);
-		STM_NextState(&STM[M1],CHARGE_BOOT_CAP);
-		break;
-	case CHARGE_BOOT_CAP:
-		if (TSK_ChargeBootCapDelayHasElapsedM1())
-		{
-			PWMC_CurrentReadingCalibr(pwmcHandle[M1],CRC_START);
-			/* USER CODE BEGIN MediumFrequencyTask M1 Charge BootCap elapsed */
+	State_t StateM1 = STM_GetState(&STM[M1]);
+	switch(StateM1) {
+		//{{{
+		case IDLE_START:
+			R3_4_F30X_TurnOnLowSides(pwmcHandle[M1]);
+			TSK_SetChargeBootCapDelayM1(CHARGE_BOOT_CAP_TICKS);
+			STM_NextState(&STM[M1],CHARGE_BOOT_CAP);
 
-			/* USER CODE END MediumFrequencyTask M1 Charge BootCap elapsed */
-			STM_NextState(&STM[M1],OFFSET_CALIB);
-		}
-		break;
-	case OFFSET_CALIB:
-		if (PWMC_CurrentReadingCalibr(pwmcHandle[M1],CRC_EXEC))
-		{
-			STM_NextState(&STM[M1],CLEAR);
-		}
-		break;
-	case CLEAR:
-		FOCVars[M1].bDriveInput = EXTERNAL;                               /* only for sensorless */
-		STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);                             /* only for sensorless */
-		RUC_Clear(&RevUpControlM1,MCI_GetImposedMotorDirection(oMCInterface[M1]));/* only for sensorless */
-		SWO_transitionStartM1 = false;                                    /* only for sensorless */
-		STO_PLL_Clear(&STO_PLL_M1);
-		if(STM_NextState(&STM[M1], START) == true)
-		{
-			FOC_Clear(M1);
-			R3_4_F30X_SwitchOnPWM(pwmcHandle[M1]);
-		}
-		break;
-	case START:
-		{
-	/* only for sensor-less control */
-			int16_t hForcedMecSpeed01Hz;
-			Curr_Components IqdRef;
-			bool StartUpTransitionEnded;
-			bool StartUpDoTransition;
-			if(!RUC_Exec(&RevUpControlM1))
+			printf ("IDLE_START\n");
+			break;
+		//}}}
+		//{{{
+		case CHARGE_BOOT_CAP:
+			if (TSK_ChargeBootCapDelayHasElapsedM1())
 			{
+				PWMC_CurrentReadingCalibr(pwmcHandle[M1],CRC_START);
+				/* USER CODE BEGIN MediumFrequencyTask M1 Charge BootCap elapsed */
+
+				/* USER CODE END MediumFrequencyTask M1 Charge BootCap elapsed */
+				STM_NextState(&STM[M1],OFFSET_CALIB);
+			}
+			printf ("CHARGE_BOOT_CAP\n");
+			break;
+		//}}}
+		//{{{
+		case OFFSET_CALIB:
+			if (PWMC_CurrentReadingCalibr(pwmcHandle[M1],CRC_EXEC))
+				STM_NextState(&STM[M1],CLEAR);
+			printf ("OFFSET_CALIB\n");
+			break;
+		//}}}
+		//{{{
+		case CLEAR:
+			FOCVars[M1].bDriveInput = EXTERNAL;                               /* only for sensorless */
+			STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);                             /* only for sensorless */
+			RUC_Clear(&RevUpControlM1,MCI_GetImposedMotorDirection(oMCInterface[M1]));/* only for sensorless */
+			SWO_transitionStartM1 = false;                                    /* only for sensorless */
+			STO_PLL_Clear(&STO_PLL_M1);
+			if(STM_NextState(&STM[M1], START) == true)
+			{
+				FOC_Clear(M1);
+				R3_4_F30X_SwitchOnPWM(pwmcHandle[M1]);
+			}
+
+			//printf ("CLEAR\n");
+			break;
+		//}}}
+		//{{{
+		case START: {
+			/* only for sensor-less control */
+				int16_t hForcedMecSpeed01Hz;
+
+				Curr_Components IqdRef;
+				bool StartUpTransitionEnded;
+				bool StartUpDoTransition;
+
+				if (!RUC_Exec(&RevUpControlM1))
 					STM_FaultProcessing(&STM[M1], MC_START_UP, 0);  /*Time allowed for startup has ended*/
-			}
-			else
-			{
-				if (SWO_transitionStartM1 == false)
-				{
-					IqdRef.qI_Component1 = STC_CalcTorqueReference(pSTC[M1]);
-					IqdRef.qI_Component2 = FOCVars[M1].UserIdref;
-					FOCVars[M1].Iqdref = IqdRef;
+				else {
+					if (SWO_transitionStartM1 == false) {
+						IqdRef.qI_Component1 = STC_CalcTorqueReference(pSTC[M1]);
+						IqdRef.qI_Component2 = FOCVars[M1].UserIdref;
+						FOCVars[M1].Iqdref = IqdRef;
+						}
+					}
+
+				StartUpTransitionEnded = VSS_CalcAvrgMecSpeed01Hz(&VirtualSpeedSensorM1,&hForcedMecSpeed01Hz);
+				StartUpDoTransition = VSS_SetStartTransition(&VirtualSpeedSensorM1,STO_PLL_IsObserverConverged(&STO_PLL_M1,hForcedMecSpeed01Hz));
+				if (VSS_IsTransitionOngoing(&VirtualSpeedSensorM1)) {
+					if (SWO_transitionStartM1 == false) {
+						int16_t Iq = 0;
+						Curr_Components StatorCurrent = MCM_Park(FOCVars[M1].Ialphabeta, SPD_GetElAngle(&STO_PLL_M1._Super));
+						Iq = StatorCurrent.qI_Component1;
+
+						REMNG_Init(pREMNG[M1]);
+						REMNG_ExecRamp(pREMNG[M1], FOCVars[M1].Iqdref.qI_Component1, 0);
+						REMNG_ExecRamp(pREMNG[M1], Iq, TRANSITION_DURATION);
+
+						SWO_transitionStartM1 = true;
+						}
+					}
+				else {
+					if (SWO_transitionStartM1 == true)
+						SWO_transitionStartM1 = false;
+					}
+
+				if (StartUpDoTransition == false)
+					StartUpTransitionEnded = true;
+
+				if (StartUpTransitionEnded == true) {
+					#if (PID_SPEED_INTEGRAL_INIT_DIV == 0)
+					PID_SetIntegralTerm(pPIDSpeed[M1], 0);
+					#else
+					PID_SetIntegralTerm(pPIDSpeed[M1],(int32_t)(FOCVars[M1].Iqdref.qI_Component1*PID_GetKIDivisor(pPIDSpeed[M1])/PID_SPEED_INTEGRAL_INIT_DIV));
+					#endif
+					STM_NextState(&STM[M1], START_RUN);
+					}
 				}
-			}
-			StartUpTransitionEnded = VSS_CalcAvrgMecSpeed01Hz(&VirtualSpeedSensorM1,&hForcedMecSpeed01Hz);
-			StartUpDoTransition = VSS_SetStartTransition(&VirtualSpeedSensorM1,STO_PLL_IsObserverConverged(&STO_PLL_M1,hForcedMecSpeed01Hz));
-			if (VSS_IsTransitionOngoing(&VirtualSpeedSensorM1))
+
+			//printf ("START\n");
+			break;
+		//}}}
+		//{{{
+		case START_RUN:
+			/* only for sensor-less control */
+			STC_SetSpeedSensor(pSTC[M1], &STO_PLL_M1._Super); /*Observer has converged*/
+
 			{
-				if (SWO_transitionStartM1 == false)
-				{
-					int16_t Iq = 0;
-					Curr_Components StatorCurrent = MCM_Park(FOCVars[M1].Ialphabeta, SPD_GetElAngle(&STO_PLL_M1._Super));
-					Iq = StatorCurrent.qI_Component1;
-
-					REMNG_Init(pREMNG[M1]);
-					REMNG_ExecRamp(pREMNG[M1], FOCVars[M1].Iqdref.qI_Component1, 0);
-					REMNG_ExecRamp(pREMNG[M1], Iq, TRANSITION_DURATION);
-
-					SWO_transitionStartM1 = true;
-				}
-			}
-			else
-			{
-				if (SWO_transitionStartM1 == true)
-				{
-					SWO_transitionStartM1 = false;
-				}
-			}
-
-			if (StartUpDoTransition == false)
-			{
-				StartUpTransitionEnded = true;
-			}
-
-			if (StartUpTransitionEnded == true)
-			{
-				#if (PID_SPEED_INTEGRAL_INIT_DIV == 0)
-				PID_SetIntegralTerm(pPIDSpeed[M1], 0);
-				#else
-				PID_SetIntegralTerm(pPIDSpeed[M1],(int32_t)(FOCVars[M1].Iqdref.qI_Component1*PID_GetKIDivisor(pPIDSpeed[M1])/PID_SPEED_INTEGRAL_INIT_DIV));
-				#endif
-				STM_NextState(&STM[M1], START_RUN);
-			}
-		}
-		break;
-	case START_RUN:
- /* only for sensor-less control */
-		STC_SetSpeedSensor(pSTC[M1], &STO_PLL_M1._Super); /*Observer has converged*/
-		{
-			/* USER CODE BEGIN MediumFrequencyTask M1 1 */
-
-			/* USER CODE END MediumFrequencyTask M1 1 */
-		FOC_InitAdditionalMethods(M1);
+			FOC_InitAdditionalMethods(M1);
 			FOC_CalcCurrRef(M1);
 			STM_NextState(&STM[M1], RUN);
+			}
+
+			STC_ForceSpeedReferenceToCurrentSpeed(pSTC[M1]); /* Init the reference speed to current speed */
+			MCI_ExecBufferedCommands(oMCInterface[M1]); /* Exec the speed ramp after changing of the speed sensor */
+
+			//printf ("IDLE_START\n");
+			break;
+		//}}}
+		//{{{
+		case RUN:
+			MCI_ExecBufferedCommands(oMCInterface[M1]);
+			FOC_CalcCurrRef(M1);
+
+			if (!IsSpeedReliable)
+				STM_FaultProcessing (&STM[M1], MC_SPEED_FDBK, 0);
+
+			//printf ("START_RUN\n");
+			break;
+		//}}}
+		//{{{
+		case ANY_STOP:
+			R3_4_F30X_SwitchOffPWM(pwmcHandle[M1]);
+			FOC_Clear(M1);
+			MPM_Clear((MotorPowMeas_Handle_t*)pMPM[M1]);
+			TSK_SetStopPermanencyTimeM1(STOPPERMANENCY_TICKS);
+			STM_NextState(&STM[M1], STOP);
+
+			//printf ("ANY_STOP\n");
+			break;
+		//}}}
+		//{{{
+		case STOP:
+			if (TSK_StopPermanencyTimeHasElapsedM1())
+				STM_NextState(&STM[M1], STOP_IDLE);
+
+			//printf ("RUN\n");
+			break;
+		//}}}
+		//{{{
+		case STOP_IDLE:
+			STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);    /*  sensor-less */
+			VSS_Clear(&VirtualSpeedSensorM1); /* Reset measured speed in IDLE */
+			STM_NextState(&STM[M1], IDLE);
+
+			//printf ("STOP_IDLE\n");
+			break;
+		//}}}
+		default:
+			break;
 		}
-		STC_ForceSpeedReferenceToCurrentSpeed(pSTC[M1]); /* Init the reference speed to current speed */
-		MCI_ExecBufferedCommands(oMCInterface[M1]); /* Exec the speed ramp after changing of the speed sensor */
-
-		break;
-	case RUN:
-		/* USER CODE BEGIN MediumFrequencyTask M1 2 */
-
-		/* USER CODE END MediumFrequencyTask M1 2 */
-		MCI_ExecBufferedCommands(oMCInterface[M1]);
-		FOC_CalcCurrRef(M1);
-
-		if(!IsSpeedReliable)
-		{
-			STM_FaultProcessing(&STM[M1], MC_SPEED_FDBK, 0);
-		}
-
-		/* USER CODE BEGIN MediumFrequencyTask M1 3 */
-
-		/* USER CODE END MediumFrequencyTask M1 3 */
-		break;
-	case ANY_STOP:
-		R3_4_F30X_SwitchOffPWM(pwmcHandle[M1]);
-		FOC_Clear(M1);
-		MPM_Clear((MotorPowMeas_Handle_t*)pMPM[M1]);
-		TSK_SetStopPermanencyTimeM1(STOPPERMANENCY_TICKS);
-		/* USER CODE BEGIN MediumFrequencyTask M1 4 */
-
-		/* USER CODE END MediumFrequencyTask M1 4 */
-		STM_NextState(&STM[M1], STOP);
-		break;
-	case STOP:
-		if(TSK_StopPermanencyTimeHasElapsedM1())
-		{
-			STM_NextState(&STM[M1], STOP_IDLE);
-		}
-		break;
-	case STOP_IDLE:
-		STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);    /*  sensor-less */
-		VSS_Clear(&VirtualSpeedSensorM1); /* Reset measured speed in IDLE */
-		/* USER CODE BEGIN MediumFrequencyTask M1 5 */
-
-		/* USER CODE END MediumFrequencyTask M1 5 */
-		STM_NextState(&STM[M1], IDLE);
-		break;
-	default:
-		break;
 	}
-	/* USER CODE BEGIN MediumFrequencyTask M1 6 */
-
-	/* USER CODE END MediumFrequencyTask M1 6 */
-}
 //}}}
 
 //{{{
