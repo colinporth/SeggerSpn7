@@ -1,76 +1,10 @@
-/**
-  ******************************************************************************
-  * @file    mc_interface.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides firmware functions that implement the features
-  *          of the MC Interface component of the Motor Control SDK:
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "mc_math.h"
 #include "speed_torq_ctrl.h"
-
 #include "mc_interface.h"
 
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @defgroup MCInterface Motor Control Interface
-  * @brief MC Interface component of the Motor Control SDK
-  *
-  * @todo Document the MC Interface "module".
-  *
-  * @{
-  */
-
-/* Private macros ------------------------------------------------------------*/
-/**
-  * @brief This macro converts the exported enum from the state machine to the corresponding bit field.
-  */
 #define BC(state) (1u<<((uint16_t)((uint8_t)(state))))
 
-/* Functions -----------------------------------------------*/
-
+//{{{
 /**
   * @brief  Initializes all the object variables, usually it has to be called
   *         once right after object creation. It is also used to assign the
@@ -95,7 +29,9 @@ void MCI_Init( MCI_Handle_t * pHandle, STM_Handle_t *pSTM, SpeednTorqCtrl_Handle
   pHandle->hDurationms = 0;
   pHandle->CommandState = MCI_BUFFER_EMPTY;
 }
+//}}}
 
+//{{{
 /**
   * @brief  This is a buffered command to set a motor speed ramp. This commands
   *         don't become active as soon as it is called but it will be executed
@@ -118,6 +54,8 @@ void MCI_ExecSpeedRamp( MCI_Handle_t * pHandle,  int16_t hFinalSpeed, uint16_t h
   pHandle->LastModalitySetByUser = STC_SPEED_MODE;
 }
 
+//}}}
+//{{{
 /**
   * @brief  This is a buffered command to set a motor torque ramp. This commands
   *         don't become active as soon as it is called but it will be executed
@@ -143,7 +81,9 @@ void MCI_ExecTorqueRamp( MCI_Handle_t * pHandle,  int16_t hFinalTorque, uint16_t
   pHandle->CommandState = MCI_COMMAND_NOT_ALREADY_EXECUTED;
   pHandle->LastModalitySetByUser = STC_TORQUE_MODE;
 }
+//}}}
 
+//{{{
 /**
   * @brief  This is a buffered command to set directly the motor current
   *         references Iq and Id. This commands don't become active as soon as
@@ -163,7 +103,8 @@ void MCI_SetCurrentReferences( MCI_Handle_t * pHandle, Curr_Components Iqdref )
   pHandle->CommandState = MCI_COMMAND_NOT_ALREADY_EXECUTED;
   pHandle->LastModalitySetByUser = STC_TORQUE_MODE;
 }
-
+//}}}
+//{{{
 /**
   * @brief  This is a user command used to begin the start-up procedure.
   *         If the state machine is in IDLE state the command is executed
@@ -196,7 +137,8 @@ bool MCI_StartMotor( MCI_Handle_t * pHandle )
 
   return RetVal;
 }
-
+//}}}
+//{{{
 /**
   * @brief  This is a user command used to begin the stop motor procedure.
   *         If the state machine is in RUN or START states the command is
@@ -216,7 +158,8 @@ bool MCI_StopMotor( MCI_Handle_t * pHandle )
 {
   return STM_NextState( pHandle->pSTM, ANY_STOP );
 }
-
+//}}}
+//{{{
 /**
   * @brief  This is a user command used to indicate that the user has seen the
   *         error condition. If is possible, the command is executed
@@ -230,7 +173,8 @@ bool MCI_FaultAcknowledged( MCI_Handle_t * pHandle )
 {
   return STM_FaultAcknowledged( pHandle->pSTM );
 }
-
+//}}}
+//{{{
 /**
   * @brief  This is a user command used to begin the encoder alignment procedure.
   *         If the state machine is in IDLE state the command is executed
@@ -250,7 +194,8 @@ bool MCI_EncoderAlign( MCI_Handle_t * pHandle )
 {
   return STM_NextState( pHandle->pSTM,IDLE_ALIGNMENT );
 }
-
+//}}}
+//{{{
 /**
   * @brief  This is usually a method managed by task. It must be called
   *         periodically in order to check the status of the related pSTM object
@@ -304,7 +249,9 @@ void MCI_ExecBufferedCommands( MCI_Handle_t * pHandle )
     }
   }
 }
+//}}}
 
+//{{{
 /**
   * @brief  It returns information about the state of the last buffered command.
   * @param  pHandle Pointer on the component instance to work on.
@@ -330,7 +277,9 @@ MCI_CommandState_t  MCI_IsCommandAcknowledged( MCI_Handle_t * pHandle )
   }
   return retVal;
 }
+//}}}
 
+//{{{
 /**
   * @brief  It returns information about the state of the related pSTM object.
   * @param  pHandle Pointer on the component instance to work on.
@@ -356,7 +305,8 @@ uint16_t MCI_GetOccurredFaults( MCI_Handle_t * pHandle )
 {
   return (uint16_t)(STM_GetFaultState( pHandle->pSTM ));
 }
-
+//}}}
+//{{{
 /**
   * @brief It returns a 16 bit fields containing information about faults
   *        currently present.
@@ -370,7 +320,8 @@ uint16_t MCI_GetCurrentFaults( MCI_Handle_t * pHandle )
 {
   return (uint16_t)(STM_GetFaultState( pHandle->pSTM ) >> 16);
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the modality of the speed and torque controller.
   * @param  pHandle Pointer on the component instance to work on.
@@ -381,7 +332,8 @@ STC_Modality_t MCI_GetControlMode( MCI_Handle_t * pHandle )
 {
   return pHandle->LastModalitySetByUser;
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the motor direction imposed by the last command
   *         (MCI_ExecSpeedRamp, MCI_ExecTorqueRamp or MCI_SetCurrentReferences).
@@ -418,7 +370,9 @@ int16_t MCI_GetImposedMotorDirection( MCI_Handle_t * pHandle )
   }
   return retVal;
 }
+//}}}
 
+//{{{
 /**
   * @brief  It returns information about the last ramp final speed sent by the
   *         user expressed in tenths of HZ.
@@ -437,7 +391,8 @@ int16_t MCI_GetLastRampFinalSpeed( MCI_Handle_t * pHandle )
   }
   return hRetVal;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Check if the settled speed or torque ramp has been completed.
   * @param  pHandle Pointer on the component instance to work on.
@@ -454,7 +409,8 @@ bool MCI_RampCompleted( MCI_Handle_t * pHandle )
 
   return retVal;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Stop the execution of speed ramp.
   * @param  pHandle Pointer on the component instance to work on.
@@ -464,7 +420,9 @@ bool MCI_StopSpeedRamp( MCI_Handle_t * pHandle )
 {
   return STC_StopSpeedRamp( pHandle->pSTC );
 }
+//}}}
 
+//{{{
 /**
   * @brief  It returns speed sensor reliability with reference to the sensor
   *         actually used for reference frame transformation
@@ -479,7 +437,8 @@ bool MCI_GetSpdSensorReliability( MCI_Handle_t * pHandle )
 
   return ( SPD_Check( SpeedSensor ) );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the last computed average mechanical speed, expressed in
   *         01Hz (tenth of Hertz) and related to the sensor actually used by FOC
@@ -493,7 +452,8 @@ int16_t MCI_GetAvrgMecSpeed01Hz( MCI_Handle_t * pHandle )
 
   return ( SPD_GetAvrgMecSpeed01Hz( SpeedSensor ) );
 }
-
+//}}}
+//{{{
 /**
   * @brief  Get the current mechanical rotor speed reference expressed in tenths
   *         of HZ.
@@ -505,8 +465,9 @@ int16_t MCI_GetMecSpeedRef01Hz( MCI_Handle_t * pHandle )
 {
   return ( STC_GetMecSpeedRef01Hz( pHandle->pSTC ) );
 }
+//}}}
 
-
+//{{{
 /**
   * @brief  It returns stator current Iab in Curr_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -516,7 +477,8 @@ Curr_Components MCI_GetIab( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Iab );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current Ialphabeta in Curr_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -526,7 +488,8 @@ Curr_Components MCI_GetIalphabeta( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Ialphabeta );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current Iqd in Curr_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -536,7 +499,8 @@ Curr_Components MCI_GetIqd( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Iqd );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current IqdHF in Curr_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -547,7 +511,8 @@ Curr_Components MCI_GetIqdHF( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->IqdHF );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current Iqdref in Curr_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -557,7 +522,8 @@ Curr_Components MCI_GetIqdref( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Iqdref );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current Vqd in Volt_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -567,7 +533,8 @@ Volt_Components MCI_GetVqd( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Vqd );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns stator current Valphabeta in Volt_Components format
   * @param  pHandle Pointer on the component instance to work on.
@@ -577,7 +544,9 @@ Volt_Components MCI_GetValphabeta( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->Valphabeta );
 }
+//}}}
 
+//{{{
 /**
   * @brief  It returns the rotor electrical angle actually used for reference
   *         frame transformation
@@ -588,7 +557,8 @@ int16_t MCI_GetElAngledpp( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->hElAngle );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the reference eletrical torque, fed to derived class for
   *         Iqref and Idref computation
@@ -599,7 +569,8 @@ int16_t MCI_GetTeref( MCI_Handle_t * pHandle )
 {
   return ( pHandle->pFOCVars->hTeref );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the motor phase current amplitude (0-to-peak) in s16A
   *         To convert s16A into Ampere following formula must be used:
@@ -626,7 +597,8 @@ int16_t MCI_GetPhaseCurrentAmplitude( MCI_Handle_t * pHandle )
 
   return ( (int16_t)wAux1 );
 }
-
+//}}}
+//{{{
 /**
   * @brief  It returns the applied motor phase voltage amplitude (0-to-peak) in
   *         s16V. To convert s16V into Volts following formula must be used:
@@ -653,7 +625,9 @@ int16_t MCI_GetPhaseVoltageAmplitude( MCI_Handle_t * pHandle )
 
   return ( (int16_t) wAux1 );
 }
+//}}}
 
+//{{{
 /**
   * @brief  When bDriveInput is set to INTERNAL, Idref should is normally managed
   *         by FOC_CalcCurrRef. Neverthless, this method allows forcing changing
@@ -669,6 +643,8 @@ void MCI_SetIdref( MCI_Handle_t * pHandle, int16_t hNewIdref )
   pHandle->pFOCVars->UserIdref = hNewIdref;
 }
 
+//}}}
+//{{{
 /**
   * @brief  It re-initializes Iqdref variables with their default values.
   * @param  pHandle Pointer on the component instance to work on.
@@ -678,14 +654,4 @@ void MCI_Clear_Iqdref( MCI_Handle_t * pHandle )
 {
   pHandle->pFOCVars->Iqdref = STC_GetDefaultIqdref( pHandle->pSTC );
 }
-
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

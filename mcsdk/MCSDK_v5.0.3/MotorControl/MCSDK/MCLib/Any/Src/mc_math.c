@@ -1,66 +1,6 @@
-/**
-  ******************************************************************************
-  * @file    mc_math.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides mathematics functions useful for and specific to
-  *          Motor Control.
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
 #include "mc_math.h"
 #include "mc_type.h"
 
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @defgroup MC_Math Motor Control Math functions
-  * @brief Motor Control Mathematic functions of the Motor Control SDK
-  *
-  * @todo Document the Motor Control Math "module".
-  *
-  * @{
-  */
-
-/* Private macro -------------------------------------------------------------*/
 #define SIN_COS_TABLE {\
 0x0000,0x00C9,0x0192,0x025B,0x0324,0x03ED,0x04B6,0x057F,\
 0x0648,0x0711,0x07D9,0x08A2,0x096A,0x0A33,0x0AFB,0x0BC4,\
@@ -100,7 +40,7 @@
 #define U90_180         0x0300u
 #define U180_270        0x0000u
 #define U270_360        0x0100u
-#define divSQRT_3	(int32_t)0x49E6    /* 1/sqrt(3) in q1.15 format=0.5773315*/
+#define divSQRT_3 (int32_t)0x49E6    /* 1/sqrt(3) in q1.15 format=0.5773315*/
 
 /* Private variables ---------------------------------------------------------*/
 const int16_t hSin_Cos_Table[256] = SIN_COS_TABLE;
@@ -112,9 +52,10 @@ const int16_t hSin_Cos_Table[256] = SIN_COS_TABLE;
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
-  * @brief  This function transforms stator currents Ia and qIb (which are 
-  *         directed along axes each displaced by 120 degrees) into currents 
+  * @brief  This function transforms stator currents Ia and qIb (which are
+  *         directed along axes each displaced by 120 degrees) into currents
   *         Ialpha and Ibeta in a stationary qd reference frame.
   *                               Ialpha = Ia
   *                       Ibeta = -(2*Ib+Ia)/sqrt(3)
@@ -124,31 +65,31 @@ __attribute__((section ("ccmram")))
 Curr_Components MCM_Clarke(Curr_Components Curr_Input)
 {
   Curr_Components Curr_Output;
-  
+
   int32_t qIa_divSQRT3_tmp, qIb_divSQRT3_tmp ;
   int32_t wIbeta_tmp;
   int16_t hIbeta_tmp;
 
   /* qIalpha = qIas*/
-  Curr_Output.qI_Component1= Curr_Input.qI_Component1;  
-  
+  Curr_Output.qI_Component1= Curr_Input.qI_Component1;
+
   qIa_divSQRT3_tmp = divSQRT_3 * (int32_t)Curr_Input.qI_Component1;
-  
+
   qIb_divSQRT3_tmp = divSQRT_3 * (int32_t)Curr_Input.qI_Component2;
-  
-  /*qIbeta = -(2*qIbs+qIas)/sqrt(3)*/   
+
+  /*qIbeta = -(2*qIbs+qIas)/sqrt(3)*/
 #ifdef FULL_MISRA_C_COMPLIANCY
   wIbeta_tmp = (-(qIa_divSQRT3_tmp)-(qIb_divSQRT3_tmp)-
                                                       (qIb_divSQRT3_tmp))/32768;
 #else
-/* WARNING: the below instruction is not MISRA compliant, user should verify 
-  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+/* WARNING: the below instruction is not MISRA compliant, user should verify
+  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by
   the compiler to perform the shift (instead of LSR logical shift right) */
 
   wIbeta_tmp = (-(qIa_divSQRT3_tmp)-(qIb_divSQRT3_tmp)-
                                                        (qIb_divSQRT3_tmp))>> 15;
 #endif
-  
+
   /* Check saturation of Ibeta */
   if (wIbeta_tmp > INT16_MAX)
   {
@@ -162,16 +103,17 @@ Curr_Components MCM_Clarke(Curr_Components Curr_Input)
   {
     hIbeta_tmp = (int16_t)(wIbeta_tmp);
   }
-  
+
   Curr_Output.qI_Component2 = hIbeta_tmp;
-  
+
   if (Curr_Output.qI_Component2 == (int16_t)(-32768))
   {
     Curr_Output.qI_Component2 = -32767;
   }
-  
-  return(Curr_Output); 
+
+  return(Curr_Output);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -180,12 +122,13 @@ Curr_Components MCM_Clarke(Curr_Components Curr_Input)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
-  * @brief  This function transforms stator currents Ialpha and Ibeta, which 
-  *         belong to a stationary qd reference frame, to a rotor flux 
+  * @brief  This function transforms stator currents Ialpha and Ibeta, which
+  *         belong to a stationary qd reference frame, to a rotor flux
   *         synchronous reference frame (properly oriented), so as Iq and Id.
   *                   Id= Ialpha *sin(theta)+qIbeta *cos(Theta)
-  *                   Iq=qIalpha *cos(Theta)-qIbeta *sin(Theta)            
+  *                   Iq=qIalpha *cos(Theta)-qIbeta *sin(Theta)
   * @param  Curr_Input: stator current Ialpha and Ibeta in Curr_Components format
   * @param  Theta: rotating frame angular position in q1.15 format
   * @retval Stator current Iq and Id in Curr_Components format
@@ -193,15 +136,15 @@ __attribute__((section ("ccmram")))
 Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
 {
   Curr_Components Curr_Output;
-  int32_t qId_tmp_1, qId_tmp_2, qIq_tmp_1, qIq_tmp_2;     
+  int32_t qId_tmp_1, qId_tmp_2, qIq_tmp_1, qIq_tmp_2;
   Trig_Components Local_Vector_Components;
   int32_t wIqd_tmp;
   int16_t hIqd_tmp;
 
   Local_Vector_Components = MCM_Trig_Functions(Theta);
-  
+
   /*No overflow guaranteed*/
-  qIq_tmp_1 = Curr_Input.qI_Component1 * (int32_t)Local_Vector_Components.hCos;  	
+  qIq_tmp_1 = Curr_Input.qI_Component1 * (int32_t)Local_Vector_Components.hCos;
 
   /*No overflow guaranteed*/
   qIq_tmp_2 = Curr_Input.qI_Component2 * (int32_t)Local_Vector_Components.hSin;
@@ -210,12 +153,12 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
 #ifdef FULL_MISRA_C_COMPLIANCY
   wIqd_tmp = (qIq_tmp_1-qIq_tmp_2)/32768;
 #else
-/* WARNING: the below instruction is not MISRA compliant, user should verify 
-  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
-  the compiler to perform the shift (instead of LSR logical shift right) */  
+/* WARNING: the below instruction is not MISRA compliant, user should verify
+  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by
+  the compiler to perform the shift (instead of LSR logical shift right) */
   wIqd_tmp = (qIq_tmp_1-qIq_tmp_2)>>15;
 #endif
-  
+
   /* Check saturation of Iq */
   if (wIqd_tmp > INT16_MAX)
   {
@@ -229,30 +172,30 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
   {
     hIqd_tmp = (int16_t)(wIqd_tmp);
   }
-  
+
   Curr_Output.qI_Component1 = hIqd_tmp;
-  
+
   if (Curr_Output.qI_Component1 == (int16_t)(-32768))
   {
     Curr_Output.qI_Component1 = -32767;
   }
-  
+
   /*No overflow guaranteed*/
   qId_tmp_1 = Curr_Input.qI_Component1 * (int32_t)Local_Vector_Components.hSin;
- 
+
   /*No overflow guaranteed*/
   qId_tmp_2 = Curr_Input.qI_Component2 * (int32_t)Local_Vector_Components.hCos;
- 
+
   /*Id component in Q1.15 Format */
 #ifdef FULL_MISRA_C_COMPLIANCY
   wIqd_tmp = (qId_tmp_1+qId_tmp_2)/32768;
 #else
-/* WARNING: the below instruction is not MISRA compliant, user should verify 
-  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+/* WARNING: the below instruction is not MISRA compliant, user should verify
+  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by
   the compiler to perform the shift (instead of LSR logical shift right) */
   wIqd_tmp = (qId_tmp_1+qId_tmp_2) >>15;
-#endif 
-  
+#endif
+
   /* Check saturation of Id */
   if (wIqd_tmp > INT16_MAX)
   {
@@ -266,16 +209,17 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
   {
     hIqd_tmp = (int16_t)(wIqd_tmp);
   }
-  
+
   Curr_Output.qI_Component2 = hIqd_tmp;
-  
+
   if (Curr_Output.qI_Component2 == (int16_t)(-32768))
   {
     Curr_Output.qI_Component2 = -32767;
   }
-  
+
   return (Curr_Output);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -284,51 +228,53 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
-  * @brief  This function transforms stator voltage qVq and qVd, that belong to 
-  *         a rotor flux synchronous rotating frame, to a stationary reference 
+  * @brief  This function transforms stator voltage qVq and qVd, that belong to
+  *         a rotor flux synchronous rotating frame, to a stationary reference
   *         frame, so as to obtain qValpha and qVbeta:
   *                  Valfa= Vq*Cos(theta)+ Vd*Sin(theta)
-  *                  Vbeta=-Vq*Sin(theta)+ Vd*Cos(theta)     
+  *                  Vbeta=-Vq*Sin(theta)+ Vd*Cos(theta)
   * @param  Curr_Input: stator voltage Vq and Vd in Volt_Components format
   * @param  Theta: rotating frame angular position in q1.15 format
   * @retval Stator voltage Valpha and Vbeta in Volt_Components format
   */
 Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta)
-{ 	
+{
   int32_t qValpha_tmp1,qValpha_tmp2,qVbeta_tmp1,qVbeta_tmp2;
   Trig_Components Local_Vector_Components;
   Volt_Components Volt_Output;
-  
+
   Local_Vector_Components = MCM_Trig_Functions(Theta);
-  
+
   /*No overflow guaranteed*/
-  qValpha_tmp1 = Volt_Input.qV_Component1 * (int32_t)Local_Vector_Components.hCos;  
+  qValpha_tmp1 = Volt_Input.qV_Component1 * (int32_t)Local_Vector_Components.hCos;
   qValpha_tmp2 = Volt_Input.qV_Component2 * (int32_t)Local_Vector_Components.hSin;
 
 #ifdef FULL_MISRA_C_COMPLIANCY
-  Volt_Output.qV_Component1 = (int16_t)(((qValpha_tmp1)+(qValpha_tmp2))/32768);  
-#else  
-/* WARNING: the below instruction is not MISRA compliant, user should verify 
-  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
-  the compiler to perform the shift (instead of LSR logical shift right) */  
+  Volt_Output.qV_Component1 = (int16_t)(((qValpha_tmp1)+(qValpha_tmp2))/32768);
+#else
+/* WARNING: the below instruction is not MISRA compliant, user should verify
+  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by
+  the compiler to perform the shift (instead of LSR logical shift right) */
   Volt_Output.qV_Component1 = (int16_t)(((qValpha_tmp1)+(qValpha_tmp2))>>15);
-#endif 
-  
+#endif
+
   qVbeta_tmp1 = Volt_Input.qV_Component1 * (int32_t)Local_Vector_Components.hSin;
   qVbeta_tmp2 = Volt_Input.qV_Component2 * (int32_t)Local_Vector_Components.hCos;
 
 #ifdef FULL_MISRA_C_COMPLIANCY
   Volt_Output.qV_Component2 = (int16_t)((qVbeta_tmp2-qVbeta_tmp1)/32768);
-#else  
-  /* WARNING: the below instruction is not MISRA compliant, user should verify 
-  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by 
+#else
+  /* WARNING: the below instruction is not MISRA compliant, user should verify
+  that Cortex-M3 assembly instruction ASR (arithmetic shift right) is used by
   the compiler to perform the shift (instead of LSR logical shift right) */
   Volt_Output.qV_Component2 = (int16_t)((qVbeta_tmp2-qVbeta_tmp1) >>15);
-#endif 
- 
+#endif
+
   return(Volt_Output);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -337,8 +283,9 @@ Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
-  * @brief  This function returns cosine and sine functions of the angle fed in 
+  * @brief  This function returns cosine and sine functions of the angle fed in
   *         input
   * @param  hAngle: angle in q1.15 format
   * @retval Sin(angle) and Cos(angle) in Trig_Components format
@@ -348,41 +295,42 @@ Trig_Components MCM_Trig_Functions(int16_t hAngle)
 {
   int32_t shindex;
   uint16_t uhindex;
-  
+
   Trig_Components Local_Components;
-  
-  /* 10 bit index computation  */  
-  shindex =((int32_t)32768 + (int32_t)hAngle); 
+
+  /* 10 bit index computation  */
+  shindex =((int32_t)32768 + (int32_t)hAngle);
   uhindex = (uint16_t)shindex;
-  uhindex /= (uint16_t)64;      
-  
-  
-  switch ((uint16_t)(uhindex) & SIN_MASK) 
+  uhindex /= (uint16_t)64;
+
+
+  switch ((uint16_t)(uhindex) & SIN_MASK)
   {
   case U0_90:
     Local_Components.hSin = hSin_Cos_Table[(uint8_t)(uhindex)];
     Local_Components.hCos = hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
     break;
-  
-  case U90_180:  
+
+  case U90_180:
      Local_Components.hSin = hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
      Local_Components.hCos = -hSin_Cos_Table[(uint8_t)(uhindex)];
     break;
-  
+
   case U180_270:
      Local_Components.hSin = -hSin_Cos_Table[(uint8_t)(uhindex)];
      Local_Components.hCos = -hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
     break;
-  
+
   case U270_360:
      Local_Components.hSin =  -hSin_Cos_Table[(uint8_t)(0xFFu-(uint8_t)(uhindex))];
-     Local_Components.hCos =  hSin_Cos_Table[(uint8_t)(uhindex)]; 
+     Local_Components.hCos =  hSin_Cos_Table[(uint8_t)(uhindex)];
     break;
   default:
     break;
   }
   return (Local_Components);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -391,6 +339,7 @@ Trig_Components MCM_Trig_Functions(int16_t hAngle)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  It calculates the square root of a non-negative int32_t. It returns 0
   *         for negative int32_t.
@@ -405,7 +354,7 @@ int32_t MCM_Sqrt(int32_t wInput)
 
   if (wInput > 0)
   {
-    
+
     if (wInput <= (int32_t)2097152)
     {
       wtemproot = (int32_t)128;
@@ -414,7 +363,7 @@ int32_t MCM_Sqrt(int32_t wInput)
     {
       wtemproot = (int32_t)8192;
     }
-    
+
     do
     {
       wtemprootnew = (wtemproot + wInput/wtemproot)/(int32_t)2;
@@ -434,10 +383,12 @@ int32_t MCM_Sqrt(int32_t wInput)
   {
     wtemprootnew = (int32_t)0;
   }
-  
-  return (wtemprootnew); 
-}
 
+  return (wtemprootnew);
+}
+//}}}
+
+//{{{
 /**
   * @brief  This function codify a floting point number into the relative
   *         32bit integer.
@@ -450,13 +401,4 @@ uint32_t MCM_floatToIntBit(float x)
   pInt = (uint32_t*)(&x);
   return *pInt;
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/******************* (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

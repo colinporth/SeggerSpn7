@@ -1,63 +1,6 @@
-/**
-  ******************************************************************************
-  * @file    pwm_curr_fdbk.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides firmware functions that implement the following features
-  *          of the PWM & Current Feedback component of the Motor Control SDK:
-  *
-  *           * current sensing
-  *           * regular ADC conversion execution
-  *           * space vector modulation
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "pwm_curr_fdbk.h"
-
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
-  * @{
-  */
-
+//{{{
 /** @defgroup pwm_curr_fdbk PWM & Current Feedback
   *
   * @brief PWM & Current Feedback components of the Motor Control SDK
@@ -91,6 +34,7 @@
   * See PWMC_Handle for more details on this mechanism.
   * @{
   */
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -99,6 +43,7 @@
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief Returns the phase current of the motor as read by the ADC (in s16A unit)
   *
@@ -117,6 +62,7 @@ void PWMC_GetPhaseCurrents(PWMC_Handle_t *pHandle,Curr_Components* pStator_Curre
 {
   pHandle->pFctGetPhaseCurrents(pHandle, pStator_Currents);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -124,13 +70,8 @@ void PWMC_GetPhaseCurrents(PWMC_Handle_t *pHandle,Curr_Components* pStator_Curre
 #elif defined (__CC_ARM)
 __attribute__((section ("ccmram")))
 #endif
-#endif  
-/**
- * @brief Sets the PWM duty cycles
- *
- *
- */
-
+#endif
+//{{{
 /**
   * @brief  Converts input voltages @f$ V_{\alpha} @f$ and @f$ V_{\beta} @f$ into PWM duty cycles
   *         and feed them to the inverter.
@@ -154,14 +95,14 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
 {
   int32_t wX, wY, wZ, wUAlpha, wUBeta, wTimePhA, wTimePhB, wTimePhC;
   PWMC_SetSampPointSectX_Cb_t pSetADCSamplingPoint;
-    
+
   wUAlpha = Valfa_beta.qV_Component1 * (int32_t)pHandle->hT_Sqrt3;
   wUBeta = -(Valfa_beta.qV_Component2 * (int32_t)(pHandle->hPWMperiod))*2;
- 
+
   wX = wUBeta;
   wY = (wUBeta + wUAlpha)/2;
   wZ = (wUBeta - wUAlpha)/2;
-  
+
   /* Sector calculation from wX, wY, wZ */
   if (wY<0)
   {
@@ -198,12 +139,12 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
       pHandle->hSector = SECTOR_2;
       wTimePhA = (int32_t)(pHandle->hPWMperiod)/4 + ((wY - wZ)/(int32_t)262144);
       wTimePhB = wTimePhA + wZ/131072;
-      wTimePhC = wTimePhA - wY/131072;             
+      wTimePhC = wTimePhA - wY/131072;
       pSetADCSamplingPoint = pHandle->pFctSetADCSampPointSect2;
     }
     else /* wZ < 0 */
       if (wX<=0)
-      {  
+      {
         pHandle->hSector = SECTOR_6;
         wTimePhA = (int32_t)(pHandle->hPWMperiod)/4 + ((wY - wX)/(int32_t)262144);
         wTimePhC = wTimePhA - wY/131072;
@@ -219,11 +160,11 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
         pSetADCSamplingPoint = pHandle->pFctSetADCSampPointSect1;
       }
   }
-  
+
   pHandle->hCntPhA = (uint16_t)wTimePhA;
   pHandle->hCntPhB = (uint16_t)wTimePhB;
   pHandle->hCntPhC = (uint16_t)wTimePhC;
-  
+
   if (pHandle->DTTest == 1u)
   {
   /* Dead time compensation */
@@ -235,7 +176,7 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
   {
     pHandle->hCntPhA -= pHandle->DTCompCnt;
   }
-  
+
   if (pHandle->hIb > 0)
   {
     pHandle->hCntPhB += pHandle->DTCompCnt;
@@ -244,7 +185,7 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
   {
     pHandle->hCntPhB -= pHandle->DTCompCnt;
   }
-  
+
   if (pHandle->hIc > 0)
   {
     pHandle->hCntPhC += pHandle->DTCompCnt;
@@ -254,10 +195,12 @@ uint16_t PWMC_SetPhaseVoltage(PWMC_Handle_t *pHandle, Volt_Components Valfa_beta
     pHandle->hCntPhC -= pHandle->DTCompCnt;
   }
   }
-  
+
   return(pSetADCSamplingPoint(pHandle));
 }
+//}}}
 
+//{{{
 /**
   * @brief  Switches PWM generation off, inactivating the outputs.
   * @param  pHandle Handle on the target instance of the PWMC component
@@ -266,7 +209,8 @@ void PWMC_SwitchOffPWM(PWMC_Handle_t *pHandle)
 {
   pHandle->pFctSwitchOffPwm(pHandle);
 }
-
+//}}}
+//{{{
 /**
   * @brief  Switches PWM generation on
   * @param  pHandle Handle on the target instance of the PWMC component
@@ -275,7 +219,9 @@ void PWMC_SwitchOnPWM(PWMC_Handle_t *pHandle)
 {
   pHandle->pFctSwitchOnPwm(pHandle);
 }
+//}}}
 
+//{{{
 /**
   * @brief  Calibrates ADC current conversions by reading the offset voltage
   *         present on ADC pins when no motor current is flowing in.
@@ -322,7 +268,8 @@ bool PWMC_CurrentReadingCalibr(PWMC_Handle_t *pHandle, CRCAction_t action)
   }
   return retVal;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Switches power stage Low Sides transistors on.
   *
@@ -336,7 +283,8 @@ void PWMC_TurnOnLowSides(PWMC_Handle_t *pHandle)
 {
   pHandle->pFctTurnOnLowSides(pHandle);
 }
-
+//}}}
+//{{{
 /**
   * @brief  Executes a regular conversion on the first ADC used by the motor control
   *         subsystem for current reading and returns the converted value.
@@ -358,12 +306,13 @@ void PWMC_TurnOnLowSides(PWMC_Handle_t *pHandle)
   * @retval Returns the converted value or oxFFFF in case of a conversion error
   */
 uint16_t PWMC_ExecRegularConv(PWMC_Handle_t *pHandle, uint8_t bChannel)
-{ 
+{
   uint16_t hConvValue;
   hConvValue = pHandle->pFctRegularConvExec(pHandle, bChannel);
   return(hConvValue);
 }
-
+//}}}
+//{{{
 /**
   * @brief Sets the specified sampling time for the specified ADC channel
   *         on the first ADC used by the motor control subsystem.
@@ -378,6 +327,8 @@ void PWMC_ADC_SetSamplingTime(PWMC_Handle_t *pHandle, ADConv_t ADConv_struct)
   pHandle->pFctSetSamplingTime(pHandle, ADConv_struct);
 }
 
+//}}}
+//{{{
 /** @brief Returns #MC_BREAK_IN if an over current condition was detected on the power stage
  *         controlled by the PWMC component pointed by  @p pHandle, since the last call to this function;
  *         returns #MC_NO_FAULTS otherwise. */
@@ -385,7 +336,9 @@ uint16_t PWMC_CheckOverCurrent(PWMC_Handle_t *pHandle)
 {
   return pHandle->pFctIsOverCurrentOccurred(pHandle);
 }
+//}}}
 
+//{{{
 /**
   * @brief  Sets the over current threshold to be used
   *
@@ -402,7 +355,8 @@ void PWMC_OCPSetReferenceVoltage(PWMC_Handle_t *pHandle,uint16_t hDACVref)
     pHandle->pFctOCPSetReferenceVoltage(pHandle, hDACVref);
   }
 }
-
+//}}}
+//{{{
 /**
   * @brief  It is used to retrieve the satus of TurnOnLowSides action.
   * @param  pHandle: handler of the current instance of the PWMC component
@@ -416,7 +370,8 @@ bool PWMC_GetTurnOnLowSidesAction(PWMC_Handle_t *pHandle)
 {
   return pHandle->bTurnOnLowSidesAction;
 }
-
+//}}}
+//{{{
 /** @brief Enables the RL detection mode on the power stage controlled by the @p pHandle PWMC component. */
 void PWMC_RLDetectionModeEnable(PWMC_Handle_t *pHandle)
 {
@@ -425,7 +380,8 @@ void PWMC_RLDetectionModeEnable(PWMC_Handle_t *pHandle)
     pHandle->pFctRLDetectionModeEnable(pHandle);
   }
 }
-
+//}}}
+//{{{
 /** @brief Disables the RL detection mode on the power stage controlled by the @p pHandle PWMC component. */
 void PWMC_RLDetectionModeDisable(PWMC_Handle_t *pHandle)
 {
@@ -434,7 +390,8 @@ void PWMC_RLDetectionModeDisable(PWMC_Handle_t *pHandle)
     pHandle->pFctRLDetectionModeDisable(pHandle);
   }
 }
-
+//}}}
+//{{{
 /**
   * @brief  Sets the PWM duty cycle to apply in the RL Detection mode.
   * @param  pHandle: handle on the target instance of the PWMC component
@@ -454,7 +411,8 @@ uint16_t PWMC_RLDetectionModeSetDuty(PWMC_Handle_t *pHandle, uint16_t hDuty)
   }
   return hRetVal;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to get phases current.
  * @param pCallBack pointer on the callback
@@ -466,7 +424,8 @@ void PWMC_RegisterGetPhaseCurrentsCallBack( PWMC_GetPhaseCurr_Cb_t pCallBack,
 {
   pHandle->pFctGetPhaseCurrents = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to switch PWM
  *        generation off.
@@ -479,7 +438,8 @@ void PWMC_RegisterSwitchOffPwmCallBack( PWMC_Generic_Cb_t pCallBack,
 {
   pHandle->pFctSwitchOffPwm = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to switch PWM
  *        generation on.
@@ -492,7 +452,8 @@ void PWMC_RegisterSwitchonPwmCallBack( PWMC_Generic_Cb_t pCallBack,
 {
   pHandle->pFctSwitchOnPwm = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to execute a calibration
  *        of the current sensing system.
@@ -505,7 +466,8 @@ void PWMC_RegisterReadingCalibrationCallBack( PWMC_Generic_Cb_t pCallBack,
 {
   pHandle->pFctCurrReadingCalib = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to turn low sides on.
  * @param pCallBack pointer on the callback
@@ -518,6 +480,8 @@ void PWMC_RegisterTurnOnLowSidesCallBack( PWMC_Generic_Cb_t pCallBack,
   pHandle->pFctTurnOnLowSides = pCallBack;
 }
 
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to set a new sampling
  *        time on a ADC channel.
@@ -530,7 +494,8 @@ void PWMC_RegisterSetSamplingTimeCallBack( PWMC_SetSampTime_Cb_t pCallBack,
 {
   pHandle->pFctSetSamplingTime = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 1.
@@ -543,7 +508,8 @@ void PWMC_RegisterSampPointSect1CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
 {
   pHandle->pFctSetADCSampPointSect1 = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 2.
@@ -556,7 +522,8 @@ void PWMC_RegisterSampPointSect2CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
 {
   pHandle->pFctSetADCSampPointSect2 = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 3.
@@ -569,7 +536,8 @@ void PWMC_RegisterSampPointSect3CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
 {
   pHandle->pFctSetADCSampPointSect3 = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 4.
@@ -582,7 +550,8 @@ void PWMC_RegisterSampPointSect4CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
 {
   pHandle->pFctSetADCSampPointSect4 = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 5.
@@ -596,6 +565,8 @@ void PWMC_RegisterSampPointSect5CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
   pHandle->pFctSetADCSampPointSect5 = pCallBack;
 }
 
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
  *        sector 6.
@@ -608,7 +579,8 @@ void PWMC_RegisterSampPointSect6CallBack( PWMC_SetSampPointSectX_Cb_t pCallBack,
 {
   pHandle->pFctSetADCSampPointSect6 = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to execute a regular ADC conversion
  * @param pCallBack pointer on the callback
@@ -620,7 +592,8 @@ void PWMC_RegisterRegularConvExecCallBack( PWMC_RegConvExec_Cb_t pCallBack,
 {
   pHandle->pFctRegularConvExec = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to the overcurrent status
  * @param pCallBack pointer on the callback
@@ -632,7 +605,8 @@ void PWMC_RegisterIsOverCurrentOccurredCallBack( PWMC_OverCurr_Cb_t pCallBack,
 {
   pHandle->pFctIsOverCurrentOccurred = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to set the reference
  *        voltage for the over current protection
@@ -644,7 +618,8 @@ void PWMC_RegisterOCPSetRefVoltageCallBack( PWMC_SetOcpRefVolt_Cb_t pCallBack,
 {
   pHandle->pFctOCPSetReferenceVoltage = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to enable the R/L detection mode
  * @param pHandle pointer on the handle structure of the PWMC instance
@@ -655,7 +630,8 @@ void PWMC_RegisterRLDetectionModeEnableCallBack( PWMC_Generic_Cb_t pCallBack,
 {
   pHandle->pFctRLDetectionModeEnable = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback which PWMC shall invoke to disable the R/L detection mode
  * @param pHandle pointer on the handle structure of the PWMC instance
@@ -666,7 +642,8 @@ void PWMC_RegisterRLDetectionModeDisableCallBack( PWMC_Generic_Cb_t pCallBack,
 {
   pHandle->pFctRLDetectionModeDisable = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to set the duty cycle
  *        for the R/L detection mode
@@ -678,7 +655,8 @@ void PWMC_RegisterRLDetectionModeSetDutyCallBack( PWMC_RLDetectSetDuty_Cb_t pCal
 {
   pHandle->pFctRLDetectionModeSetDuty = pCallBack;
 }
-
+//}}}
+//{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to call PWMC instance IRQ handler
  * @param pHandle pointer on the handle structure of the PWMC instance
@@ -690,13 +668,4 @@ void PWMC_RegisterIrqHandlerCallBack( PWMC_IrqHandler_Cb_t pCallBack,
 {
   pHandle->pFctIrqHandler = pCallBack;
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

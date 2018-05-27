@@ -1,73 +1,5 @@
-/**
- ******************************************************************************
- * @file    ics_f30x_pwm_curr_fdbk.c
- * @author  Motor Control SDK Team, ST Microelectronics
- * @brief   This file provides firmware functions that implement the ICS
- *          PWM current feedback component for F30x of the Motor Control SDK.
- * ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
- * All rights reserved.</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
-
-/* Includes ------------------------------------------------------------------*/
 #include "ics_f30x_pwm_curr_fdbk.h"
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @addtogroup pwm_curr_fdbk
-  * @{
-  */
-
-/**
- * @defgroup ics_f30x_pwm_curr_fdbk ICS F30x PWM & Current Feedback
- *
- * @brief STM32F3, ICS PWM & Current Feedback implementation
- *
- * This component is used in applications based on an STM32F3 MCU
- * and using an Insulated Current Sensors topology.
- *
- * @todo: TODO: complete documentation.
- *
- * @{
- */
 
 /* ADC SMPx mask */
 #define SMPR1_SMP_Set              ((uint32_t) (0x00000007u))
@@ -90,6 +22,7 @@
 
 static void IF3XX_TIMxInit(TIM_TypeDef* TIMx, PWMC_ICS_F3_Handle_t *pHandle);
 
+//{{{
 /**
 * @brief  It initializes TIMx, ADC, GPIO and NVIC for current reading
 *         in ICS configuration using STM32F3XX
@@ -204,7 +137,8 @@ void IF3XX_Init(PWMC_ICS_F3_Handle_t *pHandle)
 
   }
 }
-
+//}}}
+//{{{
 /**
 * @brief  It initializes TIMx peripheral for PWM generation
 * @param 'TIMx': Timer to be initialized
@@ -217,7 +151,7 @@ static void IF3XX_TIMxInit(TIM_TypeDef* TIMx, PWMC_ICS_F3_Handle_t *pHandle)
   /* disable main TIM counter to ensure
    * a synchronous start by TIM2 trigger */
   LL_TIM_DisableCounter(TIMx);
-  
+
   /* Enables the TIMx Preload on CC1 Register */
   LL_TIM_OC_EnablePreload(TIMx, LL_TIM_CHANNEL_CH1);
   /* Enables the TIMx Preload on CC2 Register */
@@ -271,7 +205,8 @@ static void IF3XX_TIMxInit(TIM_TypeDef* TIMx, PWMC_ICS_F3_Handle_t *pHandle)
     }
   }
 }
-
+//}}}
+//{{{
 /**
 * @brief  It stores handler variable the voltage present on Ia and
 *         Ib current feedback analog channels when no current is flowing into the
@@ -326,7 +261,9 @@ void IF3XX_CurrentReadingCalibration( PWMC_Handle_t * pHandle )
 
   pH->BrakeActionLock = false;
 }
+//}}}
 
+//{{{
 /**
 * @brief  It computes and return latest converted motor phase currents motor
 * @param  ICS F30x PWM Current Feedback Handle
@@ -384,8 +321,8 @@ void IF3XX_GetPhaseCurrents( PWMC_Handle_t *pHandle, Curr_Components* pStator_Cu
   pH->_Super.hIc = -pStator_Currents->qI_Component1 - pStator_Currents->qI_Component2;
 
 }
-
-
+//}}}
+//{{{
 /**
 * @brief  It sum up injected conversion data into wPhaseXOffset. It is called
 *         only during current calibration
@@ -408,7 +345,8 @@ void IF3XX_HFCurrentsCalibration(PWMC_Handle_t *pHandle, Curr_Components* pStato
     pH->bIndex++;
   }
 }
-
+//}}}
+//{{{
 /**
   * @brief  It turns on low sides switches. This function is intended to be
   *         used for charging boot capacitors of driving section. It has to be
@@ -488,8 +426,8 @@ void IF3XX_SwitchOnPWM( PWMC_Handle_t *pHandle )
 
   return;
 }
-
-
+//}}}
+//{{{
 /**
 * @brief  It disables PWM generation on the proper Timer peripheral acting on
 *         MOE bit
@@ -528,7 +466,8 @@ void IF3XX_SwitchOffPWM(PWMC_Handle_t *pHandle)
 
   return;
 }
-
+//}}}
+//{{{
 /**
 * @brief  It stores into the component instance's handle the voltage present on Ia and
 *         Ib current feedback analog channels when no current is flowin into the
@@ -566,9 +505,9 @@ uint16_t IF3XX_WriteTIMRegisters(PWMC_Handle_t *pHandle)
   }
   return aux;
 }
+//}}}
 
-
-
+//{{{
 /**
   * @brief  It contains the TIMx Update event interrupt
   * @param  pHandle: handler of the current instance of the PWM component
@@ -593,7 +532,8 @@ void* IF3XX_TIMx_UP_IRQHandler(PWMC_Handle_t *pHandle)
 
   return &(pH->_Super.bMotor);
 }
-
+//}}}
+//{{{
 /**
   * @brief  It contains the TIMx Break1 event interrupt
   * @param  pHandle: handler of the current instance of the PWM component
@@ -610,7 +550,8 @@ void* IF3XX_BRK_IRQHandler(PWMC_Handle_t *pHandle)
 
   return &(pH->_Super.bMotor);
 }
-
+//}}}
+//{{{
 /**
   * @brief  It contains the TIMx Break2 event interrupt
   * @param  pHandle: handler of the current instance of the PWM component
@@ -633,7 +574,9 @@ void* IF3XX_BRK2_IRQHandler(PWMC_Handle_t *pHandle)
 
   return &(pH->_Super.bMotor);
 }
+//}}}
 
+//{{{
 /**
 * @brief  Execute a regular conversion using ADCx_1.
 *         The function is not re-entrant (can't executed twice at the same time)
@@ -661,7 +604,8 @@ uint16_t IF3XX_ExecRegularConv( PWMC_Handle_t *pHandle, uint8_t bChannel )
 
   return (LL_ADC_REG_ReadConversionData12(ADCx_1));
 }
-
+//}}}
+//{{{
 /**
 * @brief  It sets the specified sampling time for the specified ADC channel
 *         on ADCx_1. It must be called once for each channel utilized by user
@@ -708,7 +652,8 @@ void IF3XX_ADC_SetSamplingTime(PWMC_Handle_t *pHandle, ADConv_t ADConv_struct)
     ADC1->SMPR2 = tmpreg1;
   }
 }
-
+//}}}
+//{{{
 /**
 * @brief  It is used to check if an overcurrent occurred since last call.
 * @param  ICS F30x PWM Current Feedback Handle
@@ -734,19 +679,4 @@ uint16_t IF3XX_IsOverCurrentOccurred(PWMC_Handle_t *pHandle)
 
   return retVal;
 }
-
-
-
-/**
-* @}
-*/
-
-/**
-* @}
-*/
-
-/**
- * @}
- */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}
