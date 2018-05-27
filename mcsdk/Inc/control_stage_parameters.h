@@ -1,19 +1,74 @@
-#pragma once
+/**
+  ******************************************************************************
+  * @file    control_stage_parameters.h
+  * @author  Motor Control SDK Team, ST Microelectronics
+  * @brief   This file contains the parameters needed for the Motor Control SDK
+  *          in order to configure the control stage of a motor application.
+  *
+  ******************************************************************************
+  * @attention
+  *
+  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
+  * All rights reserved.</center></h2>
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted, provided that the following conditions are met:
+  *
+  * 1. Redistribution of source code must retain the above copyright notice,
+  *    this list of conditions and the following disclaimer.
+  * 2. Redistributions in binary form must reproduce the above copyright notice,
+  *    this list of conditions and the following disclaimer in the documentation
+  *    and/or other materials provided with the distribution.
+  * 3. Neither the name of STMicroelectronics nor the names of other
+  *    contributors to this software may be used to endorse or promote products
+  *    derived from this software without specific written permission.
+  * 4. This software, including modifications and/or derivative works of this
+  *    software, must execute solely and exclusively on microcontroller or
+  *    microprocessor devices manufactured by or for STMicroelectronics.
+  * 5. Redistribution and use of this software other than as permitted under
+  *    this license is void and will automatically terminate your rights under
+  *    this license.
+  *
+  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
+  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
+  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
+  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
+  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  *
+  ******************************************************************************
+  */
+ 
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __CONTROL_STAGE_PARAMETERS_H
+#define __CONTROL_STAGE_PARAMETERS_H
 
 #define CTRBDID 2
 
-// MCU supply voltage 
+/***************************** MCU supply voltage *****************************/
 #define MCU_SUPPLY_VOLTAGE    3.30
 
+/***************************** CLOCK SETTINGS SECTION *************************/
 #define CLOCK_SOURCE          EXTERNAL  /* EXTERNAL or INTERNAL */
+
 #define CPU_CLK_72_MHZ
 
 /* ext. clock frequency */
 #define EXT_CLK_8_MHZ
 
+/************************
+ *** Motor Parameters ***
+ ************************/
+
 /* Maximum modulation index */
 #define MAX_MODULATION_85_PER_CENT
-
+                         
 /************************ DIGITAL I/O DEFINITION SECTION  *********************/
 /* PWM Timer section */
 #define PWM_TIMER_SELECTION               PWM_TIM1
@@ -90,12 +145,12 @@
 #define PHASE_W_CURR_ADC                ADC1_2
 #define PHASE_W_CURR_CHANNEL            MC_ADC_CHANNEL_6
 #define PHASE_W_GPIO_PORT               GPIOC
-#define PHASE_W_GPIO_PIN                LL_GPIO_PIN_0
+#define PHASE_W_GPIO_PIN                LL_GPIO_PIN_0       
 /* Only for 1 shunt resistor case */
 #define ADC_PERIPH                      ADC1
 #define PHASE_CURRENTS_CHANNEL          MC_ADC_CHANNEL_7
 #define PHASE_CURRENTS_GPIO_PORT        GPIOC
-#define PHASE_CURRENTS_GPIO_PIN         LL_GPIO_PIN_1
+#define PHASE_CURRENTS_GPIO_PIN         LL_GPIO_PIN_1   
 
 /* Common */
 #define ADC_AHBPERIPH                   RCC_AHBPeriph_ADC12
@@ -124,11 +179,11 @@
 
 /*
  * WB generates only OPAMPx (x=1,2..,4) syntax but when a mcu has only one opamp
- * the syntax is OPAMP (ex: STM32F302R8). Then to handle the following compilation
- * flag has been introduced
+ * the syntax is OPAMP (ex: STM32F302R8). Then to handle the following compilation 
+ * flag has been introduced 
  */
 #if ((defined STM32F301x8)||(defined STM32F302x8))
-#define OPAMP1_SELECTION                       OPAMP
+#define OPAMP1_SELECTION                       OPAMP     
 #else
 #define OPAMP1_SELECTION                       OPAMP1
 #endif
@@ -165,11 +220,11 @@
 /* Only for 1 shunt resistor case */
 /*
  * WB generates only OPAMPx (x=1,2..,4) syntax but when a mcu has only one opamp
- * the syntax is OPAMP (ex: STM32F302R8). Then to handle the following compilation
- * flag has been introduced
+ * the syntax is OPAMP (ex: STM32F302R8). Then to handle the following compilation 
+ * flag has been introduced 
  */
 #if ((defined STM32F301x8)||(defined STM32F302x8))
-#define OPAMP_SELECTION                        OPAMP
+#define OPAMP_SELECTION                        OPAMP     
 #else
 #define OPAMP_SELECTION                        OPAMP1
 #endif
@@ -255,7 +310,7 @@
 #define OCPC_OUTPUT_GPIO_PIN              LL_GPIO_PIN_8
 #define OCPC_OUTPUT_GPIO_AF               GPIO_AF_7
 #define OCPC_OUTPUTPOL                    COMP_OutputPol_NonInverted
-
+                                                              
 #define OVP_SELECTION                     COMP2
 #define OVP_INVERTINGINPUT_MODE           INT_MODE
 #define OVP_INVERTINGINPUT                COMPX_InvertingInput_VREF
@@ -279,6 +334,10 @@
 
 #define OCP_FILTER                        COMP_Mode_HighSpeed
 #define OVP_FILTER                        COMP_Mode_HighSpeed
+
+/**************************
+ *** Control Parameters ***
+ **************************/
 
 /* Debug Setting */
 #define DAC_FUNCTIONALITY                ENABLE
@@ -309,3 +368,6 @@
 #define USART_RX_GPIO_PORT              GPIOA
 #define USART_RX_GPIO_PIN               LL_GPIO_PIN_3
 #define USART_SPEED                     115200
+
+#endif /*__CONTROL_STAGE_PARAMETERS_H*/
+/******************* (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
