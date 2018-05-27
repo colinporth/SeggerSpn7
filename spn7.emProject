@@ -214,6 +214,7 @@
   <project Name="mcsdk">
     <configuration
       Name="Common"
+      STLport="Yes"
       arm_architecture="v7EM"
       arm_core_type="Cortex-M4"
       arm_endian="Little"
@@ -227,10 +228,13 @@
       arm_target_interface_type="SWD"
       c_user_include_directories=".;Inc;../system;../STM32F3xx_HAL_Driver/Inc;../CMSIS;MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc;MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Inc;MCSDK_v5.0.3/MotorControl/MCSDK/UILIbrary/Inc;MCSDK_v5.0.3/MotorControl/MCSDK/SystemDriveParams;MCSDK_v5.0.3/MotorControl/Legacy/Cube;MCSDK_v5.0.3/MotorControl/Applications/Test_MotorApp/Inc"
       debug_target_connection="J-Link"
+      debug_type_file="$(StudioDir)/bin/STLport.xml"
       gcc_c_language_standard="c11"
       gcc_cplusplus_language_standard="c++14"
       linker_additional_files="MCSDK_v5.0.3\\MotorControl\\lib\\libmc-truestudio_CCMRAM_CCMRAM.lib"
       linker_output_format="hex"
+      linker_printf_fp_enabled="Float"
+      linker_printf_width_precision_supported="Yes"
       linker_section_placement_file="$(ProjectDir)/flash_placement.xml"
       linker_section_placements_segments="FLASH RX 0x08000000 0x00080000;SRAM RWX 0x20000000 0x00010000"
       macros="STLport=No"
