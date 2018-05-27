@@ -79,7 +79,7 @@ uint8_t bMCBootCompleted = 0;
 	* @param  bMotor related motor it can be M1 or M2
 	* @retval none
 	*/
-void FOC_Clear (uint8_t bMotor)
+static void FOC_Clear (uint8_t bMotor)
 {
 	/* USER CODE BEGIN FOC_Clear 0 */
 
@@ -116,7 +116,7 @@ void FOC_Clear (uint8_t bMotor)
 	* @param  bMotor related motor it can be M1 or M2
 	* @retval none
 	*/
-void FOC_InitAdditionalMethods (uint8_t bMotor)
+static void FOC_InitAdditionalMethods (uint8_t bMotor)
 {
 	/* USER CODE BEGIN FOC_InitAdditionalMethods 0 */
 
@@ -134,7 +134,7 @@ void FOC_InitAdditionalMethods (uint8_t bMotor)
 	* @param  bMotor related motor it can be M1 or M2
 	* @retval none
 	*/
-void FOC_CalcCurrRef (uint8_t bMotor)
+static void FOC_CalcCurrRef (uint8_t bMotor)
 {
 	/* USER CODE BEGIN FOC_CalcCurrRef 0 */
 
@@ -157,7 +157,7 @@ void FOC_CalcCurrRef (uint8_t bMotor)
 	* @param  hTickCount number of ticks to be counted
 	* @retval void
 	*/
-void TSK_SetChargeBootCapDelayM1 (uint16_t hTickCount)
+static void TSK_SetChargeBootCapDelayM1 (uint16_t hTickCount)
 {
 	 hBootCapDelayCounterM1 = hTickCount;
 }
@@ -169,7 +169,7 @@ void TSK_SetChargeBootCapDelayM1 (uint16_t hTickCount)
 	* @param  none
 	* @retval bool true if time has elapsed, false otherwise
 	*/
-bool TSK_ChargeBootCapDelayHasElapsedM1()
+static bool TSK_ChargeBootCapDelayHasElapsedM1()
 {
 	bool retVal = false;
 	if (hBootCapDelayCounterM1 == 0)
@@ -186,7 +186,7 @@ bool TSK_ChargeBootCapDelayHasElapsedM1()
 	* @param  hTickCount number of ticks to be counted
 	* @retval void
 	*/
-void TSK_SetStopPermanencyTimeM1 (uint16_t hTickCount)
+static void TSK_SetStopPermanencyTimeM1 (uint16_t hTickCount)
 {
 	hStopPermanencyCounterM1 = hTickCount;
 }
@@ -198,7 +198,7 @@ void TSK_SetStopPermanencyTimeM1 (uint16_t hTickCount)
 	* @param  none
 	* @retval bool true if time is elapsed, false otherwise
 	*/
-bool TSK_StopPermanencyTimeHasElapsedM1()
+static bool TSK_StopPermanencyTimeHasElapsedM1()
 {
 	bool retVal = false;
 	if (hStopPermanencyCounterM1 == 0)
@@ -218,7 +218,7 @@ bool TSK_StopPermanencyTimeHasElapsedM1()
 	* @param  None
 	* @retval void
 	*/
-void TSK_MediumFrequencyTaskM1()
+static void TSK_MediumFrequencyTaskM1()
 {
 	/* USER CODE BEGIN MediumFrequencyTask M1 0 */
 
@@ -388,6 +388,7 @@ void TSK_MediumFrequencyTaskM1()
 	/* USER CODE END MediumFrequencyTask M1 6 */
 }
 //}}}
+
 //{{{
 /**
 	* @brief  It executes MC tasks: safety task and medium frequency for all
