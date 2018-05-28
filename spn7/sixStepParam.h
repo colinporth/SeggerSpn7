@@ -12,7 +12,6 @@
 #define BUTTON_DELAY                       200   // Delay time to enable push button for new command (1 = 1msec)
 #define NUMBER_ZCR                          12   // Number of zero crossing event during the startup for closed loop control begin
 
-#define SPEED_LOOP_TIME                      1   // Speed Loop time (1 = 1msec)
 #define KP_GAIN                           8000   // Kp parameter for PI regulator
 #define KI_GAIN                             50   // Ki parameter for PI regulator
 #define KP_DIV                            4096   // Kp parameter divider for PI regulator

@@ -1,7 +1,7 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
  <Bookmarks>
-  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
+  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
   <BookmarkItem objectName="" line="26" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="std::string kVersion = &quot;WebCam 27/4/18&quot;;" color="5"/>
   <BookmarkItem objectName="" line="42" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="2" extra="&quot;&lt;/html>\r\n&quot;;" color="5"/>
   <BookmarkItem objectName="" line="47" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="bool mButton = false;" color="5"/>
@@ -824,7 +824,7 @@
   <BookmarkItem objectName="" line="1500" column="-1" path="C:/projects/seggerf4/main.cpp" number="246" extra="audBuf[i] = int16_t(0x2000 * sin (((i % 64) / 128.f) * kPi));" color="5"/>
   <BookmarkItem objectName="" line="1508" column="-1" path="C:/projects/seggerf4/main.cpp" number="247" extra="__HAL_RCC_CLEAR_RESET_FLAGS();" color="5"/>
   <BookmarkItem objectName="" line="1509" column="-1" path="C:/projects/seggerf4/main.cpp" number="248" extra="printf (&quot;main pin:%d power:%d cApp size:%d\n&quot;, pinReset, powerOnReset, sizeof (cApp));" color="5"/>
-  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
+  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
   <BreakpointListItem trigger="" line="56" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/X-NUCLEO-IHM07M1.c" useHWbreakpoint="false"/>
@@ -937,7 +937,7 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="60" useTextEdit="1" useBinaryEdit="0" left="0" path="spn7/main.cpp" selected="1" top="52" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="30" y="58" useTextEdit="1" useBinaryEdit="0" left="0" path="spn7/main.cpp" selected="1" top="52" codecName="Default"/>
  </Files>
  <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

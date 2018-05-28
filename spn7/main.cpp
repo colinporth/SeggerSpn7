@@ -57,6 +57,8 @@ cSixStep sixStep;
 cPiParam piParam;
 
 uint32_t mLastButtonPress = 0;
+uint16_t mAlignTicks = 1;
+uint16_t mMotorStartupCount = 1;
 
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
@@ -71,20 +73,18 @@ int32_t delta = 0;                        //  Startup variable
 uint16_t index_array = 1;                 //  Speed filter variable
 int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable
 uint16_t speed_tmp_buffer[FILTER_DEEP];   //  Potentiometer filter variable
-uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
-uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index
 bool array_completed = false;             //  Speed filter variable
 bool buffer_completed = false;            //  Potentiometer filter variable
+
+uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index
+uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
 
 uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable
 int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed
 int32_t El_Speed_Hz = 0;                  //  Electrical motor speed
 
-uint16_t index_adc_chn = 0;               //  Index of ADC channel selector for measuring
-
 uint16_t index_ARR_step = 1;
 uint32_t n_zcr_startup = 0;
-uint16_t index_startup_motor = 1;
 uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop control
 uint16_t shift_n_sqrt = 14;
 
@@ -93,13 +93,11 @@ bool startup_bemf_failure = 0;
 
 uint8_t speed_fdbk_error = 0;
 
-uint16_t index_align = 1;
 int32_t speed_sum_sp_filt = 0;
 int32_t speed_sum_pot_filt = 0;
 uint16_t index_pot_filt = 1;
 int16_t potent_filtered = 0;
 
-uint32_t Tick_cnt = 0;
 uint32_t counter_ARR_Bemf = 0;
 uint64_t constant_multiplier_tmp = 0;
 //}}}
@@ -291,7 +289,7 @@ void ADC1_Init() {
 // PC3 -> ADC1_IN9   bemf1
 // PA7 -> ADC1_IN15  bemf3
 // PB0 -> ADC1_IN11  bemf2
-//
+// ---------
 // PA0 -> curr_fdbk1 - 3shunt
 // PC0 -> curr_fdbk3 - 3shunt
 // PA15-> A/H1
@@ -299,15 +297,12 @@ void ADC1_Init() {
 // PA10-> C/H3
 
   __HAL_RCC_ADC1_CLK_ENABLE();
-
-  // config GPIO C adc inputs
-  GPIO_InitTypeDef gpioInit;
-  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
-  gpioInit.Mode = GPIO_MODE_ANALOG;
-  gpioInit.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init (GPIOC, &gpioInit);
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
 
   // config GPIO A adc inputs
+  GPIO_InitTypeDef gpioInit;
   gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_7;
   gpioInit.Mode = GPIO_MODE_ANALOG;
   gpioInit.Pull = GPIO_NOPULL;
@@ -315,13 +310,11 @@ void ADC1_Init() {
 
   // config GPIO B adc inputs
   gpioInit.Pin = GPIO_PIN_0 | GPIO_PIN_1;
-  gpioInit.Mode = GPIO_MODE_ANALOG;
-  gpioInit.Pull = GPIO_NOPULL;
   HAL_GPIO_Init (GPIOB, &gpioInit);
 
-  // ADC1 interrupt Init
-  HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ (ADC1_IRQn);
+  // config GPIO C adc inputs
+  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+  HAL_GPIO_Init (GPIOC, &gpioInit);
 
   hAdc1.Instance = ADC1;
   hAdc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
@@ -340,7 +333,7 @@ void ADC1_Init() {
   if (HAL_ADC_Init (&hAdc1) != HAL_OK)
     printf ("HAL_ADC_Init failed\n");
 
-  // Current feedback
+  // current feedback
   ADC_ChannelConfTypeDef channelConfig;
   channelConfig.Channel = ADC_Current;
   channelConfig.Rank = 1;
@@ -351,41 +344,45 @@ void ADC1_Init() {
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // Potentiometer
+  // potentiometer
   channelConfig.Channel = ADC_Pot;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // Bus voltage
+  // Vbus
   channelConfig.Channel = ADC_Vbus;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // Temperature feedback
+  // temperature
   channelConfig.Channel = ADC_Temp;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // BEMF feedback phase A
+  // bemf feedback phase A
   channelConfig.Channel = ADC_Bemf_CH1;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // BEMF feedback phase B
+  // bemf feedback phase B
   channelConfig.Channel = ADC_Bemf_CH2;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
-  // BEMF feedback phase C
+  // bemf feedback phase C
   channelConfig.Channel = ADC_Bemf_CH3;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // ADC1 interrupt Init
+  HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ (ADC1_IRQn);
   }
 //}}}
 //{{{
@@ -635,7 +632,7 @@ uint64_t fastSqrt (uint64_t wInput) {
 //{{{
 void potSpeedTarget() {
 
-  target_speed = sixStep.ADC_Regular_Buffer[1] * MAX_POT_SPEED / 4096;
+  target_speed = sixStep.mAdcBuffer[1] * MAX_POT_SPEED / 4096;
 
   if (target_speed < MIN_POT_SPEED)
     target_speed = MIN_POT_SPEED;
@@ -741,7 +738,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_E_CH3_D();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3];
       break;
 
     case 2:
@@ -749,7 +746,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_D_CH3_E();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
       break;
 
     case 3:
@@ -757,7 +754,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_D_CH2_E_CH3_E();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
       break;
 
     case 4:
@@ -765,7 +762,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_E_CH3_D();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3];
      break;
 
     case 5:
@@ -773,7 +770,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH2_SetCCR (0);
       mcEnableInput_CH1_E_CH2_D_CH3_E();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
       break;
 
     case 6:
@@ -781,7 +778,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH1_SetCCR (0);
       mcEnableInput_CH1_D_CH2_E_CH3_E();
-      sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
       break;
      }
   }
@@ -792,7 +789,7 @@ void rampMotorCalc() {
   uint32_t constant_multiplier = 100;
   uint32_t constant_multiplier_2 = 4000000000;
 
-  if (index_startup_motor) {
+  if (mMotorStartupCount == 1) {
     mech_accel_hz = sixStep.ACCEL * Rotor_poles_pairs / 60;
     constant_multiplier_tmp = (uint64_t)constant_multiplier * (uint64_t)constant_multiplier_2;
     constant_k = constant_multiplier_tmp / (3 * mech_accel_hz);
@@ -800,10 +797,10 @@ void rampMotorCalc() {
     Time_vector_prev_tmp = 0;
     }
 
-  if (index_startup_motor < NUMBER_OF_STEPS) {
-    Time_vector_tmp = ((uint64_t)1000 * (uint64_t)1000 * (uint64_t) fastSqrt(((uint64_t)index_startup_motor * (uint64_t)constant_k)))/632455;
+  if (mMotorStartupCount < NUMBER_OF_STEPS) {
+    Time_vector_tmp = ((uint64_t)1000 * (uint64_t)1000 * (uint64_t) fastSqrt(((uint64_t)mMotorStartupCount * (uint64_t)constant_k)))/632455;
     delta = Time_vector_tmp - Time_vector_prev_tmp;
-    if (index_startup_motor) {
+    if (mMotorStartupCount == 1) {
       T_single_step_first_value = (2 * 3141) * delta / 1000;
       sixStep.ARR_value = (uint32_t)(65535);
       }
@@ -813,74 +810,17 @@ void rampMotorCalc() {
       }
     }
   else
-    index_startup_motor = 1;
+    mMotorStartupCount = 1;
 
-  if (index_startup_motor)
-    sixStep.prescaler_value = (((sixStep.SYSCLK_frequency / 1000000) * T_single_step_first_value)/65535) - 1;
+  if (mMotorStartupCount == 1)
+    sixStep.prescaler_value = (((sixStep.SYSCLK_frequency / 1000000) * T_single_step_first_value) / 65535) - 1;
 
   if ((sixStep.STATUS != ALIGNMENT) && (sixStep.STATUS != START))
-    index_startup_motor++;
+    mMotorStartupCount++;
   else
     Time_vector_tmp = 0;
 
   Time_vector_prev_tmp = Time_vector_tmp;
-  }
-//}}}
-//{{{
-void nextStep() {
-
-  if (sixStep.CMD) {
-    sixStep.CMD = false;
-    mcStart_PWM();
-    }
-  ARR_LF = __HAL_TIM_GetAutoreload (&hTim6);
-
-  if (sixStep.ALIGN_OK) {
-    sixStep.speed_fdbk = mcGetMechSpeedRPM();
-    sixStep.demagn_counter = 1;
-    if (sixStep.prev_step_position != sixStep.step_position)
-      n_zcr_startup = 0;
-
-    if (piParam.Reference >= 0) {
-      sixStep.step_position++;
-      if (sixStep.step_position > 6)
-        sixStep.step_position = 1;
-      if (sixStep.CL_READY)
-        sixStep.VALIDATION_OK = true;
-      }
-    else {
-      sixStep.step_position--;
-      if (sixStep.step_position < 1)
-        sixStep.step_position = 6;
-      if (sixStep.CL_READY)
-        sixStep.VALIDATION_OK = true;
-      }
-    }
-
-  if (sixStep.VALIDATION_OK) {
-    // motorStall detection and speedFeedback error generation
-    sixStep.BEMF_Tdown_count++;
-    if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
-      speed_fdbk_error = true;
-    else
-      __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
-    }
-  sixStepTable (sixStep.step_position);
-
-  // It controls if the changing step request appears during DOWNcounting
-  // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
-  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    switch (sixStep.step_position) {
-      case 3:
-      case 6: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; break;
-      case 2:
-      case 5: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2]; break;
-      case 1:
-      case 4: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; break;
-      }
-
-    mcAdcChannel (sixStep.CurrentRegular_BEMF_ch);
-    }
   }
 //}}}
 //{{{
@@ -890,53 +830,27 @@ void arrStep() {
     sixStep.ALIGNMENT = true;
 
   if (sixStep.ALIGN_OK) {
-    if (piParam.Reference >= 0) {
-      if (!sixStep.VALIDATION_OK) {
-        sixStep.STATUS = STARTUP;
-        rampMotorCalc();
-        if (index_ARR_step < sixStep.numberofitemArr) {
-          hTim6.Init.Period = sixStep.ARR_value;
-          hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
-          index_ARR_step++;
-          }
-        else if (!sixStep.ARR_OK) {
-          index_ARR_step = 1;
-          sixStep.ACCEL >>= 1;
-          if (sixStep.ACCEL < MINIMUM_ACC)
-            sixStep.ACCEL = MINIMUM_ACC;
-          mcStopMotor();
-          sixStep.STATUS = STARTUP_FAILURE;
-          }
+    if (!sixStep.VALIDATION_OK) {
+      sixStep.STATUS = STARTUP;
+      rampMotorCalc();
+      if (index_ARR_step < sixStep.numberofitemArr) {
+        hTim6.Init.Period = sixStep.ARR_value;
+        hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
+        index_ARR_step++;
         }
-      else {
-        sixStep.ARR_OK = true;
-        index_startup_motor = 1;
+      else if (!sixStep.ARR_OK) {
         index_ARR_step = 1;
+        sixStep.ACCEL >>= 1;
+        if (sixStep.ACCEL < MINIMUM_ACC)
+          sixStep.ACCEL = MINIMUM_ACC;
+        mcStopMotor();
+        sixStep.STATUS = STARTUP_FAILURE;
         }
       }
     else {
-      if (!sixStep.VALIDATION_OK) {
-        sixStep.STATUS = STARTUP;
-        rampMotorCalc();
-        if (index_ARR_step < sixStep.numberofitemArr) {
-          hTim6.Init.Period = sixStep.ARR_value;
-          hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
-          index_ARR_step++;
-          }
-        else if (!sixStep.ARR_OK) {
-          index_ARR_step = 1;
-          sixStep.ACCEL >>= 1;
-          if (sixStep.ACCEL < MINIMUM_ACC)
-            sixStep.ACCEL = MINIMUM_ACC;
-          mcStopMotor();
-          sixStep.STATUS = STARTUP_FAILURE;
-          }
-        }
-      else {
-        sixStep.ARR_OK = true;
-        index_startup_motor = 1;
-        index_ARR_step = 1;
-        }
+      sixStep.ARR_OK = true;
+      mMotorStartupCount = 1;
+      index_ARR_step = 1;
       }
     }
   }
@@ -1103,8 +1017,8 @@ void bemfDelayCalc (uint16_t piReference) {
 void taskSpeed() {
 
   if (!sixStep.VALIDATION_OK &&
-      (sixStep.speed_fdbk_filtered > (target_speed) || sixStep.speed_fdbk_filtered < (-target_speed))) {
-    printf ("taskSpeed SPEED_VALIDATED\n");
+      ((sixStep.speed_fdbk_filtered > (target_speed)) || (sixStep.speed_fdbk_filtered < (-target_speed)))) {
+    //printf ("taskSpeed SPEED_VALIDATED\n");
     sixStep.STATUS = VALIDATION;
     sixStep.SPEED_VALIDATED = true;
     }
@@ -1118,6 +1032,7 @@ void taskSpeed() {
     uint16_t ref = (uint16_t)piController (&piParam,(int16_t)sixStep.speed_fdbk_filtered);
     if (piParam.Reference < 0)
       ref = -ref;
+
     printf ("ref %d\n", ref);
     sixStep.Current_Reference = ref;
     mcCurrentRefSetValue (sixStep.Current_Reference);
@@ -1129,21 +1044,22 @@ void taskSpeed() {
 
 // callback interface
 //{{{
-void mcADC() {
+void mcAdcTick() {
+
+  uint16_t value = HAL_ADC_GetValue (&hAdc1);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    // UP-counting direction started, GET the ADC value (PHASE CURRENT)
+    // up counting started
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
       switch (sixStep.step_position) {
         //{{{
         case 1:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
-              if (sixStep.ADC_BUFFER[3] < sixStep.ADC_BEMF_threshold_DOWN)
+              if (value < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
               }
-            else if (sixStep.ADC_BUFFER[3] > sixStep.ADC_BEMF_threshold_UP) {
+            else if (value > sixStep.ADC_BEMF_threshold_UP) {
               arrBemf (1);
               sixStep.BEMF_Tdown_count = 0;
               }
@@ -1156,30 +1072,28 @@ void mcADC() {
         //{{{
         case 2:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
-              if (sixStep.ADC_BUFFER[2] > sixStep.ADC_BEMF_threshold_UP) {
+              if (value > sixStep.ADC_BEMF_threshold_UP) {
                 arrBemf (1);
                 sixStep.BEMF_Tdown_count = 0;
                 }
               }
-            else if (sixStep.ADC_BUFFER[2] < sixStep.ADC_BEMF_threshold_DOWN)
+            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
               arrBemf (0);
             }
           else
-           sixStep.demagn_counter++;
+            sixStep.demagn_counter++;
 
           break;
         //}}}
         //{{{
         case 3:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
-              if (sixStep.ADC_BUFFER[1] < sixStep.ADC_BEMF_threshold_DOWN)
+              if (value < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
               }
-            else if (sixStep.ADC_BUFFER[1] > sixStep.ADC_BEMF_threshold_UP) {
+            else if (value > sixStep.ADC_BEMF_threshold_UP) {
               arrBemf (1);
               sixStep.BEMF_Tdown_count = 0;
               }
@@ -1192,14 +1106,13 @@ void mcADC() {
         //{{{
         case 4:
          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&hAdc1);
            if (piParam.Reference >= 0) {
-             if (sixStep.ADC_BUFFER[3] > sixStep.ADC_BEMF_threshold_UP) {
+             if (value > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
                sixStep.BEMF_Tdown_count = 0;
                }
              }
-           else if (sixStep.ADC_BUFFER[3] < sixStep.ADC_BEMF_threshold_DOWN)
+           else if (value < sixStep.ADC_BEMF_threshold_DOWN)
              arrBemf (0);
            }
          else
@@ -1210,12 +1123,11 @@ void mcADC() {
         //{{{
         case 5:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&hAdc1);
            if (piParam.Reference >= 0) {
-             if (sixStep.ADC_BUFFER[2] < sixStep.ADC_BEMF_threshold_DOWN)
+             if (value < sixStep.ADC_BEMF_threshold_DOWN)
                arrBemf (0);
              }
-           else if (sixStep.ADC_BUFFER[2] > sixStep.ADC_BEMF_threshold_UP) {
+           else if (value > sixStep.ADC_BEMF_threshold_UP) {
              arrBemf (1);
              sixStep.BEMF_Tdown_count = 0;
              }
@@ -1228,14 +1140,13 @@ void mcADC() {
         //{{{
         case 6:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference>=0) {
-             if (sixStep.ADC_BUFFER[1] > sixStep.ADC_BEMF_threshold_UP) {
+             if (value > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
                sixStep.BEMF_Tdown_count = 0;
                }
              }
-           else if (sixStep.ADC_BUFFER[1] < sixStep.ADC_BEMF_threshold_DOWN)
+           else if (value < sixStep.ADC_BEMF_threshold_DOWN)
              arrBemf (0);
            }
          else
@@ -1246,35 +1157,84 @@ void mcADC() {
       //printf ("%d adcU %d\n", HAL_GetTick(), sixStep.step_position);
       }
 
-    // SET ADC CHANNEL FOR SPEED/CURRENT/VBUS
-    // Set the channel for next ADC Regular reading
-    mcAdcChannel (sixStep.ADC_SEQ_CHANNEL[index_adc_chn]);
+    // set channel for next current/pot/vbus/temp ADC reading
+    mcAdcChannel (sixStep.adcInputChannel[sixStep.adcChannelIndex]);
     }
 
   else {
-    // Down-counting direction started, Set the channel for next ADC Regular reading
-    sixStep.ADC_Regular_Buffer[index_adc_chn] = HAL_ADC_GetValue (&hAdc1);
-    if (index_adc_chn == 1) {
-      HFBuffer[HFBufferIndex++] = HAL_ADC_GetValue (&hAdc1);
-      if (HFBufferIndex >= HFBUFFERSIZE)
-        HFBufferIndex = 0;
+    // down counting started
+    sixStep.mAdcBuffer[sixStep.adcChannelIndex] = value;
+    if (sixStep.adcChannelIndex == 1) {
+      HFBuffer[HFBufferIndex] = value;
+      HFBufferIndex = (HFBufferIndex+1) % HFBUFFERSIZE;
       }
 
-    //printf ("%d adcD %d\n", HAL_GetTick(), index_adc_chn);
+    //printf ("%d i:%d %d\n", HAL_GetTick(), sixStep.adcChannelIndex, value);
+    sixStep.adcChannelIndex = (sixStep.adcChannelIndex+1) % 4;
 
-    index_adc_chn++;
-    if (index_adc_chn > 3)
-      index_adc_chn = 0;
-
-    mcAdcChannel (sixStep.CurrentRegular_BEMF_ch);
+    // set channel for next bemf ADC reading
+    mcAdcChannel (sixStep.curBemfInputChannel);
     }
   }
 //}}}
 //{{{
-void mcLfTick() {
+void mcTim6Tick() {
 
-  //printf ("mcLfTick %d\n", HAL_GetTick());
-  nextStep();
+  //printf ("mcTim6Tick %d\n", HAL_GetTick());
+  // nextStep
+  if (sixStep.CMD) {
+    printf ("mcStart_PWM %d\n", HAL_GetTick());
+    sixStep.CMD = false;
+    mcStart_PWM();
+    }
+  ARR_LF = __HAL_TIM_GetAutoreload (&hTim6);
+
+  if (sixStep.ALIGN_OK) {
+    sixStep.speed_fdbk = mcGetMechSpeedRPM();
+    sixStep.demagn_counter = 1;
+    if (sixStep.prev_step_position != sixStep.step_position)
+      n_zcr_startup = 0;
+
+    if (piParam.Reference >= 0) {
+      sixStep.step_position++;
+      if (sixStep.step_position > 6)
+        sixStep.step_position = 1;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
+      }
+    else {
+      sixStep.step_position--;
+      if (sixStep.step_position < 1)
+        sixStep.step_position = 6;
+      if (sixStep.CL_READY)
+        sixStep.VALIDATION_OK = true;
+      }
+    }
+
+  if (sixStep.VALIDATION_OK) {
+    // motorStall detection and speedFeedback error generation
+    sixStep.BEMF_Tdown_count++;
+    if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
+      speed_fdbk_error = true;
+    else
+      __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
+    }
+
+  sixStepTable (sixStep.step_position);
+
+  // It controls if the changing step request appears during DOWNcounting
+  // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
+  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
+    switch (sixStep.step_position) {
+      case 3:
+      case 6: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1]; break;
+      case 2:
+      case 5: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2]; break;
+      case 1:
+      case 4: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3]; break;
+      }
+    mcAdcChannel (sixStep.curBemfInputChannel);
+    }
 
   // BASE TIMER - ARR modification for STEP frequency changing
   if (!sixStep.ARR_OK)
@@ -1294,35 +1254,29 @@ void mcSysTick() {
     hTim6.Init.Period = sixStep.ARR_value;
     hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
 
-    potSpeedTarget();
-
-    index_align++;
-    if (index_align >= TIME_FOR_ALIGN + 1) {
+    mAlignTicks++;
+    if (mAlignTicks >= TIME_FOR_ALIGN + 1) {
       printf ("%d aligned\n", HAL_GetTick());
       sixStep.ALIGN_OK = true;
       sixStep.STATUS = STARTUP;
-      index_startup_motor = 1;
+
+      mMotorStartupCount = 1;
       rampMotorCalc();
       hTim6.Init.Prescaler = sixStep.prescaler_value;
       hTim6.Instance->PSC = hTim6.Init.Prescaler;
-      index_align = 0;
       }
+
+    potSpeedTarget();
     }
     //}}}
 
   if (sixStep.VALIDATION_OK)
     potSpeed();
 
-  // sixStep.Speed_Loop_Time x 1msec
-  if (Tick_cnt >= sixStep.Speed_Loop_Time) {
-    if (sixStep.STATUS != SPEEDFBKERROR)
-      taskSpeed();
-    if (sixStep.VALIDATION_OK)
-      mcSetSpeed();
-    Tick_cnt = 0;
-    }
-  else
-    Tick_cnt++;
+  if (sixStep.STATUS != SPEEDFBKERROR)
+    taskSpeed();
+  if (sixStep.VALIDATION_OK)
+    mcSetSpeed();
 
   if (startup_bemf_failure) {
     sixStep.ACCEL >>= 1;
@@ -1368,23 +1322,24 @@ void mcInit() {
 void mcReset() {
 
   mLastButtonPress = 0;
-  sixStep.RUN_Motor = false;
 
+  sixStep.RUN_Motor = false;
   sixStep.CMD = true;
+  sixStep.ALIGN_OK = false;
+  sixStep.VALIDATION_OK = false;
+  sixStep.ARR_OK = false;
+  sixStep.BEMF_OK = false;
+  sixStep.CL_READY = false;
+  sixStep.SPEED_VALIDATED = false;
+
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
-  sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
-  sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
   sixStep.Ireference = STARTUP_CURRENT_REFERENCE;
-  sixStep.Speed_Loop_Time = SPEED_LOOP_TIME;
+
   sixStep.pulse_value = sixStep.HF_TIMx_CCR;
   sixStep.Speed_target_ramp = MAX_POT_SPEED;
   sixStep.ALIGNMENT = false;
   sixStep.Speed_Ref_filtered = 0;
   sixStep.demagn_value = INITIAL_DEMAGN_DELAY;
-
-  sixStep.CurrentRegular_BEMF_ch = 0;
-  sixStep.prev_step_position = 0;
-  sixStep.step_position = 0;
 
   hTim1.Init.Prescaler = sixStep.HF_TIMx_PSC;
   hTim1.Instance->PSC =  sixStep.HF_TIMx_PSC;
@@ -1401,40 +1356,41 @@ void mcReset() {
   sixStep.SYSCLK_frequency = HAL_RCC_GetSysClockFreq();
 
   mcTIM1_CH1_SetCCR (0);
-  mcTIM1_CH2_SetCCR(0);
-  mcTIM1_CH3_SetCCR(0);
+  mcTIM1_CH2_SetCCR (0);
+  mcTIM1_CH3_SetCCR (0);
 
-  sixStep.ADC_SEQ_CHANNEL[0] = ADC_Current;    //CURRENT
-  sixStep.ADC_SEQ_CHANNEL[1] = ADC_Pot;        //SPEED
-  sixStep.ADC_SEQ_CHANNEL[2] = ADC_Vbus;       //VBUS
-  sixStep.ADC_SEQ_CHANNEL[3] = ADC_Temp;       //TEMP
-  sixStep.Regular_channel[1] = ADC_Bemf_CH1;   //BEMF1
-  sixStep.Regular_channel[2] = ADC_Bemf_CH2;   //BEMF2
-  sixStep.Regular_channel[3] = ADC_Bemf_CH3;   //BEMF3
+  sixStep.adcInputChannel[0] = ADC_Current;
+  sixStep.adcInputChannel[1] = ADC_Pot;
+  sixStep.adcInputChannel[2] = ADC_Vbus;
+  sixStep.adcInputChannel[3] = ADC_Temp;
+  sixStep.adcChannelIndex = 0;
 
-  sixStep.step_position = 0;
+  sixStep.curBemfInputChannel = 0;
+  sixStep.bemfInputChannel[1] = ADC_Bemf_CH1;
+  sixStep.bemfInputChannel[2] = ADC_Bemf_CH2;
+  sixStep.bemfInputChannel[3] = ADC_Bemf_CH3;
+  sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
+  sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
+
   sixStep.demagn_counter = 0;
+
   sixStep.speed_fdbk_filtered = 0;
   sixStep.Integral_Term_sum = 0;
   sixStep.Current_Reference = 0;
   sixStep.Ramp_Start = 0;
   sixStep.speed_fdbk = 0;
-  sixStep.ALIGN_OK = false;
-  sixStep.VALIDATION_OK = false;
-  sixStep.ARR_OK = false;
-  sixStep.BEMF_OK = false;
-  sixStep.CL_READY = false;
-  sixStep.SPEED_VALIDATED = false;
+
   sixStep.BEMF_Tdown_count = 0;   // Reset of the Counter to detect Stop motor condition when a stall condition occurs
 
   T_single_step = 0;
   T_single_step_first_value = 0;
-  delta = 0;
   Time_vector_tmp = 0;
   Time_vector_prev_tmp = 0;
+  delta = 0;
+
   Mech_Speed_RPM = 0;
   El_Speed_Hz = 0;
-  index_adc_chn = 0;
+
   mech_accel_hz = 0;
   constant_k = 0;
   ARR_LF = 0;
@@ -1447,12 +1403,11 @@ void mcReset() {
   n_zcr_startup = 0;
   cnt_bemf_event = 0;
 
-  index_align = 1;
+  mAlignTicks = 1;
   speed_sum_sp_filt = 0;
   speed_sum_pot_filt = 0;
   index_pot_filt = 1;
   potent_filtered = 0;
-  Tick_cnt = 0;
   counter_ARR_Bemf = 0;
   constant_multiplier_tmp = 0;
 
@@ -1460,15 +1415,18 @@ void mcReset() {
   for (uint16_t i = 0; i < HFBUFFERSIZE;i++)
     HFBuffer[i]=0;
 
+  array_completed = false;
+  buffer_completed = false;
   for (uint16_t i = 0; i < FILTER_DEEP;i++) {
     speed_tmp_array[i] = 0;
     speed_tmp_buffer[i]= 0;
     }
-  array_completed = false;
-  buffer_completed = false;
 
+  sixStep.prev_step_position = 0;
   if (piParam.Reference < 0)
     sixStep.step_position = 1;
+  else
+    sixStep.step_position = 0;
 
   target_speed = TARGET_SPEED;
   setPiParam (&piParam);
@@ -1476,7 +1434,7 @@ void mcReset() {
   mcCurrentRefStart();
   mcCurrentRefSetValue (sixStep.Ireference);
 
-  index_startup_motor = 1;
+  mMotorStartupCount = 1;
   rampMotorCalc();
   }
 //}}}
@@ -1517,16 +1475,18 @@ void mcStopMotor() {
 
   sixStep.STATUS = STOP;
   sixStep.RUN_Motor = false;
-  mcStop_PWM();
 
+  mcStop_PWM();
   hTim1.Instance->CR1 &= ~(TIM_CR1_CEN);
   hTim1.Instance->CNT = 0;
   mcDisableInput_CH1_D_CH2_D_CH3_D();
+
   HAL_TIM_Base_Stop_IT (&hTim6);
   HAL_ADC_Stop_IT (&hAdc1);
 
   mcCurrentRefStop();
   mcNucleo_Led_Off();
+
   mcReset();
   }
 //}}}
@@ -1586,13 +1546,13 @@ void mcEXTbutton() {
 // callbacks
 //{{{
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
-  mcADC();
+  mcAdcTick();
   }
 //}}}
 //{{{
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
   if (htim == &hTim6)
-    mcLfTick();
+    mcTim6Tick();
   }
 //}}}
 //{{{

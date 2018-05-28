@@ -37,14 +37,15 @@ public:
   uint16_t pulse_value = 0;            // CCR value for SixStep algorithm
   uint16_t ARR_value = 0;              // ARR vector for Accell compute
 
-  uint32_t Regular_channel[4];         // Buffer for ADC regular channel
-  uint32_t CurrentRegular_BEMF_ch = 0; // ADC regular channel to select
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;        // Number of elements
 
-  uint32_t ADC_SEQ_CHANNEL[4];         // Buffer for ADC regular channel
-  uint32_t ADC_BUFFER[4];              // Buffer for ADC regular channel
-  uint32_t ADC_Regular_Buffer[5];      // Buffer for ADC regular channel
+  uint16_t adcChannelIndex = 0;        // Index of ADC channel selector for measuring
+  uint32_t adcInputChannel[4];         // channel 1-4 looks up adc current/pot/vbus/temp input channel
+  uint32_t mAdcBuffer[5];              // Buffer for ADC regular channel
+
+  uint32_t curBemfInputChannel = 0;    // ADC bemf intput channel
+  uint32_t bemfInputChannel[4];        // channel 1-3 looks up adc bemf input channel
   uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
   uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
 
@@ -65,7 +66,6 @@ public:
   uint8_t bemf_state_5 = 0;            // Bemf variable
   uint8_t bemf_state_6 = 0;            // Bemf variable
 
-  uint16_t Speed_Loop_Time = 0;        // Speed loop variable for timing
   uint16_t Speed_Ref_filtered = 0;     // Filtered Reference Motor Speed variable
   uint16_t Speed_target_ramp = 0;      // Target Motor Speed
   uint16_t Speed_target_time = 0;      // Target Motor Ramp time
