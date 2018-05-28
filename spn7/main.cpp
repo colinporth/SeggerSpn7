@@ -281,37 +281,37 @@ void GPIO_Init() {
 //{{{
 void ADC1_Init() {
 // config
-// PC1 -> ADC1_IN7   curr_fdbk2 - 1shunt
-// PB1 -> ADC1_IN12  pot
-// PA1 -> ADC1_IN2   vbus
-// PC2 -> ADC1_IN8   temp
-// PC3 -> ADC1_IN9   bemf1
-// PA7 -> ADC1_IN15  bemf3
-// PB0 -> ADC1_IN11  bemf2
+// PC1 -> ADC1_IN7   ADC12_IN7 curr_fdbk2 - 1shunt
+// PB1 -> ADC1_IN12  ADC3_IN1  pot
+// PA1 -> ADC1_IN2   ADC1_IN2  vbus
+// PC2 -> ADC1_IN8   ADC12_IN8 temp
+// PC3 -> ADC1_IN9   ADC12_IN9 bemf1
+// PA7 -> ADC1_IN15  ADC2_IN4  bemf3
+// PB0 -> ADC1_IN11  ADC3_IN12 bemf2
 // ---------
-// PA0 -> curr_fdbk1 - 3shunt
-// PC0 -> curr_fdbk3 - 3shunt
-// PA15-> A/H1
-// PB3 -> B/H2
-// PA10-> C/H3
+// PA0 -> ADC1_IN1   curr_fdbk1 - 3shunt
+// PC0 -> ADC12_IN6  curr_fdbk3 - 3shunt
+// PA15-> TIM2_CH1   A/H1
+// PB3 -> TIM2_CH2   B/H2
+// PA10-> TIM2_CH4   C/H3
 
   __HAL_RCC_ADC1_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
-  // config GPIO A adc inputs
+  // config PA1 PA7 adc inputs
   GPIO_InitTypeDef gpioInit;
   gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_7;
   gpioInit.Mode = GPIO_MODE_ANALOG;
   gpioInit.Pull = GPIO_NOPULL;
   HAL_GPIO_Init (GPIOA, &gpioInit);
 
-  // config GPIO B adc inputs
+  // config PB0 PB1 adc inputs
   gpioInit.Pin = GPIO_PIN_0 | GPIO_PIN_1;
   HAL_GPIO_Init (GPIOB, &gpioInit);
 
-  // config GPIO C adc inputs
+  // config PC1 PC2 PC3 adc inputs
   gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
   HAL_GPIO_Init (GPIOC, &gpioInit);
 
@@ -334,7 +334,7 @@ void ADC1_Init() {
 
   // current feedback
   ADC_ChannelConfTypeDef channelConfig;
-  channelConfig.Channel = ADC_Current;
+  channelConfig.Channel = ADC_CHANNEL_7;
   channelConfig.Rank = 1;
   channelConfig.SingleDiff = ADC_SINGLE_ENDED;
   channelConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
@@ -344,37 +344,37 @@ void ADC1_Init() {
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // potentiometer
-  channelConfig.Channel = ADC_Pot;
+  channelConfig.Channel = ADC_CHANNEL_12;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // Vbus
-  channelConfig.Channel = ADC_Vbus;
+  channelConfig.Channel = ADC_CHANNEL_2;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // temperature
-  channelConfig.Channel = ADC_Temp;
+  channelConfig.Channel = ADC_CHANNEL_8;
   channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // bemf feedback phase A
-  channelConfig.Channel = ADC_Bemf_CH1;
+  channelConfig.Channel = ADC_CHANNEL_9;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // bemf feedback phase B
-  channelConfig.Channel = ADC_Bemf_CH2;
+  channelConfig.Channel = ADC_CHANNEL_11;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // bemf feedback phase C
-  channelConfig.Channel = ADC_Bemf_CH3;
+  channelConfig.Channel = ADC_CHANNEL_15;
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
@@ -1126,7 +1126,7 @@ void mcAdcTick() {
         //}}}
         //{{{
         case 5:
-          sixStep.mBemfInputBuffer[2] = value;
+          sixStep.mBemfInputBuffer[1] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
            if (piParam.Reference >= 0) {
              if (value < sixStep.ADC_BEMF_threshold_DOWN)
@@ -1146,7 +1146,7 @@ void mcAdcTick() {
         case 6:
           sixStep.mBemfInputBuffer[0] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference>=0) {
+            if (piParam.Reference >= 0) {
              if (value > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
                sixStep.BEMF_Tdown_count = 0;
@@ -1356,15 +1356,15 @@ void mcReset() {
   mcTIM1_CH3_SetCCR (0);
 
   sixStep.adcChannelIndex = 0;
-  sixStep.adcInputChannel[0] = ADC_Current;
-  sixStep.adcInputChannel[1] = ADC_Pot;
-  sixStep.adcInputChannel[2] = ADC_Vbus;
-  sixStep.adcInputChannel[3] = ADC_Temp;
+  sixStep.adcInputChannel[0] = ADC_CHANNEL_7;
+  sixStep.adcInputChannel[1] = ADC_CHANNEL_12;
+  sixStep.adcInputChannel[2] = ADC_CHANNEL_2;
+  sixStep.adcInputChannel[3] = ADC_CHANNEL_8;
 
   sixStep.curBemfInputChannel = 0;
-  sixStep.bemfInputChannel[0] = ADC_Bemf_CH1;
-  sixStep.bemfInputChannel[1] = ADC_Bemf_CH2;
-  sixStep.bemfInputChannel[2] = ADC_Bemf_CH3;
+  sixStep.bemfInputChannel[0] = ADC_CHANNEL_9;
+  sixStep.bemfInputChannel[1] = ADC_CHANNEL_11;
+  sixStep.bemfInputChannel[2] = ADC_CHANNEL_15;
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
 
@@ -1628,10 +1628,11 @@ int main() {
 
   mcInit();
 
-  int loop = 0;
   while (1) {
-    HAL_Delay (1000);
-    printf ("%d %d %d %d\n", sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3]);
+    HAL_Delay (500);
+    printf ("i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
+            sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
+            sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
     }
   }
 //}}}

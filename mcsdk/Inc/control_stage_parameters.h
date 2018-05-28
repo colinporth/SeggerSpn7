@@ -1,6 +1,4 @@
-#ifndef __CONTROL_STAGE_PARAMETERS_H
-#define __CONTROL_STAGE_PARAMETERS_H
-
+#pragma once
 #define CTRBDID 2
 
 #define MCU_SUPPLY_VOLTAGE    3.30
@@ -74,6 +72,7 @@
 /* Only for three shunt resistors and ICS cases */
 #define ADC_1_PERIPH                    ADC1
 #define ADC_2_PERIPH                    ADC2
+
 #define PHASE_U_CURR_ADC                ADC1
 #define PHASE_U_CURR_CHANNEL            MC_ADC_CHANNEL_1
 #define PHASE_U_GPIO_PORT               GPIOA
@@ -312,6 +311,3 @@
 #define USART_RX_GPIO_PORT              GPIOA
 #define USART_RX_GPIO_PIN               LL_GPIO_PIN_3
 #define USART_SPEED                     115200
-
-#endif /*__CONTROL_STAGE_PARAMETERS_H*/
-/******************* (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
