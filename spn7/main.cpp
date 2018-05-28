@@ -46,27 +46,13 @@
 #include "ihm07m1.h"
 #include "sixStepLib.h"
 //}}}
-//{{{  defines
-#define GPIO_CH1  GPIO_PIN_10
-#define GPIO_CH2  GPIO_PIN_11
-#define GPIO_CH3  GPIO_PIN_12
 
-#define ADC_CH_1_ST      ADC_SAMPLETIME_1CYCLE_5    // CURRENT sampling time
-#define ADC_CH_2_ST      ADC_SAMPLETIME_181CYCLES_5 // SPEED sampling time
-#define ADC_CH_3_ST      ADC_SAMPLETIME_181CYCLES_5 // VBUS sampling time
-#define ADC_CH_4_ST      ADC_SAMPLETIME_181CYCLES_5 // TEMP sampling time
-
-#define ADC_Bemf_CH1_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF1 sampling time
-#define ADC_Bemf_CH2_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF2 sampling time
-#define ADC_Bemf_CH3_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF3 sampling time
-//}}}
-
-static ADC_HandleTypeDef hAdc1;
-static TIM_HandleTypeDef hTim1;
-static TIM_HandleTypeDef hTim2;
-static TIM_HandleTypeDef hTim6;
-static TIM_HandleTypeDef hTim16;
-static DAC_HandleTypeDef hDac;
+ADC_HandleTypeDef hAdc1;
+TIM_HandleTypeDef hTim1;
+TIM_HandleTypeDef hTim2;
+TIM_HandleTypeDef hTim6;
+TIM_HandleTypeDef hTim16;
+DAC_HandleTypeDef hDac;
 
 cSixStep sixStep;
 cPiParam piParam;
@@ -179,33 +165,33 @@ void MC_ADC_Channel (uint32_t adc_ch) {
 //{{{
 void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
 
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET);  // EN1 DISABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET);  // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET);  // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET);  // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_12, GPIO_PIN_RESET);  // EN3 DISABLE
   }
 //}}}
 //{{{
 void MC_EnableInput_CH1_E_CH2_E_CH3_D() {
 
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);    // EN1 ENABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);    // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);    // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);    // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_12, GPIO_PIN_RESET);  // EN3 ENABLE
   }
 //}}}
 //{{{
 void MC_EnableInput_CH1_E_CH2_D_CH3_E() {
 
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);   // EN1 ENABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET); // EN2 DISABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);   // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_12, GPIO_PIN_SET);   // EN3 ENABLE
   }
 //}}}
 //{{{
 void MC_EnableInput_CH1_D_CH2_E_CH3_E() {
 
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET); // EN1 DISABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);   // EN2 ENABLE
-  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET); // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);   // EN2 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_12, GPIO_PIN_SET);   // EN3 ENABLE
   }
 //}}}
 //{{{
@@ -356,7 +342,7 @@ void ADC1_Init() {
   channelConfig.Channel = ADC_Current;
   channelConfig.Rank = 1;
   channelConfig.SingleDiff = ADC_SINGLE_ENDED;
-  channelConfig.SamplingTime = ADC_CH_1_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   channelConfig.OffsetNumber = ADC_OFFSET_NONE;
   channelConfig.Offset = 0;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
@@ -364,37 +350,37 @@ void ADC1_Init() {
 
   // Potentiometer
   channelConfig.Channel = ADC_Pot;
-  channelConfig.SamplingTime = ADC_CH_2_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // Bus voltage
   channelConfig.Channel = ADC_Vbus;
-  channelConfig.SamplingTime = ADC_CH_3_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // Temperature feedback
   channelConfig.Channel = ADC_Temp;
-  channelConfig.SamplingTime = ADC_CH_4_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // BEMF feedback phase A
   channelConfig.Channel = ADC_Bemf_CH1;
-  channelConfig.SamplingTime = ADC_Bemf_CH1_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // BEMF feedback phase B
   channelConfig.Channel = ADC_Bemf_CH2;
-  channelConfig.SamplingTime = ADC_Bemf_CH2_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
 
   // BEMF feedback phase C
   channelConfig.Channel = ADC_Bemf_CH3;
-  channelConfig.SamplingTime = ADC_Bemf_CH3_ST;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
   }
