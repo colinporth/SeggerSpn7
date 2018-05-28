@@ -105,6 +105,7 @@ int32_t MC_GetMechSpeedRPM();
 
 void MC_StartMotor();
 void MC_StopMotor();
+void MC_Panic();
 
 void MC_SetSpeed();
 void MC_EXTbutton();

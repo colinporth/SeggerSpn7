@@ -104,6 +104,19 @@ extern "C" {
     }
   //}}}
   //{{{
+  void TIM1_BRK_TIM15_IRQHandler() {
+
+    printf ("TIM1_BRK_TIM15_IRQHandler\n");
+
+    if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET) {
+      MC_StopMotor();
+      sixStep.STATUS = OVERCURRENT;
+      }
+
+    HAL_TIM_IRQHandler (&htim1);
+    }
+  //}}}
+  //{{{
   void EXTI15_10_IRQHandler() {
 
     printf ("EXTI15_10_IRQHandler\n");
@@ -1035,14 +1048,6 @@ void MC_StopMotor() {
   MC_Reset();
   }
 //}}}
-//{{{
-void MC_Panic() {
-
-  MC_StopMotor();
-  sixStep.STATUS = OVERCURRENT;
-  }
-//}}}
-
 //{{{
 void MC_SetSpeed() {
 

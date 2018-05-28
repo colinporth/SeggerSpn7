@@ -1,6 +1,5 @@
 // ihm07m1.c
 #include "ihm07m1.h"
-#include "sixStepLib.h"
 
 #define GPIO_CH1  GPIO_PIN_10
 #define GPIO_CH2  GPIO_PIN_11
@@ -34,7 +33,8 @@ extern "C" {
   //{{{
   void TIM1_BRK_TIM15_IRQHandler() {
 
-    //printf ("TIM1_BRK_TIM15_IRQHandler\n");
+    printf ("TIM1_BRK_TIM15_IRQHandler\n");
+
     if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET)
       MC_Panic();
 
