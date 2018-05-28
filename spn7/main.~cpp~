@@ -42,11 +42,34 @@
 //}}}
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
+
+#include "ihm07m1.h"
 #include "sixStepLib.h"
 //}}}
+//{{{  defines
+#define GPIO_CH1  GPIO_PIN_10
+#define GPIO_CH2  GPIO_PIN_11
+#define GPIO_CH3  GPIO_PIN_12
 
-struct sSixStep sixStep;
-struct sPiParam piParam; // SixStep PI regulator structure
+#define ADC_CH_1_ST      ADC_SAMPLETIME_1CYCLE_5    // CURRENT sampling time
+#define ADC_CH_2_ST      ADC_SAMPLETIME_181CYCLES_5 // SPEED sampling time
+#define ADC_CH_3_ST      ADC_SAMPLETIME_181CYCLES_5 // VBUS sampling time
+#define ADC_CH_4_ST      ADC_SAMPLETIME_181CYCLES_5 // TEMP sampling time
+
+#define ADC_Bemf_CH1_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF1 sampling time
+#define ADC_Bemf_CH2_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF2 sampling time
+#define ADC_Bemf_CH3_ST  ADC_SAMPLETIME_61CYCLES_5  // BEMF3 sampling time
+//}}}
+
+static ADC_HandleTypeDef hAdc1;
+static TIM_HandleTypeDef hTim1;
+static TIM_HandleTypeDef hTim2;
+static TIM_HandleTypeDef hTim6;
+static TIM_HandleTypeDef hTim16;
+static DAC_HandleTypeDef hDac;
+
+cSixStep sixStep;
+cPiParam piParam;
 //{{{  vars
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
@@ -97,23 +120,28 @@ uint64_t constant_multiplier_tmp = 0;
 
 extern "C" {
   //{{{
-  void SysTick_Handler() {
+  void ADC1_IRQHandler() {
 
-    HAL_IncTick();
-    HAL_SYSTICK_IRQHandler();
+    //printf ("ADC1_IRQHandler\n");
+    HAL_ADC_IRQHandler (&hAdc1);
     }
   //}}}
   //{{{
   void TIM1_BRK_TIM15_IRQHandler() {
 
-    printf ("TIM1_BRK_TIM15_IRQHandler\n");
+    //printf ("TIM1_BRK_TIM15_IRQHandler\n");
+    if (__HAL_TIM_GET_FLAG (&hTim1, TIM_FLAG_BREAK) != RESET)
+      MC_Panic();
 
-    if (__HAL_TIM_GET_FLAG (&htim1, TIM_FLAG_BREAK) != RESET) {
-      MC_StopMotor();
-      sixStep.STATUS = OVERCURRENT;
-      }
+    HAL_TIM_IRQHandler (&hTim1);
+    }
+  //}}}
+  //{{{
+  void TIM6_DAC_IRQHandler() {
 
-    HAL_TIM_IRQHandler (&htim1);
+    //printf ("TIM6_DAC_IRQHandler\n");
+    HAL_TIM_IRQHandler (&hTim6);
+    HAL_DAC_IRQHandler (&hDac);
     }
   //}}}
   //{{{
@@ -123,7 +151,547 @@ extern "C" {
     HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13);
     }
   //}}}
+  //{{{
+  void SysTick_Handler() {
+
+    HAL_IncTick();
+    HAL_SYSTICK_IRQHandler();
+    }
+  //}}}
   }
+
+//{{{  ihm07m1
+//{{{
+void MC_ADC_Channel (uint32_t adc_ch) {
+
+  hAdc1.Instance->CR |= ADC_CR_ADSTP;
+  while (hAdc1.Instance->CR & ADC_CR_ADSTP);
+
+  // Clear the old SQx bits for the selected rank
+  hAdc1.Instance->SQR1 &= ~__HAL_ADC_SQR1_RK (ADC_SQR2_SQ5, 1);
+
+  // Set the SQx bits for the selected rank
+  hAdc1.Instance->SQR1 |= __HAL_ADC_SQR1_RK (adc_ch, 1);
+  hAdc1.Instance->CR |= ADC_CR_ADSTART;
+  }
+//}}}
+
+//{{{
+void MC_EnableInput_CH1_E_CH2_E_CH3_D() {
+
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);    // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);    // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 ENABLE
+  }
+//}}}
+//{{{
+void MC_EnableInput_CH1_E_CH2_D_CH3_E() {
+
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_SET);   // EN1 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET); // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
+  }
+//}}}
+//{{{
+void MC_EnableInput_CH1_D_CH2_E_CH3_E() {
+
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET); // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_SET);   // EN2 ENABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_SET);   // EN3 ENABLE
+  }
+//}}}
+//{{{
+void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
+
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH1, GPIO_PIN_RESET);  // EN1 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH2, GPIO_PIN_RESET);  // EN2 DISABLE
+  HAL_GPIO_WritePin (GPIOC, GPIO_CH3, GPIO_PIN_RESET);  // EN3 DISABLE
+  }
+//}}}
+//{{{
+void MC_TIM1_CH1_SetCCR (uint16_t value) {
+  hTim1.Instance->CCR1 = value;
+  }
+//}}}
+//{{{
+void MC_TIM1_CH2_SetCCR (uint16_t value) {
+  hTim1.Instance->CCR2 = value;
+  }
+//}}}
+//{{{
+void MC_TIM1_CH3_SetCCR (uint16_t value) {
+  hTim1.Instance->CCR3 = value;
+  }
+//}}}
+//{{{
+void MC_Start_PWM() {
+  HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_1); // TIM1_CH1 ENABLE
+  HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_2); // TIM1_CH2 ENABLE
+  HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_3); // TIM1_CH3 ENABLE
+  }
+//}}}
+//{{{
+void MC_Stop_PWM() {
+  HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_1); // TIM1_CH1 DISABLE
+  HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_2); // TIM1_CH2 DISABLE
+  HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_3); // TIM1_CH3 DISABLE
+  }
+//}}}
+
+//{{{
+void MC_CurrentRefStart() {
+
+  hTim16.Instance->CCR1 = 0;
+  HAL_TIM_PWM_Start (&hTim16, TIM_CHANNEL_1);
+  }
+//}}}
+//{{{
+void MC_CurrentRefStop() {
+
+  hTim16.Instance->CCR1 = 0;
+  HAL_TIM_PWM_Stop (&hTim16, TIM_CHANNEL_1);
+  }
+//}}}
+//{{{
+void MC_CurrentRefSetValue (uint16_t value) {
+  printf ("MC_Current_Reference_Setvalue %d\n", value);
+  hTim16.Instance->CCR1 = (uint32_t)(value * hTim16.Instance->ARR) / 4096;
+  }
+//}}}
+
+//{{{
+void NUCLEO_LED_ON() {
+  HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+  }
+//}}}
+//{{{
+void NUCLEO_LED_OFF() {
+  HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+  }
+//}}}
+//}}}
+//{{{  ihm07m1 inits
+//{{{
+void GPIO_Init() {
+// PB2  -> redLed
+// PC13 <- blueButton + extInt
+
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  // config gpio pin PB2 - output ihm07m1 red led
+  GPIO_InitTypeDef gpioInit;
+  gpioInit.Pin = GPIO_PIN_2;
+  gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
+  gpioInit.Pull = GPIO_NOPULL;
+  gpioInit.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init (GPIOB, &gpioInit);
+  HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
+
+  // config gpio PC13 input interrupt - blueButton
+  gpioInit.Pin = GPIO_PIN_13;
+  gpioInit.Mode = GPIO_MODE_IT_RISING;
+  gpioInit.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOC, &gpioInit);
+
+  // EXTI interrupt init
+  HAL_NVIC_SetPriority (EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ (EXTI15_10_IRQn);
+  }
+//}}}
+//{{{
+void ADC1_Init() {
+// PC1 -> ADC1_IN7   current
+// PC2 -> ADC1_IN8   temp
+// PC3 -> ADC1_IN9   bemf1
+// PA1 -> ADC1_IN2   vbus
+// PA7 -> ADC1_IN15  bemf3
+// PB0 -> ADC1_IN11  bemf2
+// PB1 -> ADC1_IN12  speed
+
+  __HAL_RCC_ADC1_CLK_ENABLE();
+
+  // config GPIO C adc inputs
+  GPIO_InitTypeDef gpioInit;
+  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
+  gpioInit.Mode = GPIO_MODE_ANALOG;
+  gpioInit.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOC, &gpioInit);
+
+  // config GPIO A adc inputs
+  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_7;
+  gpioInit.Mode = GPIO_MODE_ANALOG;
+  gpioInit.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOA, &gpioInit);
+
+  // config GPIO B adc inputs
+  gpioInit.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+  gpioInit.Mode = GPIO_MODE_ANALOG;
+  gpioInit.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOB, &gpioInit);
+
+  // ADC1 interrupt Init
+  HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ (ADC1_IRQn);
+
+  hAdc1.Instance = ADC1;
+  hAdc1.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hAdc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hAdc1.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hAdc1.Init.ContinuousConvMode = DISABLE;
+  hAdc1.Init.DiscontinuousConvMode = DISABLE;
+  hAdc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hAdc1.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
+  hAdc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hAdc1.Init.NbrOfConversion = 1;
+  hAdc1.Init.DMAContinuousRequests = DISABLE;
+  hAdc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hAdc1.Init.LowPowerAutoWait = DISABLE;
+  hAdc1.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+  if (HAL_ADC_Init (&hAdc1) != HAL_OK)
+    printf ("HAL_ADC_Init failed\n");
+
+  // Current feedback
+  ADC_ChannelConfTypeDef channelConfig;
+  channelConfig.Channel = ADC_Current;
+  channelConfig.Rank = 1;
+  channelConfig.SingleDiff = ADC_SINGLE_ENDED;
+  channelConfig.SamplingTime = ADC_CH_1_ST;
+  channelConfig.OffsetNumber = ADC_OFFSET_NONE;
+  channelConfig.Offset = 0;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // Potentiometer
+  channelConfig.Channel = ADC_Pot;
+  channelConfig.SamplingTime = ADC_CH_2_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // Bus voltage
+  channelConfig.Channel = ADC_Vbus;
+  channelConfig.SamplingTime = ADC_CH_3_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // Temperature feedback
+  channelConfig.Channel = ADC_Temp;
+  channelConfig.SamplingTime = ADC_CH_4_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // BEMF feedback phase A
+  channelConfig.Channel = ADC_Bemf_CH1;
+  channelConfig.SamplingTime = ADC_Bemf_CH1_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // BEMF feedback phase B
+  channelConfig.Channel = ADC_Bemf_CH2;
+  channelConfig.SamplingTime = ADC_Bemf_CH2_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+
+  // BEMF feedback phase C
+  channelConfig.Channel = ADC_Bemf_CH3;
+  channelConfig.SamplingTime = ADC_Bemf_CH3_ST;
+  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+  }
+//}}}
+//{{{
+void TIM1_Init() {
+// 3 phase PWM
+
+  __HAL_RCC_TIM1_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOC_CLK_ENABLE();
+
+  //{{{  config PA6 TIM1_BKIN timer output
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
+  HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
+  //}}}
+  //{{{  config PA12 TIM1_ETR timer output
+  GPIO_InitStruct.Pin = GPIO_PIN_12;
+  GPIO_InitStruct.Alternate = GPIO_AF11_TIM1;
+  HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
+  //}}}
+  //{{{  config PC10 PC11 PC12 output
+  GPIO_InitStruct.Pin = GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init (GPIOC, &GPIO_InitStruct);
+  HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12, GPIO_PIN_RESET);
+  //}}}
+
+  //{{{  TIM1 init
+  hTim1.Instance = TIM1;
+  hTim1.Init.Prescaler = 0;
+  hTim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
+  hTim1.Init.Period = 719;
+  hTim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  hTim1.Init.RepetitionCounter = 0;
+  hTim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init (&hTim1) != HAL_OK)
+    printf ("HAL_TIM_Base_Init failed\n");
+  //}}}
+  //{{{  TIM1 clockSource
+  TIM_ClockConfigTypeDef sClockSourceConfig;
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource (&hTim1, &sClockSourceConfig) != HAL_OK)
+    printf ("HAL_TIM_ConfigClockSource failed\n");
+  if (HAL_TIM_PWM_Init (&hTim1) != HAL_OK)
+    printf ("HAL_TIM_PWM_Init failed\n");
+  //}}}
+  //{{{  TIM1 clearInput ETR
+  TIM_ClearInputConfigTypeDef clearInputConfig;
+  clearInputConfig.ClearInputState = ENABLE;
+  clearInputConfig.ClearInputSource = TIM_CLEARINPUTSOURCE_ETR;
+  clearInputConfig.ClearInputPolarity = TIM_CLEARINPUTPOLARITY_NONINVERTED;
+  clearInputConfig.ClearInputPrescaler = TIM_CLEARINPUTPRESCALER_DIV1;
+  clearInputConfig.ClearInputFilter = 0;
+  if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_1) != HAL_OK)
+    printf ("HAL_TIM_ConfigOCrefClear 1 failed\n");
+  if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_2) != HAL_OK)
+    printf ("HAL_TIM_ConfigOCrefClear 2 failed\n");
+  if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_3) != HAL_OK)
+    printf ("HAL_TIM_ConfigOCrefClear 3 failed\n");
+  //}}}
+  //{{{  TIM1 masterConfig
+  TIM_MasterConfigTypeDef masterConfig;
+  masterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
+  masterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
+  masterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization (&hTim1, &masterConfig) != HAL_OK)
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
+  //}}}
+  //{{{  TIM1 configOC
+  TIM_OC_InitTypeDef configOC;
+  configOC.OCMode = TIM_OCMODE_PWM1;
+  configOC.Pulse = 575;
+  configOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  configOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  configOC.OCFastMode = TIM_OCFAST_DISABLE;
+  configOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  configOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel (&hTim1, &configOC, TIM_CHANNEL_1) != HAL_OK)
+    printf ("HAL_TIM_PWM_ConfigChannel1 failed\n");
+  if (HAL_TIM_PWM_ConfigChannel (&hTim1, &configOC, TIM_CHANNEL_2) != HAL_OK)
+    printf ("HAL_TIM_PWM_ConfigChannel2 failed\n");
+  if (HAL_TIM_PWM_ConfigChannel (&hTim1, &configOC, TIM_CHANNEL_3) != HAL_OK)
+    printf ("HAL_TIM_PWM_ConfigChannel3 failed\n");
+  //}}}
+  //{{{  TIM1 deadTime
+  TIM_BreakDeadTimeConfigTypeDef breakDeadTimeConfig;
+  breakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  breakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  breakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  breakDeadTimeConfig.DeadTime = 0;
+  breakDeadTimeConfig.BreakState = TIM_BREAK_ENABLE;
+  breakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_LOW;
+  breakDeadTimeConfig.BreakFilter = 0;
+  breakDeadTimeConfig.Break2State = TIM_BREAK2_DISABLE;
+  breakDeadTimeConfig.Break2Polarity = TIM_BREAK2POLARITY_LOW;
+  breakDeadTimeConfig.Break2Filter = 0;
+  breakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime (&hTim1, &breakDeadTimeConfig) != HAL_OK)
+    printf ("HAL_TIMEx_ConfigBreakDeadTime failed\n");
+  //}}}
+  //{{{  config PA8 PA9 PA10 PWM YUW out, why late?
+  GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF6_TIM1;
+  HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
+  //}}}
+
+  // stop TIM during Breakpoint
+  __HAL_FREEZE_TIM1_DBGMCU();
+  __HAL_TIM_ENABLE_IT (&hTim1, TIM_IT_BREAK);
+  }
+//}}}
+//{{{
+void TIM2_Init() {
+// Hall effect ?
+// PB3  -> TIM2_CH2
+// PB10 -> TIM2_CH3
+// PA5  -> ?
+
+  __HAL_RCC_TIM2_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  // config PB3 PB10 timer outputs
+  GPIO_InitTypeDef gpioInit;
+  gpioInit.Pin = GPIO_PIN_3 | GPIO_PIN_10;
+  gpioInit.Mode = GPIO_MODE_AF_PP;
+  gpioInit.Pull = GPIO_NOPULL;
+  gpioInit.Speed = GPIO_SPEED_FREQ_LOW;
+  gpioInit.Alternate = GPIO_AF1_TIM2;
+  HAL_GPIO_Init (GPIOB, &gpioInit);
+
+  hTim2.Instance = TIM2;
+  hTim2.Init.Prescaler = 719;
+  hTim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  hTim2.Init.Period = 50000;
+  hTim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  hTim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init (&hTim2) != HAL_OK)
+    printf ("HAL_TIM_Base_Init failed\n");
+
+  TIM_ClockConfigTypeDef clockSourceConfig;
+  clockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource (&hTim2, &clockSourceConfig) != HAL_OK)
+    printf ("HAL_TIM_ConfigClockSource failed\n");
+  if (HAL_TIM_PWM_Init (&hTim2) != HAL_OK)
+    printf ("HAL_TIM_PWM_Init failed\n");
+
+  TIM_MasterConfigTypeDef masterConfig;
+  masterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  masterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization (&hTim2, &masterConfig) != HAL_OK)
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
+
+  TIM_OC_InitTypeDef configOC;
+  configOC.OCMode = TIM_OCMODE_PWM1;
+  configOC.Pulse = 0;
+  configOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  configOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel (&hTim2, &configOC, TIM_CHANNEL_1) != HAL_OK)
+    printf ("HAL_TIM_PWM_ConfigChannel failed\n");
+
+  // config PA5
+  gpioInit.Pin = GPIO_PIN_5;
+  gpioInit.Mode = GPIO_MODE_AF_PP;
+  gpioInit.Pull = GPIO_NOPULL;
+  gpioInit.Speed = GPIO_SPEED_FREQ_LOW;
+  gpioInit.Alternate = GPIO_AF1_TIM2;
+  HAL_GPIO_Init (GPIOA, &gpioInit);
+  }
+//}}}
+//{{{
+void TIM6_Init() {
+
+  // config TIM6 interrupt
+  __HAL_RCC_TIM6_CLK_ENABLE();
+
+  hTim6.Instance = TIM6;
+  hTim6.Init.Prescaler = 11;
+  hTim6.Init.CounterMode = TIM_COUNTERMODE_UP;
+  hTim6.Init.Period = 24000;
+  hTim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init (&hTim6) != HAL_OK)
+    printf ("HAL_TIM_Base_Init failed\n");
+
+  TIM_MasterConfigTypeDef masterConfig;
+  masterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  masterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization (&hTim6, &masterConfig) != HAL_OK)
+    printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
+
+  HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ (TIM6_DAC_IRQn);
+  }
+//}}}
+//{{{
+void TIM16_Init() {
+// PB4 -> currentRef
+
+  __HAL_RCC_TIM16_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  hTim16.Instance = TIM16;
+  hTim16.Init.Prescaler = 0;
+  hTim16.Init.CounterMode = TIM_COUNTERMODE_UP;
+  hTim16.Init.Period = 1439;
+  hTim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  hTim16.Init.RepetitionCounter = 0;
+  hTim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init (&hTim16) != HAL_OK)
+    printf ("HAL_TIM_Base_Init failed\n");
+  if (HAL_TIM_PWM_Init (&hTim16) != HAL_OK)
+    printf ("HAL_TIM_PWM_Init failed\n");
+
+  TIM_OC_InitTypeDef configOC;
+  configOC.OCMode = TIM_OCMODE_PWM1;
+  configOC.Pulse = 720;
+  configOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  configOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
+  configOC.OCFastMode = TIM_OCFAST_ENABLE;
+  configOC.OCIdleState = TIM_OCIDLESTATE_RESET;
+  configOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
+  if (HAL_TIM_PWM_ConfigChannel (&hTim16, &configOC, TIM_CHANNEL_1) != HAL_OK)
+    printf ("HAL_TIM_PWM_ConfigChannel failed\n");
+
+  TIM_BreakDeadTimeConfigTypeDef breakDeadTimeConfig;
+  breakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
+  breakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
+  breakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
+  breakDeadTimeConfig.DeadTime = 0;
+  breakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
+  breakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
+  breakDeadTimeConfig.BreakFilter = 0;
+  breakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
+  if (HAL_TIMEx_ConfigBreakDeadTime (&hTim16, &breakDeadTimeConfig) != HAL_OK)
+    printf ("HAL_TIMEx_ConfigBreakDeadTime failed\n");
+
+  GPIO_InitTypeDef gpioInit;
+  gpioInit.Pin = GPIO_PIN_4;
+  gpioInit.Mode = GPIO_MODE_AF_PP;
+  gpioInit.Pull = GPIO_NOPULL;
+  gpioInit.Speed = GPIO_SPEED_FREQ_LOW;
+  gpioInit.Alternate = GPIO_AF1_TIM16;
+  HAL_GPIO_Init (GPIOB, &gpioInit);
+  }
+//}}}
+//{{{
+void DAC_Init() {
+// PA4 -> DAC_OUT1
+
+  __HAL_RCC_DAC1_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  GPIO_InitTypeDef gpioInit;
+  gpioInit.Pin = GPIO_PIN_4;
+  gpioInit.Mode = GPIO_MODE_ANALOG;
+  gpioInit.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init (GPIOA, &gpioInit);
+
+  hDac.Instance = DAC;
+  if (HAL_DAC_Init (&hDac) != HAL_OK)
+    printf ("HAL_DAC_Init failed\n");
+
+  DAC_ChannelConfTypeDef config;
+  config.DAC_Trigger = DAC_TRIGGER_NONE;
+  config.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  if (HAL_DAC_ConfigChannel (&hDac, &config, DAC_CHANNEL_1) != HAL_OK)
+    printf ("HAL_DAC_ConfigChannel failed\n");
+
+  // interrupt Init
+  HAL_NVIC_SetPriority (TIM6_DAC_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ (TIM6_DAC_IRQn);
+  }
+//}}}
+
+//{{{
+void MC_Nucleo_Init() {
+
+  GPIO_Init();
+  ADC1_Init();
+  TIM1_Init();
+  TIM2_Init();
+  TIM6_Init();
+  TIM16_Init();
+  DAC_Init();
+  }
+//}}}
+//}}}
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
@@ -255,49 +823,49 @@ void sixStepTable (uint8_t step_number) {
 
   switch (step_number) {
     case 1:
-      MC_HF_TIMx_SetDutyCycle_CH1 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH2 (0);
-      MC_HF_TIMx_SetDutyCycle_CH3 (0);
+      MC_TIM1_CH1_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH2_SetCCR (0);
+      MC_TIM1_CH3_SetCCR (0);
       MC_EnableInput_CH1_E_CH2_E_CH3_D();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
       break;
 
     case 2:
-      MC_HF_TIMx_SetDutyCycle_CH1 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH2 (0);
-      MC_HF_TIMx_SetDutyCycle_CH3 (0);
+      MC_TIM1_CH1_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH2_SetCCR (0);
+      MC_TIM1_CH3_SetCCR (0);
       MC_EnableInput_CH1_E_CH2_D_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
       break;
 
     case 3:
-      MC_HF_TIMx_SetDutyCycle_CH2 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH3 (0);
-      MC_HF_TIMx_SetDutyCycle_CH1 (0);
+      MC_TIM1_CH2_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH1_SetCCR (0);
+      MC_TIM1_CH3_SetCCR (0);
       MC_EnableInput_CH1_D_CH2_E_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
       break;
 
     case 4:
-      MC_HF_TIMx_SetDutyCycle_CH2 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH1 (0);
-      MC_HF_TIMx_SetDutyCycle_CH3 (0);
+      MC_TIM1_CH2_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH1_SetCCR (0);
+      MC_TIM1_CH3_SetCCR (0);
       MC_EnableInput_CH1_E_CH2_E_CH3_D();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
      break;
 
     case 5:
-      MC_HF_TIMx_SetDutyCycle_CH3 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH1 (0);
-      MC_HF_TIMx_SetDutyCycle_CH2 (0);
+      MC_TIM1_CH3_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH1_SetCCR (0);
+      MC_TIM1_CH2_SetCCR (0);
       MC_EnableInput_CH1_E_CH2_D_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
       break;
 
     case 6:
-      MC_HF_TIMx_SetDutyCycle_CH3 (sixStep.pulse_value);
-      MC_HF_TIMx_SetDutyCycle_CH2 (0);
-      MC_HF_TIMx_SetDutyCycle_CH1 (0);
+      MC_TIM1_CH3_SetCCR (sixStep.pulse_value);
+      MC_TIM1_CH2_SetCCR (0);
+      MC_TIM1_CH1_SetCCR (0);
       MC_EnableInput_CH1_D_CH2_E_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
       break;
@@ -314,7 +882,7 @@ void rampMotorCalc() {
     mech_accel_hz = sixStep.ACCEL * Rotor_poles_pairs / 60;
     constant_multiplier_tmp = (uint64_t)constant_multiplier * (uint64_t)constant_multiplier_2;
     constant_k = constant_multiplier_tmp / (3 * mech_accel_hz);
-    MC_Current_Reference_Setvalue (sixStep.Ireference);
+    MC_CurrentRefSetValue (sixStep.Ireference);
     Time_vector_prev_tmp = 0;
     }
 
@@ -352,7 +920,7 @@ void nextStep() {
     sixStep.CMD = false;
     MC_Start_PWM();
     }
-  ARR_LF = __HAL_TIM_GetAutoreload (&LF_TIMx);
+  ARR_LF = __HAL_TIM_GetAutoreload (&hTim6);
 
   if (sixStep.ALIGN_OK) {
     sixStep.speed_fdbk = MC_GetMechSpeedRPM();
@@ -382,13 +950,13 @@ void nextStep() {
     if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
       speed_fdbk_error = true;
     else
-      __HAL_TIM_SetAutoreload (&LF_TIMx, 0xFFFF);
+      __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
     }
   sixStepTable (sixStep.step_position);
 
   // It controls if the changing step request appears during DOWNcounting
   // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
-  if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
+  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     switch (sixStep.step_position) {
       case 3:
       case 6: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1]; break;
@@ -414,8 +982,8 @@ void arrStep() {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
         if (index_ARR_step < sixStep.numberofitemArr) {
-          LF_TIMx.Init.Period = sixStep.ARR_value;
-          LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
+          hTim6.Init.Period = sixStep.ARR_value;
+          hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
           index_ARR_step++;
           }
         else if (!sixStep.ARR_OK) {
@@ -438,8 +1006,8 @@ void arrStep() {
         sixStep.STATUS = STARTUP;
         rampMotorCalc();
         if (index_ARR_step < sixStep.numberofitemArr) {
-          LF_TIMx.Init.Period = sixStep.ARR_value;
-          LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
+          hTim6.Init.Period = sixStep.ARR_value;
+          hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
           index_ARR_step++;
           }
         else if (!sixStep.ARR_OK) {
@@ -484,15 +1052,15 @@ void arrBemf (bool up_bemf) {
     sixStep.prev_step_position = sixStep.step_position;
 
     if (sixStep.VALIDATION_OK) {
-      counter_ARR_Bemf = __HAL_TIM_GetCounter (&LF_TIMx);
-      __HAL_TIM_SetAutoreload (&LF_TIMx, counter_ARR_Bemf + ARR_LF / 2);
+      counter_ARR_Bemf = __HAL_TIM_GetCounter (&hTim6);
+      __HAL_TIM_SetAutoreload (&hTim6, counter_ARR_Bemf + ARR_LF / 2);
       }
     }
   }
 //}}}
 
 //{{{
-void setPiParam (sPiParam* PI_PARAM) {
+void setPiParam (cPiParam* PI_PARAM) {
 
   PI_PARAM->Reference = sixStep.CW_CCW ? -target_speed : target_speed;
 
@@ -507,7 +1075,7 @@ void setPiParam (sPiParam* PI_PARAM) {
   }
 //}}}
 //{{{
-int16_t piController (sPiParam* PI_PARAM, int16_t speed_fdb) {
+int16_t piController (cPiParam* PI_PARAM, int16_t speed_fdb) {
 
   int32_t Error = PI_PARAM->Reference - speed_fdb;
 
@@ -639,7 +1207,7 @@ void taskSpeed() {
       ref = -ref;
     printf ("ref %d\n", ref);
     sixStep.Current_Reference = ref;
-    MC_Current_Reference_Setvalue (sixStep.Current_Reference);
+    MC_CurrentRefSetValue (sixStep.Current_Reference);
     }
 
   bemfDelayCalc (piParam.Reference);
@@ -650,14 +1218,14 @@ void taskSpeed() {
 //{{{
 void MC_ADC() {
 
-  if (__HAL_TIM_DIRECTION_STATUS (&HF_TIMx)) {
+  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     // UP-counting direction started, GET the ADC value (PHASE CURRENT)
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
       switch (sixStep.step_position) {
         //{{{
         case 1:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&ADCx);
+            sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[3] < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
@@ -675,7 +1243,7 @@ void MC_ADC() {
         //{{{
         case 2:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&ADCx);
+            sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[2] > sixStep.ADC_BEMF_threshold_UP) {
                 arrBemf (1);
@@ -693,7 +1261,7 @@ void MC_ADC() {
         //{{{
         case 3:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&ADCx);
+            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference >= 0) {
               if (sixStep.ADC_BUFFER[1] < sixStep.ADC_BEMF_threshold_DOWN)
                 arrBemf (0);
@@ -711,7 +1279,7 @@ void MC_ADC() {
         //{{{
         case 4:
          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&ADCx);
+           sixStep.ADC_BUFFER[3] = HAL_ADC_GetValue (&hAdc1);
            if (piParam.Reference >= 0) {
              if (sixStep.ADC_BUFFER[3] > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
@@ -729,7 +1297,7 @@ void MC_ADC() {
         //{{{
         case 5:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&ADCx);
+           sixStep.ADC_BUFFER[2] = HAL_ADC_GetValue (&hAdc1);
            if (piParam.Reference >= 0) {
              if (sixStep.ADC_BUFFER[2] < sixStep.ADC_BEMF_threshold_DOWN)
                arrBemf (0);
@@ -747,7 +1315,7 @@ void MC_ADC() {
         //{{{
         case 6:
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue(&ADCx);
+            sixStep.ADC_BUFFER[1] = HAL_ADC_GetValue (&hAdc1);
             if (piParam.Reference>=0) {
              if (sixStep.ADC_BUFFER[1] > sixStep.ADC_BEMF_threshold_UP) {
                arrBemf (1);
@@ -772,9 +1340,9 @@ void MC_ADC() {
 
   else {
     // Down-counting direction started, Set the channel for next ADC Regular reading
-    sixStep.ADC_Regular_Buffer[index_adc_chn] = HAL_ADC_GetValue (&ADCx);
+    sixStep.ADC_Regular_Buffer[index_adc_chn] = HAL_ADC_GetValue (&hAdc1);
     if (index_adc_chn == 1) {
-      HFBuffer[HFBufferIndex++] = HAL_ADC_GetValue (&ADCx);
+      HFBuffer[HFBufferIndex++] = HAL_ADC_GetValue (&hAdc1);
       if (HFBufferIndex >= HFBUFFERSIZE)
         HFBufferIndex = 0;
       }
@@ -807,8 +1375,8 @@ void MC_SysTick() {
   if (sixStep.ALIGNMENT && !sixStep.ALIGN_OK) {
     //{{{  align motor
     sixStep.step_position = 6;
-    LF_TIMx.Init.Period = sixStep.ARR_value;
-    LF_TIMx.Instance->ARR = (uint32_t)LF_TIMx.Init.Period;
+    hTim6.Init.Period = sixStep.ARR_value;
+    hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
     sixStep.STATUS = ALIGNMENT;
 
     potSpeedTarget();
@@ -820,8 +1388,8 @@ void MC_SysTick() {
       sixStep.STATUS = STARTUP;
       index_startup_motor = 1;
       rampMotorCalc();
-      LF_TIMx.Init.Prescaler = sixStep.prescaler_value;
-      LF_TIMx.Instance->PSC = LF_TIMx.Init.Prescaler;
+      hTim6.Init.Prescaler = sixStep.prescaler_value;
+      hTim6.Instance->PSC = hTim6.Init.Prescaler;
       index_align = 0;
       }
     }
@@ -867,14 +1435,16 @@ void MC_Init() {
 
   MC_Nucleo_Init();
 
-  sixStep.HF_TIMx_CCR = HF_TIMx.Instance->HF_TIMx_CCR1;
-  sixStep.HF_TIMx_ARR = HF_TIMx.Instance->ARR;
-  sixStep.HF_TIMx_PSC = HF_TIMx.Instance->PSC;
-  sixStep.LF_TIMx_ARR = LF_TIMx.Instance->ARR;
-  sixStep.LF_TIMx_PSC = LF_TIMx.Instance->PSC;
+  sixStep.HF_TIMx_ARR = hTim1.Instance->ARR;
+  sixStep.HF_TIMx_PSC = hTim1.Instance->PSC;
+  sixStep.HF_TIMx_CCR = hTim1.Instance->CCR1;
+
+  sixStep.LF_TIMx_ARR = hTim6.Instance->ARR;
+  sixStep.LF_TIMx_PSC = hTim6.Instance->PSC;
 
   sixStep.Ireference = STARTUP_CURRENT_REFERENCE;
   sixStep.NUMPOLESPAIRS = NUM_POLE_PAIRS;
+
   sixStep.ACCEL = ACC;
   sixStep.KP = KP_GAIN;
   sixStep.KI = KI_GAIN;
@@ -903,30 +1473,31 @@ void MC_Reset() {
   sixStep.prev_step_position = 0;
   sixStep.step_position = 0;
 
-  LF_TIMx.Init.Prescaler = sixStep.LF_TIMx_PSC;
-  LF_TIMx.Instance->PSC =  sixStep.LF_TIMx_PSC;
-  LF_TIMx.Init.Period =    sixStep.LF_TIMx_ARR;
-  LF_TIMx.Instance->ARR =  sixStep.LF_TIMx_ARR;
-  HF_TIMx.Init.Prescaler = sixStep.HF_TIMx_PSC;
-  HF_TIMx.Instance->PSC =  sixStep.HF_TIMx_PSC;
-  HF_TIMx.Init.Period =    sixStep.HF_TIMx_ARR;
-  HF_TIMx.Instance->ARR =  sixStep.HF_TIMx_ARR;
-  HF_TIMx.Instance->HF_TIMx_CCR1 = sixStep.HF_TIMx_CCR;
+  hTim1.Init.Prescaler = sixStep.HF_TIMx_PSC;
+  hTim1.Instance->PSC =  sixStep.HF_TIMx_PSC;
+  hTim1.Init.Period =    sixStep.HF_TIMx_ARR;
+  hTim1.Instance->ARR =  sixStep.HF_TIMx_ARR;
+  hTim1.Instance->CCR1 = sixStep.HF_TIMx_CCR;
+
+  hTim6.Init.Prescaler = sixStep.LF_TIMx_PSC;
+  hTim6.Instance->PSC =  sixStep.LF_TIMx_PSC;
+  hTim6.Init.Period =    sixStep.LF_TIMx_ARR;
+  hTim6.Instance->ARR =  sixStep.LF_TIMx_ARR;
 
   Rotor_poles_pairs = sixStep.NUMPOLESPAIRS;
   sixStep.SYSCLK_frequency = HAL_RCC_GetSysClockFreq();
 
-  MC_HF_TIMx_SetDutyCycle_CH1(0);
-  MC_HF_TIMx_SetDutyCycle_CH2(0);
-  MC_HF_TIMx_SetDutyCycle_CH3(0);
+  MC_TIM1_CH1_SetCCR (0);
+  MC_TIM1_CH2_SetCCR(0);
+  MC_TIM1_CH3_SetCCR(0);
 
   sixStep.Regular_channel[1] = ADC_Bemf_CH1;   //BEMF1
   sixStep.Regular_channel[2] = ADC_Bemf_CH2;   //BEMF2
   sixStep.Regular_channel[3] = ADC_Bemf_CH3;   //BEMF3
-  sixStep.ADC_SEQ_CHANNEL[0] = ADC_CH_1;       //CURRENT
-  sixStep.ADC_SEQ_CHANNEL[1] = ADC_CH_2;       //SPEED
-  sixStep.ADC_SEQ_CHANNEL[2] = ADC_CH_3;       //VBUS
-  sixStep.ADC_SEQ_CHANNEL[3] = ADC_CH_4;       //TEMP
+  sixStep.ADC_SEQ_CHANNEL[0] = ADC_Current;    //CURRENT
+  sixStep.ADC_SEQ_CHANNEL[1] = ADC_Pot;        //SPEED
+  sixStep.ADC_SEQ_CHANNEL[2] = ADC_Vbus;       //VBUS
+  sixStep.ADC_SEQ_CHANNEL[3] = ADC_Temp;       //TEMP
 
   sixStep.step_position = 0;
   sixStep.demagn_counter = 0;
@@ -991,8 +1562,8 @@ void MC_Reset() {
   target_speed = TARGET_SPEED;
   setPiParam (&piParam);
 
-  MC_Current_Reference_Start();
-  MC_Current_Reference_Setvalue (sixStep.Ireference);
+  MC_CurrentRefStart();
+  MC_CurrentRefSetValue (sixStep.Ireference);
 
   index_startup_motor = 1;
   rampMotorCalc();
@@ -1002,8 +1573,8 @@ void MC_Reset() {
 //{{{
 int32_t MC_GetElSpeedHz() {
 
-  if (__HAL_TIM_GetAutoreload (&LF_TIMx) != 0xFFFF)
-    El_Speed_Hz = (int32_t)((sixStep.SYSCLK_frequency) / LF_TIMx.Instance->PSC) / (__HAL_TIM_GetAutoreload (&LF_TIMx) * 6);
+  if (__HAL_TIM_GetAutoreload (&hTim6) != 0xFFFF)
+    El_Speed_Hz = (int32_t)((sixStep.SYSCLK_frequency) / hTim6.Instance->PSC) / (__HAL_TIM_GetAutoreload (&hTim6) * 6);
   else
     El_Speed_Hz = 0;
 
@@ -1024,8 +1595,8 @@ void MC_StartMotor() {
   sixStep.STATUS = START;
   sixStep.RUN_Motor = true;
 
-  HAL_TIM_Base_Start_IT (&LF_TIMx);
-  HAL_ADC_Start_IT (&ADCx);
+  HAL_TIM_Base_Start_IT (&hTim6);
+  HAL_ADC_Start_IT (&hAdc1);
 
   NUCLEO_LED_ON();
   }
@@ -1037,17 +1608,25 @@ void MC_StopMotor() {
   sixStep.RUN_Motor = false;
   MC_Stop_PWM();
 
-  HF_TIMx.Instance->CR1 &= ~(TIM_CR1_CEN);
-  HF_TIMx.Instance->CNT = 0;
+  hTim1.Instance->CR1 &= ~(TIM_CR1_CEN);
+  hTim1.Instance->CNT = 0;
   MC_DisableInput_CH1_D_CH2_D_CH3_D();
-  HAL_TIM_Base_Stop_IT (&LF_TIMx);
-  HAL_ADC_Stop_IT (&ADCx);
+  HAL_TIM_Base_Stop_IT (&hTim6);
+  HAL_ADC_Stop_IT (&hAdc1);
 
-  MC_Current_Reference_Stop();
+  MC_CurrentRefStop();
   NUCLEO_LED_OFF();
   MC_Reset();
   }
 //}}}
+//{{{
+void MC_Panic() {
+
+  MC_StopMotor();
+  sixStep.STATUS = OVERCURRENT;
+  }
+//}}}
+
 //{{{
 void MC_SetSpeed() {
 

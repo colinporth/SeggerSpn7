@@ -197,7 +197,6 @@
     </folder>
     <file file_name="spn7/main.cpp" />
     <file file_name="system/stm32f3xx_nucleo.c" />
-    <file file_name="spn7/ihm07m1.cpp" />
   </project>
   <configuration
     Name="Debug"

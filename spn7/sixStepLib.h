@@ -1,5 +1,4 @@
 #pragma once
-#include "ihm07m1.h"
 #include "sixStepParam.h"
 //{{{
 #ifdef __cplusplus
@@ -11,7 +10,7 @@ enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
                       SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
 
 //{{{
-class sSixStep {
+class cSixStep {
 public:
   eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
 
@@ -84,7 +83,7 @@ public:
   };
 //}}}
 //{{{
-class sPiParam {
+class cPiParam {
 public:
   int16_t Reference;          // Refence value for PI regulator
   int16_t Kp_Gain;            // Kp value for PI regulator
