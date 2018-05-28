@@ -1,5 +1,4 @@
 #pragma once
-
 #include "ihm07m1.h"
 #include "sixStepParam.h"
 //{{{
@@ -8,9 +7,8 @@
 #endif
 //}}}
 
-enum eSixStepStatus {
-  IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
-  SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
+enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
+                      SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
 
 //{{{
 class sSixStep {

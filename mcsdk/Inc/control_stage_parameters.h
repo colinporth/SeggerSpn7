@@ -3,25 +3,14 @@
 
 #define CTRBDID 2
 
-/***************************** MCU supply voltage *****************************/
 #define MCU_SUPPLY_VOLTAGE    3.30
-
-/***************************** CLOCK SETTINGS SECTION *************************/
 #define CLOCK_SOURCE          EXTERNAL  /* EXTERNAL or INTERNAL */
-
 #define CPU_CLK_72_MHZ
-
-/* ext. clock frequency */
 #define EXT_CLK_8_MHZ
-
-/************************
- *** Motor Parameters ***
- ************************/
 
 /* Maximum modulation index */
 #define MAX_MODULATION_85_PER_CENT
 
-/************************ DIGITAL I/O DEFINITION SECTION  *********************/
 /* PWM Timer section */
 #define PWM_TIMER_SELECTION               PWM_TIM1
 #define PWM_TIMER_REMAPPING               PWM_PARTIAL_REMAP
@@ -89,15 +78,18 @@
 #define PHASE_U_CURR_CHANNEL            MC_ADC_CHANNEL_1
 #define PHASE_U_GPIO_PORT               GPIOA
 #define PHASE_U_GPIO_PIN                LL_GPIO_PIN_0
+
 #define PHASE_V_CURR_ADC                ADC1_2
 #define PHASE_V_CURR_CHANNEL            MC_ADC_CHANNEL_7
 #define PHASE_V_GPIO_PORT               GPIOC
 #define PHASE_V_GPIO_PIN                LL_GPIO_PIN_1
+
 /* Only for three shunts case */
 #define PHASE_W_CURR_ADC                ADC1_2
 #define PHASE_W_CURR_CHANNEL            MC_ADC_CHANNEL_6
 #define PHASE_W_GPIO_PORT               GPIOC
 #define PHASE_W_GPIO_PIN                LL_GPIO_PIN_0
+
 /* Only for 1 shunt resistor case */
 #define ADC_PERIPH                      ADC1
 #define PHASE_CURRENTS_CHANNEL          MC_ADC_CHANNEL_7
