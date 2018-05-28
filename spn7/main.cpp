@@ -46,7 +46,7 @@
 #include "ihm07m1.h"
 #include "sixStepLib.h"
 //}}}
-
+//{{{  vars
 ADC_HandleTypeDef hAdc1;
 TIM_HandleTypeDef hTim1;
 TIM_HandleTypeDef hTim2;
@@ -56,7 +56,7 @@ DAC_HandleTypeDef hDac;
 
 cSixStep sixStep;
 cPiParam piParam;
-//{{{  vars
+
 uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
 uint32_t constant_k = 0;                  //  1/3*mech_accel_hz
@@ -103,7 +103,7 @@ uint32_t Tick_cnt = 0;
 uint32_t counter_ARR_Bemf = 0;
 uint64_t constant_multiplier_tmp = 0;
 //}}}
-
+//{{{
 extern "C" {
   //{{{
   void ADC1_IRQHandler() {
@@ -117,7 +117,7 @@ extern "C" {
 
     //printf ("TIM1_BRK_TIM15_IRQHandler\n");
     if (__HAL_TIM_GET_FLAG (&hTim1, TIM_FLAG_BREAK) != RESET)
-      MC_Panic();
+      mcPanic();
 
     HAL_TIM_IRQHandler (&hTim1);
     }
@@ -145,25 +145,25 @@ extern "C" {
     }
   //}}}
   }
+//}}}
 
 //{{{  ihm07m1
 //{{{
-void MC_ADC_Channel (uint32_t adc_ch) {
+void mcAdcChannel (uint32_t channel) {
 
+  // stop and wait
   hAdc1.Instance->CR |= ADC_CR_ADSTP;
   while (hAdc1.Instance->CR & ADC_CR_ADSTP);
 
-  // Clear the old SQx bits for the selected rank
+  // clear the old SQx bits, Set the SQx bits for the selected rank
   hAdc1.Instance->SQR1 &= ~__HAL_ADC_SQR1_RK (ADC_SQR2_SQ5, 1);
-
-  // Set the SQx bits for the selected rank
-  hAdc1.Instance->SQR1 |= __HAL_ADC_SQR1_RK (adc_ch, 1);
+  hAdc1.Instance->SQR1 |= __HAL_ADC_SQR1_RK (channel, 1);
   hAdc1.Instance->CR |= ADC_CR_ADSTART;
   }
 //}}}
 
 //{{{
-void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
+void mcDisableInput_CH1_D_CH2_D_CH3_D() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET);  // EN1 DISABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET);  // EN2 DISABLE
@@ -171,7 +171,7 @@ void MC_DisableInput_CH1_D_CH2_D_CH3_D() {
   }
 //}}}
 //{{{
-void MC_EnableInput_CH1_E_CH2_E_CH3_D() {
+void mcEnableInput_CH1_E_CH2_E_CH3_D() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);    // EN1 ENABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);    // EN2 DISABLE
@@ -179,7 +179,7 @@ void MC_EnableInput_CH1_E_CH2_E_CH3_D() {
   }
 //}}}
 //{{{
-void MC_EnableInput_CH1_E_CH2_D_CH3_E() {
+void mcEnableInput_CH1_E_CH2_D_CH3_E() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);   // EN1 ENABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // EN2 DISABLE
@@ -187,7 +187,7 @@ void MC_EnableInput_CH1_E_CH2_D_CH3_E() {
   }
 //}}}
 //{{{
-void MC_EnableInput_CH1_D_CH2_E_CH3_E() {
+void mcEnableInput_CH1_D_CH2_E_CH3_E() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET); // EN1 DISABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);   // EN2 ENABLE
@@ -195,29 +195,29 @@ void MC_EnableInput_CH1_D_CH2_E_CH3_E() {
   }
 //}}}
 //{{{
-void MC_TIM1_CH1_SetCCR (uint16_t value) {
+void mcTIM1_CH1_SetCCR (uint16_t value) {
   hTim1.Instance->CCR1 = value;
   }
 //}}}
 //{{{
-void MC_TIM1_CH2_SetCCR (uint16_t value) {
+void mcTIM1_CH2_SetCCR (uint16_t value) {
   hTim1.Instance->CCR2 = value;
   }
 //}}}
 //{{{
-void MC_TIM1_CH3_SetCCR (uint16_t value) {
+void mcTIM1_CH3_SetCCR (uint16_t value) {
   hTim1.Instance->CCR3 = value;
   }
 //}}}
 //{{{
-void MC_Start_PWM() {
+void mcStart_PWM() {
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_1); // TIM1_CH1 ENABLE
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_2); // TIM1_CH2 ENABLE
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_3); // TIM1_CH3 ENABLE
   }
 //}}}
 //{{{
-void MC_Stop_PWM() {
+void mcStop_PWM() {
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_1); // TIM1_CH1 DISABLE
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_2); // TIM1_CH2 DISABLE
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_3); // TIM1_CH3 DISABLE
@@ -225,38 +225,37 @@ void MC_Stop_PWM() {
 //}}}
 
 //{{{
-void MC_CurrentRefStart() {
+void mcCurrentRefStart() {
 
   hTim16.Instance->CCR1 = 0;
   HAL_TIM_PWM_Start (&hTim16, TIM_CHANNEL_1);
   }
 //}}}
 //{{{
-void MC_CurrentRefStop() {
+void mcCurrentRefStop() {
 
   hTim16.Instance->CCR1 = 0;
   HAL_TIM_PWM_Stop (&hTim16, TIM_CHANNEL_1);
   }
 //}}}
 //{{{
-void MC_CurrentRefSetValue (uint16_t value) {
-  printf ("MC_Current_Reference_Setvalue %d\n", value);
+void mcCurrentRefSetValue (uint16_t value) {
+  printf ("mcCurrent_Reference_Setvalue %d\n", value);
   hTim16.Instance->CCR1 = (uint32_t)(value * hTim16.Instance->ARR) / 4096;
   }
 //}}}
 
 //{{{
-void NUCLEO_LED_ON() {
+void mcNucleo_Led_On() {
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
   }
 //}}}
 //{{{
-void NUCLEO_LED_OFF() {
+void mcNucleo_Led_Off() {
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
   }
 //}}}
-//}}}
-//{{{  ihm07m1 inits
+
 //{{{
 void GPIO_Init() {
 // PB2  -> redLed
@@ -666,7 +665,7 @@ void DAC_Init() {
 //}}}
 
 //{{{
-void MC_Nucleo_Init() {
+void mcNucleo_Init() {
 
   GPIO_Init();
   ADC1_Init();
@@ -703,7 +702,6 @@ uint64_t fastSqrt (uint64_t wInput) {
   return tempRootNew;
   }
 //}}}
-
 //{{{
 void potSpeedTarget() {
 
@@ -809,50 +807,50 @@ void sixStepTable (uint8_t step_number) {
 
   switch (step_number) {
     case 1:
-      MC_TIM1_CH1_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH2_SetCCR (0);
-      MC_TIM1_CH3_SetCCR (0);
-      MC_EnableInput_CH1_E_CH2_E_CH3_D();
+      mcTIM1_CH1_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH2_SetCCR (0);
+      mcTIM1_CH3_SetCCR (0);
+      mcEnableInput_CH1_E_CH2_E_CH3_D();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
       break;
 
     case 2:
-      MC_TIM1_CH1_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH2_SetCCR (0);
-      MC_TIM1_CH3_SetCCR (0);
-      MC_EnableInput_CH1_E_CH2_D_CH3_E();
+      mcTIM1_CH1_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH2_SetCCR (0);
+      mcTIM1_CH3_SetCCR (0);
+      mcEnableInput_CH1_E_CH2_D_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
       break;
 
     case 3:
-      MC_TIM1_CH2_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH1_SetCCR (0);
-      MC_TIM1_CH3_SetCCR (0);
-      MC_EnableInput_CH1_D_CH2_E_CH3_E();
+      mcTIM1_CH2_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH1_SetCCR (0);
+      mcTIM1_CH3_SetCCR (0);
+      mcEnableInput_CH1_D_CH2_E_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
       break;
 
     case 4:
-      MC_TIM1_CH2_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH1_SetCCR (0);
-      MC_TIM1_CH3_SetCCR (0);
-      MC_EnableInput_CH1_E_CH2_E_CH3_D();
+      mcTIM1_CH2_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH1_SetCCR (0);
+      mcTIM1_CH3_SetCCR (0);
+      mcEnableInput_CH1_E_CH2_E_CH3_D();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3];
      break;
 
     case 5:
-      MC_TIM1_CH3_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH1_SetCCR (0);
-      MC_TIM1_CH2_SetCCR (0);
-      MC_EnableInput_CH1_E_CH2_D_CH3_E();
+      mcTIM1_CH3_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH1_SetCCR (0);
+      mcTIM1_CH2_SetCCR (0);
+      mcEnableInput_CH1_E_CH2_D_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[2];
       break;
 
     case 6:
-      MC_TIM1_CH3_SetCCR (sixStep.pulse_value);
-      MC_TIM1_CH2_SetCCR (0);
-      MC_TIM1_CH1_SetCCR (0);
-      MC_EnableInput_CH1_D_CH2_E_CH3_E();
+      mcTIM1_CH3_SetCCR (sixStep.pulse_value);
+      mcTIM1_CH2_SetCCR (0);
+      mcTIM1_CH1_SetCCR (0);
+      mcEnableInput_CH1_D_CH2_E_CH3_E();
       sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[1];
       break;
      }
@@ -868,7 +866,7 @@ void rampMotorCalc() {
     mech_accel_hz = sixStep.ACCEL * Rotor_poles_pairs / 60;
     constant_multiplier_tmp = (uint64_t)constant_multiplier * (uint64_t)constant_multiplier_2;
     constant_k = constant_multiplier_tmp / (3 * mech_accel_hz);
-    MC_CurrentRefSetValue (sixStep.Ireference);
+    mcCurrentRefSetValue (sixStep.Ireference);
     Time_vector_prev_tmp = 0;
     }
 
@@ -898,18 +896,17 @@ void rampMotorCalc() {
   Time_vector_prev_tmp = Time_vector_tmp;
   }
 //}}}
-
 //{{{
 void nextStep() {
 
   if (sixStep.CMD) {
     sixStep.CMD = false;
-    MC_Start_PWM();
+    mcStart_PWM();
     }
   ARR_LF = __HAL_TIM_GetAutoreload (&hTim6);
 
   if (sixStep.ALIGN_OK) {
-    sixStep.speed_fdbk = MC_GetMechSpeedRPM();
+    sixStep.speed_fdbk = mcGetMechSpeedRPM();
     sixStep.demagn_counter = 1;
     if (sixStep.prev_step_position != sixStep.step_position)
       n_zcr_startup = 0;
@@ -952,7 +949,7 @@ void nextStep() {
       case 4: sixStep.CurrentRegular_BEMF_ch = sixStep.Regular_channel[3]; break;
       }
 
-    MC_ADC_Channel (sixStep.CurrentRegular_BEMF_ch);
+    mcAdcChannel (sixStep.CurrentRegular_BEMF_ch);
     }
   }
 //}}}
@@ -977,7 +974,7 @@ void arrStep() {
           sixStep.ACCEL >>= 1;
           if (sixStep.ACCEL < MINIMUM_ACC)
             sixStep.ACCEL = MINIMUM_ACC;
-          MC_StopMotor();
+          mcStopMotor();
           sixStep.STATUS = STARTUP_FAILURE;
           }
         }
@@ -1001,7 +998,7 @@ void arrStep() {
           sixStep.ACCEL >>= 1;
           if (sixStep.ACCEL < MINIMUM_ACC)
             sixStep.ACCEL = MINIMUM_ACC;
-          MC_StopMotor();
+          mcStopMotor();
           sixStep.STATUS = STARTUP_FAILURE;
           }
         }
@@ -1193,7 +1190,7 @@ void taskSpeed() {
       ref = -ref;
     printf ("ref %d\n", ref);
     sixStep.Current_Reference = ref;
-    MC_CurrentRefSetValue (sixStep.Current_Reference);
+    mcCurrentRefSetValue (sixStep.Current_Reference);
     }
 
   bemfDelayCalc (piParam.Reference);
@@ -1202,7 +1199,7 @@ void taskSpeed() {
 
 // callback interface
 //{{{
-void MC_ADC() {
+void mcADC() {
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     // UP-counting direction started, GET the ADC value (PHASE CURRENT)
@@ -1321,7 +1318,7 @@ void MC_ADC() {
 
     // SET ADC CHANNEL FOR SPEED/CURRENT/VBUS
     // Set the channel for next ADC Regular reading
-    MC_ADC_Channel (sixStep.ADC_SEQ_CHANNEL[index_adc_chn]);
+    mcAdcChannel (sixStep.ADC_SEQ_CHANNEL[index_adc_chn]);
     }
 
   else {
@@ -1339,12 +1336,12 @@ void MC_ADC() {
     if (index_adc_chn > 3)
       index_adc_chn = 0;
 
-    MC_ADC_Channel (sixStep.CurrentRegular_BEMF_ch);
+    mcAdcChannel (sixStep.CurrentRegular_BEMF_ch);
     }
   }
 //}}}
 //{{{
-void MC_Timebase() {
+void mcTimebase() {
 
   nextStep();
 
@@ -1356,7 +1353,7 @@ void MC_Timebase() {
   }
 //}}}
 //{{{
-void MC_SysTick() {
+void mcSysTick() {
 
   if (sixStep.ALIGNMENT && !sixStep.ALIGN_OK) {
     //{{{  align motor
@@ -1393,7 +1390,7 @@ void MC_SysTick() {
     if (sixStep.STATUS != SPEEDFBKERROR)
       taskSpeed();
     if (sixStep.VALIDATION_OK)
-      MC_SetSpeed();
+      mcSetSpeed();
     Tick_cnt = 0;
     }
   else
@@ -1403,13 +1400,13 @@ void MC_SysTick() {
     sixStep.ACCEL >>= 1;
     if (sixStep.ACCEL < MINIMUM_ACC)
       sixStep.ACCEL = MINIMUM_ACC;
-    MC_StopMotor();
+    mcStopMotor();
     cnt_bemf_event = 0;
     sixStep.STATUS = STARTUP_BEMF_FAILURE;
     }
 
   if (speed_fdbk_error) {
-    MC_StopMotor();
+    mcStopMotor();
     sixStep.STATUS = SPEEDFBKERROR;
     }
   }
@@ -1417,9 +1414,9 @@ void MC_SysTick() {
 
 // external interface
 //{{{
-void MC_Init() {
+void mcInit() {
 
-  MC_Nucleo_Init();
+  mcNucleo_Init();
 
   sixStep.HF_TIMx_ARR = hTim1.Instance->ARR;
   sixStep.HF_TIMx_PSC = hTim1.Instance->PSC;
@@ -1437,11 +1434,11 @@ void MC_Init() {
   sixStep.CW_CCW = DIRECTION;
   sixStep.Button_ready = true;
 
-  MC_Reset();
+  mcReset();
   }
 //}}}
 //{{{
-void MC_Reset() {
+void mcReset() {
 
   sixStep.CMD = true;
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
@@ -1473,9 +1470,9 @@ void MC_Reset() {
   Rotor_poles_pairs = sixStep.NUMPOLESPAIRS;
   sixStep.SYSCLK_frequency = HAL_RCC_GetSysClockFreq();
 
-  MC_TIM1_CH1_SetCCR (0);
-  MC_TIM1_CH2_SetCCR(0);
-  MC_TIM1_CH3_SetCCR(0);
+  mcTIM1_CH1_SetCCR (0);
+  mcTIM1_CH2_SetCCR(0);
+  mcTIM1_CH3_SetCCR(0);
 
   sixStep.Regular_channel[1] = ADC_Bemf_CH1;   //BEMF1
   sixStep.Regular_channel[2] = ADC_Bemf_CH2;   //BEMF2
@@ -1548,8 +1545,8 @@ void MC_Reset() {
   target_speed = TARGET_SPEED;
   setPiParam (&piParam);
 
-  MC_CurrentRefStart();
-  MC_CurrentRefSetValue (sixStep.Ireference);
+  mcCurrentRefStart();
+  mcCurrentRefSetValue (sixStep.Ireference);
 
   index_startup_motor = 1;
   rampMotorCalc();
@@ -1557,7 +1554,7 @@ void MC_Reset() {
 //}}}
 
 //{{{
-int32_t MC_GetElSpeedHz() {
+int32_t mcGetElSpeedHz() {
 
   if (__HAL_TIM_GetAutoreload (&hTim6) != 0xFFFF)
     El_Speed_Hz = (int32_t)((sixStep.SYSCLK_frequency) / hTim6.Instance->PSC) / (__HAL_TIM_GetAutoreload (&hTim6) * 6);
@@ -1568,15 +1565,15 @@ int32_t MC_GetElSpeedHz() {
   }
 //}}}
 //{{{
-int32_t MC_GetMechSpeedRPM() {
+int32_t mcGetMechSpeedRPM() {
 
-  Mech_Speed_RPM = (int32_t)(MC_GetElSpeedHz() *  60 / Rotor_poles_pairs);
+  Mech_Speed_RPM = (int32_t)(mcGetElSpeedHz() *  60 / Rotor_poles_pairs);
   return (Mech_Speed_RPM);
   }
 //}}}
 
 //{{{
-void MC_StartMotor() {
+void mcStartMotor() {
 
   sixStep.STATUS = START;
   sixStep.RUN_Motor = true;
@@ -1584,37 +1581,37 @@ void MC_StartMotor() {
   HAL_TIM_Base_Start_IT (&hTim6);
   HAL_ADC_Start_IT (&hAdc1);
 
-  NUCLEO_LED_ON();
+  mcNucleo_Led_On();
   }
 //}}}
 //{{{
-void MC_StopMotor() {
+void mcStopMotor() {
 
   sixStep.STATUS = STOP;
   sixStep.RUN_Motor = false;
-  MC_Stop_PWM();
+  mcStop_PWM();
 
   hTim1.Instance->CR1 &= ~(TIM_CR1_CEN);
   hTim1.Instance->CNT = 0;
-  MC_DisableInput_CH1_D_CH2_D_CH3_D();
+  mcDisableInput_CH1_D_CH2_D_CH3_D();
   HAL_TIM_Base_Stop_IT (&hTim6);
   HAL_ADC_Stop_IT (&hAdc1);
 
-  MC_CurrentRefStop();
-  NUCLEO_LED_OFF();
-  MC_Reset();
+  mcCurrentRefStop();
+  mcNucleo_Led_Off();
+  mcReset();
   }
 //}}}
 //{{{
-void MC_Panic() {
+void mcPanic() {
 
-  MC_StopMotor();
+  mcStopMotor();
   sixStep.STATUS = OVERCURRENT;
   }
 //}}}
 
 //{{{
-void MC_SetSpeed() {
+void mcSetSpeed() {
 
   int16_t reference_tmp = 0;
 
@@ -1641,17 +1638,17 @@ void MC_SetSpeed() {
   }
 //}}}
 //{{{
-void MC_EXTbutton() {
+void mcEXTbutton() {
 
   if (Enable_start_button) {
     if (!sixStep.RUN_Motor && sixStep.Button_ready) {
       printf ("StartMotor\n");
-      MC_StartMotor();
+      mcStartMotor();
       Enable_start_button = false;
       }
     else {
       printf ("StopMotor\n");
-      MC_StopMotor();
+      mcStopMotor();
       Enable_start_button = false;
       }
     }
@@ -1661,22 +1658,22 @@ void MC_EXTbutton() {
 // callbacks
 //{{{
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
-  MC_ADC();
+  mcADC();
   }
 //}}}
 //{{{
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
-  MC_Timebase();
+  mcTimebase();
   }
 //}}}
 //{{{
 void HAL_SYSTICK_Callback() {
-  MC_SysTick();
+  mcSysTick();
   }
 //}}}
 //{{{
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin) {
-  MC_EXTbutton();
+  mcEXTbutton();
   }
 //}}}
 
@@ -1743,7 +1740,7 @@ int main() {
   HAL_NVIC_SetPriority (PendSV_IRQn, 0, 0);
   HAL_NVIC_SetPriority (SysTick_IRQn, 2, 0);
 
-  MC_Init();
+  mcInit();
 
   int loop = 0;
   while (1) {

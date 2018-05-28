@@ -96,18 +96,18 @@ public:
 //}}}
 
 // external interface
-void MC_Init();
-void MC_Reset();
+void mcInit();
+void mcReset();
 
-int32_t MC_GetElSpeedHz();
-int32_t MC_GetMechSpeedRPM();
+int32_t mcGetElSpeedHz();
+int32_t mcGetMechSpeedRPM();
 
-void MC_StartMotor();
-void MC_StopMotor();
-void MC_Panic();
+void mcStartMotor();
+void mcStopMotor();
+void mcPanic();
 
-void MC_SetSpeed();
-void MC_EXTbutton();
+void mcSetSpeed();
+void mcEXTbutton();
 
 //{{{
 #ifdef __cplusplus

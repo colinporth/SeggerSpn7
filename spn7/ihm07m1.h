@@ -7,7 +7,7 @@
 #endif
 //}}}
 
-//{{{  defines
+// defines
 #define ADC_Bemf_CH1       ADC_CHANNEL_9   // BEMF1
 #define ADC_Bemf_CH2       ADC_CHANNEL_11  // BEMF2
 #define ADC_Bemf_CH3       ADC_CHANNEL_15  // BEMF3
@@ -21,33 +21,26 @@
 #define DACx               hdac
 #define DACx_CH            DAC1_CHANNEL_1  // DAC Channel
 #define DACx_ALIGN         DAC_ALIGN_12B_L // DAC Aligment value
-//}}}
 
-//extern ADC_HandleTypeDef hadc1;
-//extern TIM_HandleTypeDef htim1;
-//extern TIM_HandleTypeDef htim2;
-//extern TIM_HandleTypeDef htim6;
-//extern TIM_HandleTypeDef htim16;
+void mcAdcChannel (uint32_t channel);
+void mcNucleo_Init();
 
-void MC_ADC_Channel (uint32_t);
-void MC_Nucleo_Init();
+void mcEnableInput_CH1_E_CH2_E_CH3_D();
+void mcEnableInput_CH1_E_CH2_D_CH3_E();
+void mcEnableInput_CH1_D_CH2_E_CH3_E();
+void mcDisableInput_CH1_D_CH2_D_CH3_D();
+void mcTIM1_CH1_SetCCR (uint16_t value);
+void mcTIM1_CH2_SetCCR (uint16_t value);
+void mcTIM1_CH3_SetCCR (uint16_t value);
+void mcStart_PWM();
+void mcStop_PWM();
 
-void MC_EnableInput_CH1_E_CH2_E_CH3_D();
-void MC_EnableInput_CH1_E_CH2_D_CH3_E();
-void MC_EnableInput_CH1_D_CH2_E_CH3_E();
-void MC_DisableInput_CH1_D_CH2_D_CH3_D();
-void MC_TIM1_CH1_SetCCR (uint16_t value);
-void MC_TIM1_CH2_SetCCR (uint16_t value);
-void MC_TIM1_CH3_SetCCR (uint16_t value);
-void MC_Start_PWM();
-void MC_Stop_PWM();
+void mcCurrentRefStart();
+void mcCurrentRefStop();
+void mcCurrentRefSetValue (uint16_t value);
 
-void MC_CurrentRefStart();
-void MC_CurrentRefStop();
-void MC_CurrentRefSetValue (uint16_t value);
-
-void NUCLEO_LED_ON();
-void NUCLEO_LED_OFF();
+void mcNucleo_Led_On();
+void mcNucleo_Led_Off();
 
 //{{{
 #ifdef __cplusplus
