@@ -89,9 +89,8 @@ uint16_t target_speed = TARGET_SPEED;     //  Target speed for closed loop contr
 uint16_t shift_n_sqrt = 14;
 
 uint16_t cnt_bemf_event = 0;
-bool startup_bemf_failure = 0;
-
-uint8_t speed_fdbk_error = 0;
+bool startup_bemf_failure = false;
+bool speed_fdbk_error = false;
 
 int32_t speed_sum_sp_filt = 0;
 int32_t speed_sum_pot_filt = 0;
@@ -738,7 +737,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_E_CH3_D();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
       break;
 
     case 2:
@@ -746,7 +745,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_D_CH3_E();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
       break;
 
     case 3:
@@ -754,7 +753,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_D_CH2_E_CH3_E();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[0];
       break;
 
     case 4:
@@ -762,7 +761,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH3_SetCCR (0);
       mcEnableInput_CH1_E_CH2_E_CH3_D();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
      break;
 
     case 5:
@@ -770,7 +769,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH1_SetCCR (0);
       mcTIM1_CH2_SetCCR (0);
       mcEnableInput_CH1_E_CH2_D_CH3_E();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
       break;
 
     case 6:
@@ -778,7 +777,7 @@ void sixStepTable (uint8_t step_number) {
       mcTIM1_CH2_SetCCR (0);
       mcTIM1_CH1_SetCCR (0);
       mcEnableInput_CH1_D_CH2_E_CH3_E();
-      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1];
+      sixStep.curBemfInputChannel = sixStep.bemfInputChannel[0];
       break;
      }
   }
@@ -843,6 +842,7 @@ void arrStep() {
         sixStep.ACCEL >>= 1;
         if (sixStep.ACCEL < MINIMUM_ACC)
           sixStep.ACCEL = MINIMUM_ACC;
+        printf ("STARTUP_FAILURE\n");
         mcStopMotor();
         sixStep.STATUS = STARTUP_FAILURE;
         }
@@ -860,7 +860,7 @@ void arrBemf (bool up_bemf) {
 
   if (sixStep.prev_step_position != sixStep.step_position) {
     if (sixStep.SPEED_VALIDATED) {
-       if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
+      if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
         startup_bemf_failure = true;
 
       if (up_bemf && !sixStep.BEMF_OK) {
@@ -1054,6 +1054,7 @@ void mcAdcTick() {
       switch (sixStep.step_position) {
         //{{{
         case 1:
+          sixStep.mBemfInputBuffer[2] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             if (piParam.Reference >= 0) {
               if (value < sixStep.ADC_BEMF_threshold_DOWN)
@@ -1071,6 +1072,7 @@ void mcAdcTick() {
         //}}}
         //{{{
         case 2:
+          sixStep.mBemfInputBuffer[1] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             if (piParam.Reference >= 0) {
               if (value > sixStep.ADC_BEMF_threshold_UP) {
@@ -1088,6 +1090,7 @@ void mcAdcTick() {
         //}}}
         //{{{
         case 3:
+          sixStep.mBemfInputBuffer[0] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             if (piParam.Reference >= 0) {
               if (value < sixStep.ADC_BEMF_threshold_DOWN)
@@ -1105,23 +1108,25 @@ void mcAdcTick() {
         //}}}
         //{{{
         case 4:
-         if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           if (piParam.Reference >= 0) {
-             if (value > sixStep.ADC_BEMF_threshold_UP) {
-               arrBemf (1);
-               sixStep.BEMF_Tdown_count = 0;
-               }
-             }
-           else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-             arrBemf (0);
-           }
-         else
-           sixStep.demagn_counter++;
+          sixStep.mBemfInputBuffer[2] = value;
+          if (sixStep.demagn_counter >= sixStep.demagn_value) {
+            if (piParam.Reference >= 0) {
+              if (value > sixStep.ADC_BEMF_threshold_UP) {
+                arrBemf (1);
+                sixStep.BEMF_Tdown_count = 0;
+                }
+              }
+            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+              arrBemf (0);
+            }
+          else
+            sixStep.demagn_counter++;
 
          break;
         //}}}
         //{{{
         case 5:
+          sixStep.mBemfInputBuffer[2] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
            if (piParam.Reference >= 0) {
              if (value < sixStep.ADC_BEMF_threshold_DOWN)
@@ -1139,6 +1144,7 @@ void mcAdcTick() {
         //}}}
         //{{{
         case 6:
+          sixStep.mBemfInputBuffer[0] = value;
           if (sixStep.demagn_counter >= sixStep.demagn_value) {
             if (piParam.Reference>=0) {
              if (value > sixStep.ADC_BEMF_threshold_UP) {
@@ -1221,23 +1227,10 @@ void mcTim6Tick() {
     }
 
   sixStepTable (sixStep.step_position);
-
-  // It controls if the changing step request appears during DOWNcounting
-  // in this case it changes the ADC channel UP-COUNTING direction started DIR = 0
-  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    switch (sixStep.step_position) {
-      case 3:
-      case 6: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[1]; break;
-      case 2:
-      case 5: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[2]; break;
-      case 1:
-      case 4: sixStep.curBemfInputChannel = sixStep.bemfInputChannel[3]; break;
-      }
+  if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc channel
     mcAdcChannel (sixStep.curBemfInputChannel);
-    }
 
-  // BASE TIMER - ARR modification for STEP frequency changing
-  if (!sixStep.ARR_OK)
+  if (!sixStep.ARR_OK) // STEP frequency changing
     arrStep();
 
   speedFilter();
@@ -1283,13 +1276,16 @@ void mcSysTick() {
     if (sixStep.ACCEL < MINIMUM_ACC)
       sixStep.ACCEL = MINIMUM_ACC;
     mcStopMotor();
-    cnt_bemf_event = 0;
     sixStep.STATUS = STARTUP_BEMF_FAILURE;
+    printf ("STARTUP_BEMF_FAILURE\n");
+
+    cnt_bemf_event = 0;
     }
 
   if (speed_fdbk_error) {
     mcStopMotor();
     sixStep.STATUS = SPEEDFBKERROR;
+    printf ("SPEEDFBKERROR\n");
     }
   }
 //}}}
@@ -1359,16 +1355,16 @@ void mcReset() {
   mcTIM1_CH2_SetCCR (0);
   mcTIM1_CH3_SetCCR (0);
 
+  sixStep.adcChannelIndex = 0;
   sixStep.adcInputChannel[0] = ADC_Current;
   sixStep.adcInputChannel[1] = ADC_Pot;
   sixStep.adcInputChannel[2] = ADC_Vbus;
   sixStep.adcInputChannel[3] = ADC_Temp;
-  sixStep.adcChannelIndex = 0;
 
   sixStep.curBemfInputChannel = 0;
-  sixStep.bemfInputChannel[1] = ADC_Bemf_CH1;
-  sixStep.bemfInputChannel[2] = ADC_Bemf_CH2;
-  sixStep.bemfInputChannel[3] = ADC_Bemf_CH3;
+  sixStep.bemfInputChannel[0] = ADC_Bemf_CH1;
+  sixStep.bemfInputChannel[1] = ADC_Bemf_CH2;
+  sixStep.bemfInputChannel[2] = ADC_Bemf_CH3;
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
 
@@ -1390,8 +1386,8 @@ void mcReset() {
 
   Mech_Speed_RPM = 0;
   El_Speed_Hz = 0;
-
   mech_accel_hz = 0;
+
   constant_k = 0;
   ARR_LF = 0;
   index_array = 1;
@@ -1495,6 +1491,7 @@ void mcPanic() {
 
   mcStopMotor();
   sixStep.STATUS = OVERCURRENT;
+  printf ("mcPanic\n");
   }
 //}}}
 
@@ -1634,7 +1631,7 @@ int main() {
   int loop = 0;
   while (1) {
     HAL_Delay (1000);
-    //printf ("loop %d\n", loop++);
+    printf ("%d %d %d %d\n", sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3]);
     }
   }
 //}}}

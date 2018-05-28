@@ -42,10 +42,11 @@ public:
 
   uint16_t adcChannelIndex = 0;        // Index of ADC channel selector for measuring
   uint32_t adcInputChannel[4];         // channel 1-4 looks up adc current/pot/vbus/temp input channel
-  uint32_t mAdcBuffer[5];              // Buffer for ADC regular channel
+  uint32_t mAdcBuffer[4];              // ADC values channel
 
   uint32_t curBemfInputChannel = 0;    // ADC bemf intput channel
-  uint32_t bemfInputChannel[4];        // channel 1-3 looks up adc bemf input channel
+  uint32_t bemfInputChannel[3];        // channel 1-3 looks up adc bemf input channel
+  uint32_t mBemfInputBuffer[3];        // channel 1-3 value
   uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
   uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
 
