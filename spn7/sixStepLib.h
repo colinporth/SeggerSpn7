@@ -12,11 +12,10 @@ enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
 //{{{
 class cSixStep {
 public:
-  eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
-
-  bool Button_ready = false;           //
-  bool CMD = false;                    // Flag control for Motor Start/Stop
   bool RUN_Motor = false;              // Flag for Motor status
+
+  eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
+  bool CMD = false;                    // Flag control for Motor Start/Stop
   bool ALIGNMENT = false;              // Flag control for Motor Alignment ongoing
   bool ALIGN_OK = false;               // Flag control for Motor Alignment
   bool ARR_OK = false;                 // ARR flag control for Accell status
@@ -37,13 +36,14 @@ public:
   uint8_t prev_step_position = 0;      // Previous step number for SixStep algorithm
   uint16_t pulse_value = 0;            // CCR value for SixStep algorithm
   uint16_t ARR_value = 0;              // ARR vector for Accell compute
+
   uint32_t Regular_channel[4];         // Buffer for ADC regular channel
   uint32_t CurrentRegular_BEMF_ch = 0; // ADC regular channel to select
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;        // Number of elements
 
-  uint32_t ADC_BUFFER[4];              // Buffer for ADC regular channel
   uint32_t ADC_SEQ_CHANNEL[4];         // Buffer for ADC regular channel
+  uint32_t ADC_BUFFER[4];              // Buffer for ADC regular channel
   uint32_t ADC_Regular_Buffer[5];      // Buffer for ADC regular channel
   uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
   uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
