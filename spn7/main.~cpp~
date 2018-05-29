@@ -339,7 +339,7 @@ void ADC_Init() {
 //}}}
 //{{{
 void TIM1_Init() {
-// 3phase PWM timer
+// 3 phase PWM timer
 
   __HAL_RCC_TIM1_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -545,6 +545,20 @@ void TIM16_Init() {
 //}}}
 
 //{{{
+void mcNucleoAdcChannel (ADC_HandleTypeDef* hAdc, uint32_t channel) {
+
+  // stop and wait
+  hAdc->Instance->CR |= ADC_CR_ADSTP;
+  while (hAdc->Instance->CR & ADC_CR_ADSTP);
+
+  // clear the old SQx bits, Set the SQx bits for the selected rank
+  hAdc->Instance->SQR1 &= ~__HAL_ADC_SQR1_RK (ADC_SQR2_SQ5, 1);
+  hAdc->Instance->SQR1 |= __HAL_ADC_SQR1_RK (channel, 1);
+  hAdc->Instance->CR |= ADC_CR_ADSTART;
+  }
+//}}}
+
+//{{{
 void mcNucleoDisableChan() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET);  // EN1 DISABLE
@@ -617,20 +631,6 @@ void mcNucleoCurrentRefSetValue (uint16_t value) {
 
   //printf ("mcCurrent_Reference_Setvalue %d\n", value);
   hTim16.Instance->CCR1 = (uint32_t)(value * hTim16.Instance->ARR) / 4096;
-  }
-//}}}
-
-//{{{
-void mcNucleoAdcChan (ADC_HandleTypeDef* hAdc, uint32_t chan) {
-
-  // stop and wait
-  hAdc->Instance->CR |= ADC_CR_ADSTP;
-  while (hAdc->Instance->CR & ADC_CR_ADSTP);
-
-  // clear old SQx bits, set SQx bits for the selected chan
-  hAdc->Instance->SQR1 &= ~__HAL_ADC_SQR1_RK (ADC_SQR2_SQ5, 1);
-  hAdc->Instance->SQR1 |= __HAL_ADC_SQR1_RK (chan, 1);
-  hAdc->Instance->CR |= ADC_CR_ADSTART;
   }
 //}}}
 
@@ -1204,25 +1204,25 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
       //printf ("%d adcU %d\n", HAL_GetTick(), sixStep.mStep);
       }
 
-    // set chan for next current/pot/vbus/temp ADC reading
-    sixStep.adcChanIndex = (sixStep.adcChanIndex+1) % 4;
-    mcNucleoAdcChan (sixStep.adcInputAdc[sixStep.adcChanIndex],
-                     sixStep.adcInputChan[sixStep.adcChanIndex]);
+    // set channel for next current/pot/vbus/temp ADC reading
+    sixStep.adcChannelIndex = (sixStep.adcChannelIndex+1) % 4;
+    mcNucleoAdcChannel (sixStep.adcInputAdc[sixStep.adcChannelIndex],
+                        sixStep.adcInputChannel[sixStep.adcChannelIndex]);
     }
 
   else {
     // down counting started
-    sixStep.mAdcBuffer[sixStep.adcChanIndex] = value;
-    if (sixStep.adcChanIndex == 1) {
+    sixStep.mAdcBuffer[sixStep.adcChannelIndex] = value;
+    if (sixStep.adcChannelIndex == 1) {
       HFBuffer[HFBufferIndex] = value;
       HFBufferIndex = (HFBufferIndex+1) % HFBUFFERSIZE;
       }
 
-    //printf ("%d i:%d %d\n", HAL_GetTick(), sixStep.adcChanIndex, value);
+    //printf ("%d i:%d %d\n", HAL_GetTick(), sixStep.adcChannelIndex, value);
 
-    // set Chan for next bemf ADC reading
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex],
-                     sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    // set channel for next bemf ADC reading
+    mcNucleoAdcChannel (sixStep.bemfInputAdc[sixStep.mBemfIndex],
+                        sixStep.bemfInputChannel[sixStep.mBemfIndex]);
     }
   }
 //}}}
@@ -1270,9 +1270,9 @@ void mcTim6Tick() {
 
   sixStepTable (sixStep.mStep);
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    // step request during downCount, change adc Chan
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex],
-                     sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    // step request during downCount, change adc channel
+    mcNucleoAdcChannel (sixStep.bemfInputAdc[sixStep.mBemfIndex],
+                        sixStep.bemfInputChannel[sixStep.mBemfIndex]);
     //printf ("step request during downCount\n");
     }
 
@@ -1400,26 +1400,26 @@ void mcReset() {
   // PB1 -> ADC3_IN1   pot
   // PA1 -> ADC1_IN2   vbus
   // PC2 -> ADC12_IN8  temp
-  sixStep.adcChanIndex = 0;
+  sixStep.adcChannelIndex = 0;
   sixStep.adcInputAdc[0] = &hAdc1;
-  sixStep.adcInputChan[0] = ADC_CHANNEL_7;
+  sixStep.adcInputChannel[0] = ADC_CHANNEL_7;
   sixStep.adcInputAdc[1] = &hAdc3;
-  sixStep.adcInputChan[1] = ADC_CHANNEL_1;
+  sixStep.adcInputChannel[1] = ADC_CHANNEL_1;
   sixStep.adcInputAdc[2] = &hAdc1;
-  sixStep.adcInputChan[2] = ADC_CHANNEL_2;
+  sixStep.adcInputChannel[2] = ADC_CHANNEL_2;
   sixStep.adcInputAdc[3] = &hAdc1;
-  sixStep.adcInputChan[3] = ADC_CHANNEL_8;
+  sixStep.adcInputChannel[3] = ADC_CHANNEL_8;
 
   // PC3 -> ADC12_IN9  bemf1
   // PA7 -> ADC2_IN4   bemf3
   // PB0 -> ADC3_IN12  bemf2
   sixStep.mBemfIndex = 0;
   sixStep.bemfInputAdc[0] = &hAdc1;
-  sixStep.bemfInputChan[0] = ADC_CHANNEL_9;
+  sixStep.bemfInputChannel[0] = ADC_CHANNEL_9;
   sixStep.bemfInputAdc[1] = &hAdc2;
-  sixStep.bemfInputChan[1] = ADC_CHANNEL_4;
+  sixStep.bemfInputChannel[1] = ADC_CHANNEL_4;
   sixStep.bemfInputAdc[2] = &hAdc3;
-  sixStep.bemfInputChan[2] = ADC_CHANNEL_12;
+  sixStep.bemfInputChannel[2] = ADC_CHANNEL_12;
 
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
@@ -1527,7 +1527,7 @@ void mcStopMotor() {
   sixStep.STATUS = STOP;
   sixStep.mMotorRunning = false;
 
-  mcNucleoStopPwm();
+  mcNucleoStop_PWM();
   hTim1.Instance->CR1 &= ~(TIM_CR1_CEN);
   hTim1.Instance->CNT = 0;
   mcNucleoDisableChan();

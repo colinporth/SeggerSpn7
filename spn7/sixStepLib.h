@@ -11,12 +11,12 @@ enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
 //{{{
 class cSixStep {
 public:
-  bool RUN_Motor = false;              // Flag for Motor status
-
   eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
-  bool CMD = false;                    // Flag control for Motor Start/Stop
-  bool ALIGNMENT = false;              // Flag control for Motor Alignment ongoing
-  bool ALIGN_OK = false;               // Flag control for Motor Alignment
+
+  bool mMotorRunning = false;
+  bool mPmwRunning  = false;
+  bool mAligning = false;
+  bool mAligned = false;
   bool ARR_OK = false;                 // ARR flag control for Accell status
   bool SPEED_VALIDATED = false;        // Validation flag for Speed before closed loop control
   bool VALIDATION_OK = false;          // Validation flag for Closed loop control begin
@@ -38,15 +38,15 @@ public:
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;        // Number of elements
 
-  uint16_t adcChannelIndex = 0;        // current/pot/vbus/temp adc channel index
-  ADC_HandleTypeDef* adcInputAdc[4];   // channel 0-3 looks up current/pot/vbus/temp input adc
-  uint32_t adcInputChannel[4];         // channel 0-3 looks up current/pot/vbus/temp adc channel
-  uint32_t mAdcBuffer[4];              // channel 0-3 lastReadValue
+  uint16_t adcChanIndex = 0;           // current/pot/vbus/temp chan index
+  ADC_HandleTypeDef* adcInputAdc[4];   // chan 0-3 current/pot/vbus/temp adc lookup
+  uint32_t adcInputChan[4];            // chan 0-3 current/pot/vbus/temp adc chan lookup
+  uint32_t mAdcBuffer[4];              // chan 0-3 lastReadValue
 
-  uint32_t mBemfIndex = 0;             // bemf adc channel index
-  ADC_HandleTypeDef* bemfInputAdc[3];  // channel 0-2 looks up BEMF adc
-  uint32_t bemfInputChannel[3];        // channel 0-2 looks up BEMF adc channel
-  uint32_t mBemfInputBuffer[3];        // channel 0-2 lastReadValue
+  uint32_t mBemfIndex = 0;             // BEMF chan index
+  ADC_HandleTypeDef* bemfInputAdc[3];  // chan 0-2 BEMF adc lookup
+  uint32_t bemfInputChan[3];           // chan 0-2 BEMF adc chan lookup
+  uint32_t mBemfInputBuffer[3];        // chan 0-2 lastReadValue
 
   uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
   uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
@@ -87,13 +87,13 @@ public:
 //{{{
 class cPiParam {
 public:
-  int16_t Reference;          // Refence value for PI regulator
+  int16_t Reference;          // refence value for PI regulator
   int16_t Kp_Gain;            // Kp value for PI regulator
   int16_t Ki_Gain;            // Ki value for PI regulator
-  int16_t Lower_Limit_Output; // Min output value for PI regulator
-  int16_t Upper_Limit_Output; // Max output value for PI regulator
-  bool Max_PID_Output;        // Max Saturation indicator flag
-  bool Min_PID_Output;        // Min Saturation indicator flag
+  int16_t Lower_Limit_Output; // min output value for PI regulator
+  int16_t Upper_Limit_Output; // max output value for PI regulator
+  bool Max_PID_Output;        // max saturation indicator flag
+  bool Min_PID_Output;        // min saturation indicator flag
   };
 //}}}
 
