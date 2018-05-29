@@ -32,8 +32,8 @@
 #define ADC_SPEED_TH                        82   // Fixed treshold to change the target speed (t.b.f)
 
 // motorStall detection parameters
-#define BEMF_CONSEC_DOWN_MAX                10   // Maximum value of BEMF Consecutive Threshold Falling Crossings Counter in closed loop
 #define BEMF_CNT_EVENT_MAX                 100   // Maximum number of BEMF Counter in open loop
+#define BEMF_CONSEC_DOWN_MAX                10   // Maximum value of BEMF Consecutive Threshold Falling Crossings Counter in closed loop
 
 // look UP table for dynamic demagn control of speed
 #define DEMAGN_VAL_1                         1   // demagn speed (10000,12000] or [-12000,-10000) range

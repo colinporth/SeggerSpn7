@@ -6,8 +6,8 @@
 #endif
 //}}}
 
-enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
-                      SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
+enum eSixStepStatus { IDLE, STARTUP, ALIGNMENT, VALIDATION, START, RUN, STOP,
+                      STARTUP_BEMF_FAILURE, OVERCURRENT_FAILURE, SPEED_FEEDBACK_FAILURE, STARTUP_FAILURE };
 //{{{
 class cSixStep {
 public:
@@ -21,7 +21,7 @@ public:
   bool SPEED_VALIDATED = false;        // Validation flag for Speed before closed loop control
   bool VALIDATION_OK = false;          // Validation flag for Closed loop control begin
   bool BEMF_OK = false;
-  bool CL_READY = false;
+  bool mClosedLoopReady = false;
 
   bool CW_CCW = false;                 // Set the motor direction
 

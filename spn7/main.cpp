@@ -90,8 +90,8 @@ uint16_t index_ARR_step = 1;
 uint32_t n_zcr_startup = 0;
 uint16_t shift_n_sqrt = 14;
 
-uint16_t cnt_bemf_event = 0;
-bool startup_bemf_failure = false;
+uint16_t mOpenLoopBemfEvent = 0;
+bool mOpenLoopBemfFailure = false;
 bool speed_fdbk_error = false;
 
 int32_t speed_sum_sp_filt = 0;
@@ -889,9 +889,10 @@ void arrStep() {
         sixStep.ACCEL >>= 1;
         if (sixStep.ACCEL < MINIMUM_ACC)
           sixStep.ACCEL = MINIMUM_ACC;
-        printf ("STARTUP_FAILURE\n");
-        mcStopMotor();
+
         sixStep.STATUS = STARTUP_FAILURE;
+        mcStopMotor();
+        printf ("startup failure\n");
         }
       }
     }
@@ -904,15 +905,15 @@ void arrBemf (bool up) {
     sixStep.mPrevStep = sixStep.mStep;
 
     if (sixStep.SPEED_VALIDATED) {
-      if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
-        startup_bemf_failure = true;
+      if (mOpenLoopBemfEvent > BEMF_CNT_EVENT_MAX)
+        mOpenLoopBemfFailure = true;
 
       if (up && !sixStep.BEMF_OK) {
         n_zcr_startup++;
-        cnt_bemf_event = 0;
+        mOpenLoopBemfEvent = 0;
         }
       else if (!sixStep.BEMF_OK)
-        cnt_bemf_event++;
+        mOpenLoopBemfEvent++;
 
       if ((n_zcr_startup >= NUMBER_ZCR) && !sixStep.BEMF_OK) {
         sixStep.BEMF_OK = true;
@@ -1066,8 +1067,8 @@ void taskSpeed() {
     sixStep.SPEED_VALIDATED = true;
     }
 
-  if (sixStep.SPEED_VALIDATED && sixStep.BEMF_OK && !sixStep.CL_READY)
-    sixStep.CL_READY = true;
+  if (sixStep.SPEED_VALIDATED && sixStep.BEMF_OK && !sixStep.mClosedLoopReady)
+    sixStep.mClosedLoopReady = true;
 
   if (sixStep.VALIDATION_OK) {
     //printf ("taskSpeed VALIDATION_OK\n");
@@ -1239,14 +1240,14 @@ void mcTim6Tick() {
       sixStep.mStep++;
       if (sixStep.mStep > 6)
         sixStep.mStep = 1;
-      if (sixStep.CL_READY)
+      if (sixStep.mClosedLoopReady)
         sixStep.VALIDATION_OK = true;
       }
     else {
       sixStep.mStep--;
       if (sixStep.mStep < 1)
         sixStep.mStep = 6;
-      if (sixStep.CL_READY)
+      if (sixStep.mClosedLoopReady)
         sixStep.VALIDATION_OK = true;
       }
     }
@@ -1300,27 +1301,26 @@ void mcSysTick() {
 
   if (sixStep.VALIDATION_OK)
     potSpeed();
-
-  if (sixStep.STATUS != SPEEDFBKERROR)
+  if (sixStep.STATUS != SPEED_FEEDBACK_FAILURE)
     taskSpeed();
   if (sixStep.VALIDATION_OK)
     mcSetSpeed();
 
-  if (startup_bemf_failure) {
+  if (mOpenLoopBemfFailure) {
     sixStep.ACCEL >>= 1;
     if (sixStep.ACCEL < MINIMUM_ACC)
       sixStep.ACCEL = MINIMUM_ACC;
     mcStopMotor();
-    sixStep.STATUS = STARTUP_BEMF_FAILURE;
-    printf ("STARTUP_BEMF_FAILURE\n");
 
-    cnt_bemf_event = 0;
+    sixStep.STATUS = STARTUP_BEMF_FAILURE;
+    printf ("startup Bemf failure\n");
+    mOpenLoopBemfEvent = 0;
     }
 
   if (speed_fdbk_error) {
     mcStopMotor();
-    sixStep.STATUS = SPEEDFBKERROR;
-    printf ("SPEEDFBKERROR\n");
+    sixStep.STATUS = SPEED_FEEDBACK_FAILURE;
+    printf ("speed feedback failure\n");
     }
   }
 //}}}
@@ -1361,7 +1361,7 @@ void mcReset() {
   sixStep.VALIDATION_OK = false;
   sixStep.ARR_OK = false;
   sixStep.BEMF_OK = false;
-  sixStep.CL_READY = false;
+  sixStep.mClosedLoopReady = false;
   sixStep.SPEED_VALIDATED = false;
 
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
@@ -1439,12 +1439,12 @@ void mcReset() {
   ARR_LF = 0;
   index_array = 1;
 
-  startup_bemf_failure = false;
+  mOpenLoopBemfEvent = 0;
+  mOpenLoopBemfFailure = false;
   speed_fdbk_error = false;
 
   index_ARR_step = 1;
   n_zcr_startup = 0;
-  cnt_bemf_event = 0;
 
   mAlignTicks = 1;
   speed_sum_sp_filt = 0;
@@ -1537,7 +1537,7 @@ void mcStopMotor() {
 void mcPanic() {
 
   mcStopMotor();
-  sixStep.STATUS = OVERCURRENT;
+  sixStep.STATUS = OVERCURRENT_FAILURE;
   printf ("mcPanic\n");
   }
 //}}}
