@@ -165,10 +165,11 @@ void ADC_Init() {
 //  PA1 -> ADC1_IN2   vbus
 //  PC2 -> ADC12_IN8  temp
 
-//  PC3 -> ADC12_IN9  bemf1/A
-//  PB0 -> ADC3_IN12  bemf2/B
-//  PA7 -> ADC2_IN4   bemf3/C
+//  PC3 -> ADC12_IN9  bemf 1/A
+//  PB0 -> ADC3_IN12  bemf 2/B
+//  PA7 -> ADC2_IN4   bemf 3/C
 
+// unused
 //  PA0 -> ADC1_IN1   curr_fdbk1 - 3shunt
 //  PC0 -> ADC12_IN6  curr_fdbk3 - 3shunt
 //  PA15-> TIM2_CH1   A/H1
@@ -897,14 +898,16 @@ void arrStep() {
   }
 //}}}
 //{{{
-void arrBemf (bool up_bemf) {
+void arrBemf (bool up) {
 
   if (sixStep.mPrevStep != sixStep.mStep) {
+    sixStep.mPrevStep = sixStep.mStep;
+
     if (sixStep.SPEED_VALIDATED) {
       if (cnt_bemf_event > BEMF_CNT_EVENT_MAX)
         startup_bemf_failure = true;
 
-      if (up_bemf && !sixStep.BEMF_OK) {
+      if (up && !sixStep.BEMF_OK) {
         n_zcr_startup++;
         cnt_bemf_event = 0;
         }
@@ -917,29 +920,28 @@ void arrBemf (bool up_bemf) {
         }
       }
 
-    sixStep.mPrevStep = sixStep.mStep;
-
     if (sixStep.VALIDATION_OK) {
       counter_ARR_Bemf = __HAL_TIM_GetCounter (&hTim6);
       __HAL_TIM_SetAutoreload (&hTim6, counter_ARR_Bemf + ARR_LF / 2);
+
       }
     }
   }
 //}}}
 
 //{{{
-void setPiParam (cPiParam* PI_PARAM) {
+void setPiParam (cPiParam* piParam) {
 
-  PI_PARAM->Reference = sixStep.CW_CCW ? -target_speed : target_speed;
+  piParam->Reference = sixStep.CW_CCW ? -target_speed : target_speed;
 
-  PI_PARAM->Kp_Gain = sixStep.KP;
-  PI_PARAM->Ki_Gain = sixStep.KI;
+  piParam->Kp_Gain = sixStep.KP;
+  piParam->Ki_Gain = sixStep.KI;
 
-  PI_PARAM->Lower_Limit_Output = LOWER_OUT_LIMIT;
-  PI_PARAM->Upper_Limit_Output = UPPER_OUT_LIMIT;
+  piParam->Lower_Limit_Output = LOWER_OUT_LIMIT;
+  piParam->Upper_Limit_Output = UPPER_OUT_LIMIT;
 
-  PI_PARAM->Max_PID_Output = false;
-  PI_PARAM->Min_PID_Output = false;
+  piParam->Max_PID_Output = false;
+  piParam->Min_PID_Output = false;
   }
 //}}}
 //{{{
@@ -1096,108 +1098,98 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
         //{{{
         case 1:
           sixStep.mBemfInputBuffer[2] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference >= 0) {
-              if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
-              }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
-            }
-          else
+
+          if (sixStep.demagn_counter < sixStep.demagn_value)
             sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value < sixStep.ADC_BEMF_threshold_DOWN)
+              arrBemf (0);
+            }
+          else if (value > sixStep.ADC_BEMF_threshold_UP) {
+            arrBemf (1);
+            sixStep.BEMF_Tdown_count = 0;
+            }
 
           break;
         //}}}
         //{{{
         case 2:
           sixStep.mBemfInputBuffer[1] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
-              }
-            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-              arrBemf (0);
-            }
-          else
+          if (sixStep.demagn_counter < sixStep.demagn_value)
             sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value > sixStep.ADC_BEMF_threshold_UP) {
+              arrBemf (1);
+              sixStep.BEMF_Tdown_count = 0;
+              }
+            }
+          else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+            arrBemf (0);
 
           break;
         //}}}
         //{{{
         case 3:
           sixStep.mBemfInputBuffer[0] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference >= 0) {
-              if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
-              }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
-            }
-          else
+          if (sixStep.demagn_counter < sixStep.demagn_value)
             sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value < sixStep.ADC_BEMF_threshold_DOWN)
+              arrBemf (0);
+            }
+          else if (value > sixStep.ADC_BEMF_threshold_UP) {
+            arrBemf (1);
+            sixStep.BEMF_Tdown_count = 0;
+            }
 
           break;
         //}}}
         //{{{
         case 4:
           sixStep.mBemfInputBuffer[2] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
-              }
-            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-              arrBemf (0);
-            }
-          else
+
+          if (sixStep.demagn_counter >= sixStep.demagn_value)
             sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value > sixStep.ADC_BEMF_threshold_UP) {
+              arrBemf (1);
+              sixStep.BEMF_Tdown_count = 0;
+              }
+            }
+           else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+             arrBemf (0);
 
          break;
         //}}}
         //{{{
         case 5:
           sixStep.mBemfInputBuffer[1] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-           if (piParam.Reference >= 0) {
-             if (value < sixStep.ADC_BEMF_threshold_DOWN)
-               arrBemf (0);
-             }
-           else if (value > sixStep.ADC_BEMF_threshold_UP) {
-             arrBemf (1);
-             sixStep.BEMF_Tdown_count = 0;
-             }
-           }
-         else
-           sixStep.demagn_counter++;
+          if (sixStep.demagn_counter < sixStep.demagn_value)
+            sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value < sixStep.ADC_BEMF_threshold_DOWN)
+              arrBemf (0);
+            }
+          else if (value > sixStep.ADC_BEMF_threshold_UP) {
+            arrBemf (1);
+            sixStep.BEMF_Tdown_count = 0;
+            }
 
          break;
         //}}}
         //{{{
         case 6:
           sixStep.mBemfInputBuffer[0] = value;
-          if (sixStep.demagn_counter >= sixStep.demagn_value) {
-            if (piParam.Reference >= 0) {
-             if (value > sixStep.ADC_BEMF_threshold_UP) {
-               arrBemf (1);
-               sixStep.BEMF_Tdown_count = 0;
-               }
-             }
-           else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+          if (sixStep.demagn_counter < sixStep.demagn_value)
+            sixStep.demagn_counter++;
+          else if (piParam.Reference >= 0) {
+            if (value > sixStep.ADC_BEMF_threshold_UP) {
+              arrBemf (1);
+              sixStep.BEMF_Tdown_count = 0;
+              }
+            }
+          else if (value < sixStep.ADC_BEMF_threshold_DOWN)
              arrBemf (0);
-           }
-         else
-           sixStep.demagn_counter++;
           break;
         //}}}
         }
@@ -1685,7 +1677,8 @@ int main() {
 
   while (1) {
     HAL_Delay (100);
-    printf ("i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
+    printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
+            ARR_LF, counter_ARR_Bemf, piParam.Reference,
             sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
             sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
     }

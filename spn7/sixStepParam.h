@@ -18,7 +18,7 @@
 #define LOWER_OUT_LIMIT                    120   // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000   // High Out value of PI regulator
 #define MAX_POT_SPEED                     6000   // Maximum Speed regulated by potentiometer
-#define MIN_POT_SPEED                     1000   // Minimum Speed regulated by potentiometer
+#define MIN_POT_SPEED                     1500   // Minimum Speed regulated by potentiometer
 #define VAL_POT_SPEED_DIV                    2   // Validation potentiometer speed divider
 #define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection
 
