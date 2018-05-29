@@ -46,10 +46,8 @@
 #include "ihm07m1.h"
 #include "sixStepLib.h"
 //}}}
-//{{{  vars
-cSixStep sixStep;
-cPiParam piParam;
 
+//{{{  vars
 uint32_t mLastButtonPress = 0;
 uint16_t mAlignTicks = 1;
 uint16_t mMotorStartupCount = 1;
@@ -94,6 +92,8 @@ int16_t potent_filtered = 0;
 uint32_t counter_ARR_Bemf = 0;
 uint64_t constant_multiplier_tmp = 0;
 //}}}
+cSixStep sixStep;
+cPiParam piParam;
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
