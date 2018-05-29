@@ -11,6 +11,7 @@ enum eSixStepStatus { IDLE, STARTUP, ALIGNMENT, VALIDATION, START, RUN, STOP,
 //{{{
 class cSixStep {
 public:
+  // states
   eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
 
   bool mMotorRunning = false;
@@ -23,13 +24,22 @@ public:
   bool BEMF_OK = false;
   bool mClosedLoopReady = false;
 
+  // init from parameters
   bool CW_CCW = false;                 // Set the motor direction
+  uint16_t mStartupCurrent = 0;        // Currrent reference
+  uint16_t mNumPolePair = 0;           // Number of motor pole pairs
+  uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
+  uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
 
-  uint32_t LF_TIMx_PSC = 0;            // Prescaler variable for low frequency timer
-  uint32_t LF_TIMx_ARR = 0;            // ARR variable for low frequency timer
+  // unchanging values
+  uint32_t SYSCLK_frequency = 0;       // System clock main frequency
+
+  // odd reg addresses
   uint32_t HF_TIMx_PSC = 0;            // Prescaler variable for high frequency timer
   uint32_t HF_TIMx_ARR = 0;            // ARR variable for high frequency timer
   uint32_t HF_TIMx_CCR = 0;            // CCR variable for high frequency timer
+  uint32_t LF_TIMx_PSC = 0;            // Prescaler variable for low frequency timer
+  uint32_t LF_TIMx_ARR = 0;            // ARR variable for low frequency timer
 
   uint8_t mStep = 0;
   uint8_t mPrevStep = 0;               // Previous step number for SixStep algorithm
@@ -48,9 +58,6 @@ public:
   uint32_t bemfInputChan[3];           // chan 0-2 BEMF adc chan lookup
   uint32_t mBemfInputBuffer[3];        // chan 0-2 lastReadValue
 
-  uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
-  uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
-
   uint16_t demagn_counter = 0;         // Demagnetization counter
   uint16_t demagn_value = 0;           // Demagnetization value
 
@@ -61,24 +68,14 @@ public:
   uint16_t Current_Reference = 0;      // Currrent reference for SixStep algorithm
   uint16_t Ireference = 0;             // Currrent reference for SixStep algorithm
   int32_t Integral_Term_sum = 0;       // Global Integral part for PI
-  uint8_t bemf_state_1 = 0;            // Bemf variable
-  uint8_t bemf_state_2 = 0;            // Bemf variable
-  uint8_t bemf_state_3 = 0;            // Bemf variable
-  uint8_t bemf_state_4 = 0;            // Bemf variable
-  uint8_t bemf_state_5 = 0;            // Bemf variable
-  uint8_t bemf_state_6 = 0;            // Bemf variable
 
   uint16_t Speed_Ref_filtered = 0;     // Filtered Reference Motor Speed variable
   uint16_t Speed_target_ramp = 0;      // Target Motor Speed
   uint16_t Speed_target_time = 0;      // Target Motor Ramp time
 
-  uint16_t Ramp_Start = 0;             // Ramp time start
   uint16_t Bemf_delay_start = 0;       // Bemf variable
-
-  uint32_t SYSCLK_frequency = 0;       // System clock main frequency
   uint8_t BEMF_Tdown_count = 0;        // BEMF Consecutive Threshold Falling Crossings Counter
-  uint16_t IREFERENCE = 0;             // Currrent reference
-  uint16_t NUMPOLESPAIRS = 0;          // Number of motor pole pairs
+
   uint32_t ACCEL = 0;                  // Acceleration start-up parameter
   uint16_t KP = 0;                     // KP parameter for PI regulator
   uint16_t KI = 0;                     // KI parameter for PI regulator

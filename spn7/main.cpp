@@ -61,7 +61,6 @@ uint32_t mLastButtonPress = 0;
 uint16_t mAlignTicks = 1;
 uint16_t mMotorStartupCount = 1;
 
-uint16_t Rotor_poles_pairs;               //  Number of pole pairs of the motor
 uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
 uint32_t constant_k = 0;                  //  1/3*mech_accel_hz
 
@@ -92,7 +91,7 @@ uint16_t shift_n_sqrt = 14;
 
 uint16_t mOpenLoopBemfEvent = 0;
 bool mOpenLoopBemfFailure = false;
-bool speed_fdbk_error = false;
+bool mSpeedFeedbackFailure = false;
 
 int32_t speed_sum_sp_filt = 0;
 int32_t speed_sum_pot_filt = 0;
@@ -831,10 +830,10 @@ void rampMotor() {
   uint32_t constant_multiplier_2 = 4000000000;
 
   if (mMotorStartupCount == 1) {
-    mech_accel_hz = sixStep.ACCEL * Rotor_poles_pairs / 60;
+    mech_accel_hz = sixStep.ACCEL * sixStep.mNumPolePair/ 60;
     constant_multiplier_tmp = (uint64_t)constant_multiplier * (uint64_t)constant_multiplier_2;
     constant_k = constant_multiplier_tmp / (3 * mech_accel_hz);
-    mcNucleoCurrentRefSetValue (sixStep.Ireference);
+    mcNucleoCurrentRefSetValue (sixStep.mStartupCurrent);
     Time_vector_prev_tmp = 0;
     }
 
@@ -1199,23 +1198,21 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
 
     // set chan for next current/pot/vbus/temp ADC reading
     sixStep.adcChanIndex = (sixStep.adcChanIndex+1) % 4;
-    mcNucleoAdcChan (sixStep.adcInputAdc[sixStep.adcChanIndex],
-                     sixStep.adcInputChan[sixStep.adcChanIndex]);
+    mcNucleoAdcChan (sixStep.adcInputAdc[sixStep.adcChanIndex], sixStep.adcInputChan[sixStep.adcChanIndex]);
     }
 
   else {
     // down counting started
     sixStep.mAdcBuffer[sixStep.adcChanIndex] = value;
+
     if (sixStep.adcChanIndex == 1) {
       HFBuffer[HFBufferIndex] = value;
       HFBufferIndex = (HFBufferIndex+1) % HFBUFFERSIZE;
       }
-
     //printf ("%d i:%d %d\n", HAL_GetTick(), sixStep.adcChanIndex, value);
 
     // set Chan for next bemf ADC reading
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex],
-                     sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex], sixStep.bemfInputChan[sixStep.mBemfIndex]);
     }
   }
 //}}}
@@ -1253,10 +1250,9 @@ void mcTim6Tick() {
     }
 
   if (sixStep.VALIDATION_OK) {
-    // motorStall detection and speedFeedback error generation
-    sixStep.BEMF_Tdown_count++;
-    if (sixStep.BEMF_Tdown_count > BEMF_CONSEC_DOWN_MAX)
-      speed_fdbk_error = true;
+    // motorStall detection
+    if (sixStep.BEMF_Tdown_count++ > BEMF_CONSEC_DOWN_MAX)
+      mSpeedFeedbackFailure = true;
     else
       __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
     }
@@ -1264,8 +1260,7 @@ void mcTim6Tick() {
   sixStepTable (sixStep.mStep);
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     // step request during downCount, change adc Chan
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex],
-                     sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex], sixStep.bemfInputChan[sixStep.mBemfIndex]);
     //printf ("step request during downCount\n");
     }
 
@@ -1317,7 +1312,7 @@ void mcSysTick() {
     mOpenLoopBemfEvent = 0;
     }
 
-  if (speed_fdbk_error) {
+  if (mSpeedFeedbackFailure) {
     mcStopMotor();
     sixStep.STATUS = SPEED_FEEDBACK_FAILURE;
     printf ("speed feedback failure\n");
@@ -1338,8 +1333,8 @@ void mcInit() {
   sixStep.LF_TIMx_ARR = hTim6.Instance->ARR;
   sixStep.LF_TIMx_PSC = hTim6.Instance->PSC;
 
-  sixStep.Ireference = STARTUP_CURRENT_REFERENCE;
-  sixStep.NUMPOLESPAIRS = NUM_POLE_PAIRS;
+  sixStep.mStartupCurrent = STARTUP_CURRENT_REFERENCE;
+  sixStep.mNumPolePair = NUM_POLE_PAIR;
 
   sixStep.ACCEL = ACC;
   sixStep.KP = KP_GAIN;
@@ -1365,7 +1360,7 @@ void mcReset() {
   sixStep.SPEED_VALIDATED = false;
 
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
-  sixStep.Ireference = STARTUP_CURRENT_REFERENCE;
+  sixStep.mStartupCurrent = STARTUP_CURRENT_REFERENCE;
 
   sixStep.pulse_value = sixStep.HF_TIMx_CCR;
   sixStep.Speed_target_ramp = MAX_POT_SPEED;
@@ -1383,7 +1378,6 @@ void mcReset() {
   hTim6.Init.Period =    sixStep.LF_TIMx_ARR;
   hTim6.Instance->ARR =  sixStep.LF_TIMx_ARR;
 
-  Rotor_poles_pairs = sixStep.NUMPOLESPAIRS;
   sixStep.SYSCLK_frequency = HAL_RCC_GetSysClockFreq();
 
   mcNucleoSetChanCCR (0,0,0);
@@ -1420,7 +1414,6 @@ void mcReset() {
   sixStep.speed_fdbk_filtered = 0;
   sixStep.Integral_Term_sum = 0;
   sixStep.Current_Reference = 0;
-  sixStep.Ramp_Start = 0;
   sixStep.speed_fdbk = 0;
 
   sixStep.BEMF_Tdown_count = 0;   // Reset of the Counter to detect Stop motor condition when a stall condition occurs
@@ -1441,7 +1434,7 @@ void mcReset() {
 
   mOpenLoopBemfEvent = 0;
   mOpenLoopBemfFailure = false;
-  speed_fdbk_error = false;
+  mSpeedFeedbackFailure = false;
 
   index_ARR_step = 1;
   n_zcr_startup = 0;
@@ -1475,7 +1468,7 @@ void mcReset() {
   setPiParam (&piParam);
 
   mcNucleoCurrentRefStart();
-  mcNucleoCurrentRefSetValue (sixStep.Ireference);
+  mcNucleoCurrentRefSetValue (sixStep.mStartupCurrent);
 
   mMotorStartupCount = 1;
   rampMotor();
@@ -1496,7 +1489,7 @@ int32_t mcGetElSpeedHz() {
 //{{{
 int32_t mcGetMechSpeedRPM() {
 
-  Mech_Speed_RPM = (int32_t)(mcGetElSpeedHz() *  60 / Rotor_poles_pairs);
+  Mech_Speed_RPM = (int32_t)(mcGetElSpeedHz() *  60 / sixStep.mNumPolePair);
   return (Mech_Speed_RPM);
   }
 //}}}
