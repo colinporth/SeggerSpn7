@@ -7,25 +7,31 @@
 #endif
 //}}}
 
-void mcNucleoAdcChannel (uint32_t channel);
-void mcNucleoNucleo_Init();
+extern ADC_HandleTypeDef hAdc1;
+extern ADC_HandleTypeDef hAdc2;
+extern ADC_HandleTypeDef hAdc3;
+extern TIM_HandleTypeDef hTim1;
+extern TIM_HandleTypeDef hTim6;
+extern TIM_HandleTypeDef hTim16;
 
-void mcNucleoEnableInput_CH1_E_CH2_E_CH3_D();
-void mcNucleoEnableInput_CH1_E_CH2_D_CH3_E();
-void mcNucleoEnableInput_CH1_D_CH2_E_CH3_E();
-void mcNucleoDisableInput_CH1_D_CH2_D_CH3_D();
-void mcNucleoTIM1_CH1_SetCCR (uint16_t value);
-void mcNucleoTIM1_CH2_SetCCR (uint16_t value);
-void mcNucleoTIM1_CH3_SetCCR (uint16_t value);
-void mcNucleoStart_PWM();
-void mcNucleoStop_PWM();
+void mcNucleoDisableChan();
+void mcNucleoEnableInputChan12();
+void mcNucleoEnableInputChan13();
+void mcNucleoEnableInputChan23();
+void mcNucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
+void mcNucleoStartPwm();
+void mcNucleoStopPwm();
 
 void mcNucleoCurrentRefStart();
 void mcNucleoCurrentRefStop();
 void mcNucleoCurrentRefSetValue (uint16_t value);
 
+void mcNucleoAdcChan (ADC_HandleTypeDef* hAdc, uint32_t chan);
+
 void mcNucleoLedOn();
 void mcNucleoLedOff();
+
+void mcNucleoInit();
 
 //{{{
 #ifdef __cplusplus
