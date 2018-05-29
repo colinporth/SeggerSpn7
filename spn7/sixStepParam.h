@@ -27,7 +27,6 @@
 #define BEMF_THRSLD_UP                      200  // Zero Crossing threshold
 
 // speedFiltering parameters
-#define HFBUFFERSIZE                        10
 #define FILTER_DEEP                         20   // Number of bits for digital filter
 #define ADC_SPEED_TH                        82   // Fixed treshold to change the target speed (t.b.f)
 

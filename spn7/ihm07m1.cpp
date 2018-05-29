@@ -136,7 +136,7 @@ void ADC_Init() {
   __HAL_RCC_ADC2_CLK_ENABLE();
   __HAL_RCC_ADC34_CLK_ENABLE();
   //}}}
-  //{{{  config PA1 PA7 adc input pin
+  //{{{  config PA1 PA7 analog input pin
   GPIO_InitTypeDef gpioInit;
   gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_7;
   gpioInit.Mode = GPIO_MODE_ANALOG;
@@ -144,11 +144,11 @@ void ADC_Init() {
 
   HAL_GPIO_Init (GPIOA, &gpioInit);
   //}}}
-  //{{{  config PB0 PB0 adc input pin
+  //{{{  config PB0 PB1 analog input pin
   gpioInit.Pin = GPIO_PIN_0 | GPIO_PIN_1;
   HAL_GPIO_Init (GPIOB, &gpioInit);
   //}}}
-  //{{{  config PC1 PC2 PC3 adc input pin
+  //{{{  config PC1 PC2 PC3 analog input pin
   gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
   HAL_GPIO_Init (GPIOC, &gpioInit);
   //}}}
@@ -320,7 +320,6 @@ void TIM1_Init() {
   HAL_GPIO_Init (GPIOA, &GPIO_InitStruct);
   //}}}
 
-  //{{{  TIM1 init
   hTim1.Instance = TIM1;
   hTim1.Init.Prescaler = 0;
   hTim1.Init.CounterMode = TIM_COUNTERMODE_CENTERALIGNED1;
@@ -328,45 +327,40 @@ void TIM1_Init() {
   hTim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   hTim1.Init.RepetitionCounter = 0;
   hTim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-
   if (HAL_TIM_Base_Init (&hTim1) != HAL_OK)
     printf ("HAL_TIM_Base_Init failed\n");
-  //}}}
-  //{{{  TIM1 clockSource
+
+  // TIM1 config ETR clockSource
   TIM_ClockConfigTypeDef clockSourceConfig;
   clockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-
   if (HAL_TIM_ConfigClockSource (&hTim1, &clockSourceConfig) != HAL_OK)
     printf ("HAL_TIM_ConfigClockSource failed\n");
-  //}}}
+
   if (HAL_TIM_PWM_Init (&hTim1) != HAL_OK)
     printf ("HAL_TIM_PWM_Init failed\n");
 
-  //{{{  TIM1 config ETR clearInput
+  // TIM1 config ETR clearInput
   TIM_ClearInputConfigTypeDef clearInputConfig;
-
   clearInputConfig.ClearInputState = ENABLE;
   clearInputConfig.ClearInputSource = TIM_CLEARINPUTSOURCE_ETR;
   clearInputConfig.ClearInputPolarity = TIM_CLEARINPUTPOLARITY_NONINVERTED;
   clearInputConfig.ClearInputPrescaler = TIM_CLEARINPUTPRESCALER_DIV1;
   clearInputConfig.ClearInputFilter = 0;
-
   if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_1) != HAL_OK)
     printf ("HAL_TIM_ConfigOCrefClear 1 failed\n");
   if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_2) != HAL_OK)
     printf ("HAL_TIM_ConfigOCrefClear 2 failed\n");
   if (HAL_TIM_ConfigOCrefClear (&hTim1, &clearInputConfig, TIM_CHANNEL_3) != HAL_OK)
     printf ("HAL_TIM_ConfigOCrefClear 3 failed\n");
-  //}}}
-  //{{{  TIM1 config master synchronisation
+
+  // TIM1 config master synchronisation
   TIM_MasterConfigTypeDef masterConfig;
   masterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
   masterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   masterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
-
   if (HAL_TIMEx_MasterConfigSynchronization (&hTim1, &masterConfig) != HAL_OK)
     printf ("HAL_TIMEx_MasterConfigSynchronization failed\n");
-  //}}}
+
   //{{{  TIM1 config OC CH1,CH2,CH3
   TIM_OC_InitTypeDef configOC;
 
@@ -402,6 +396,7 @@ void TIM1_Init() {
   if (HAL_TIMEx_ConfigBreakDeadTime (&hTim1, &breakDeadTimeConfig) != HAL_OK)
     printf ("HAL_TIMEx_ConfigBreakDeadTime failed\n");
   //}}}
+
   //{{{  config PA8 PA9 PA10 YUW pwm output
   GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;

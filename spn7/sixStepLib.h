@@ -48,14 +48,14 @@ public:
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;        // Number of elements
 
-  uint16_t adcChanIndex = 0;           // current/pot/vbus/temp chan index
-  ADC_HandleTypeDef* adcInputAdc[4];   // chan 0-3 current/pot/vbus/temp adc lookup
-  uint32_t adcInputChan[4];            // chan 0-3 current/pot/vbus/temp adc chan lookup
+  uint16_t mAdcIndex = 0;              // adc current/pot/vbus/temp index
+  ADC_HandleTypeDef* mAdcInputAdc[4];  // chan 0-3 current/pot/vbus/temp adc lookup
+  uint32_t mAdcInputChan[4];           // chan 0-3 current/pot/vbus/temp adc chan lookup
   uint32_t mAdcBuffer[4];              // chan 0-3 lastReadValue
 
-  uint32_t mBemfIndex = 0;             // BEMF chan index
-  ADC_HandleTypeDef* bemfInputAdc[3];  // chan 0-2 BEMF adc lookup
-  uint32_t bemfInputChan[3];           // chan 0-2 BEMF adc chan lookup
+  uint32_t mBemfIndex = 0;             // adc BEMF chan index
+  ADC_HandleTypeDef* mBemfInputAdc[3]; // chan 0-2 BEMF adc lookup
+  uint32_t mBemfInputChan[3];          // chan 0-2 BEMF adc chan lookup
   uint32_t mBemfInputBuffer[3];        // chan 0-2 lastReadValue
 
   uint16_t demagn_counter = 0;         // Demagnetization counter
@@ -85,10 +85,13 @@ public:
 class cPiParam {
 public:
   int16_t Reference;          // refence value for PI regulator
+
   int16_t Kp_Gain;            // Kp value for PI regulator
   int16_t Ki_Gain;            // Ki value for PI regulator
+
   int16_t Lower_Limit_Output; // min output value for PI regulator
   int16_t Upper_Limit_Output; // max output value for PI regulator
+
   bool Max_PID_Output;        // max saturation indicator flag
   bool Min_PID_Output;        // min saturation indicator flag
   };

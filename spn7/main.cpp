@@ -1,45 +1,4 @@
 // main.c
-//{{{  F303RE pins
-// CN7           1 PC10 ->Enable_CH1-L6230    Enable_CH2-L6230<- PC11 2
-//               3 PC12 ->Enable_CH3-L6230                       PD2  4
-//               5 VDD                                           E5V  6
-//               7 BOOT0                                         GND  8
-//               9                                                   10
-//              11                                             IOREF 12
-//              13 PA13                                          RST 14
-//              15 PA14                                         +3.3 16
-//              17 PA15 <-Encoder A/Hall H1        Encoder/Hall<- +5 18
-//              19 GND                                           GND 20
-//              21 PB7                                           GND 22
-//              23 PC13 <-BlueButton                             VIN 24
-//              25 PC14                                              26
-//              27 PC15                          Curr_fdbk_PhA-> PA0 28
-//              29 PF0                            VBUS_sensing-> PA1 30 ->ADC1_IN2
-//              31 PF1                                  DAC_Ch<- PA4 32
-//              33 VBAT                          BEMF2_sensing-> PB0 34 ->ADC1_IN11
-//   ADC1_IN8<- 35 PC2 <-Temperature feedback    Curr_fdbk_PhB-> PC1 36 ->ADC1_IN7
-//   ADC1_IN9<- 37 PC3 <-BEMF1_sensing           Curr_fdbk_PhC-> PC0 38
-//
-// CN10          1 PC9                                           PC8  2
-//               3 PB8                                           PC6  4
-//               5 PB9                                           PC5  6
-//               7 AVDD                                          U5V  8
-//               9 GND                                               10
-//              11 PA5 GPIO/DAC/PWM                       CPOUT PA12 12 ->TIM1_ETR
-//       TIM1<- 13 PA6 DIAG/ENABLE/BKIN1      DIAG/ENABLE/BKIN2 PA11 14
-//  ADC1_IN15<- 15 PA7 <-BEMF3_sensing                          PB12 16
-//              17 PB6                                          PB11 18
-//              19 PC7                                           GND 20
-//              21 PA9 ->VH_PWM                          LedRed<-PB2 22
-//              23 PA8 ->UH_PWM                   POTENTIOMETER->PB1 24 ->ADC1_IN12
-//       TIM2<- 25 PB10 <-Encoder Z/Hall H3      BEMF3_sensing->PB15 26
-//              27 PB4 CurrentRef             DIAG/ENABLE/BKIN1 PB14 28
-//              29 PB5 GPIO/DAC/PWM                GPIO/DAC/PWM PB13 30
-//       TIM2<- 31 PB3 <-Encoder B/Hall H2                      AGND 32
-//              33 PA10 ->WH_PWM                                 PC4 34
-//              35 PA2                                               36
-//              37 PA3                                               38
-//}}}
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
 
@@ -52,27 +11,28 @@ uint32_t mLastButtonPress = 0;
 uint16_t mAlignTicks = 1;
 uint16_t mMotorStartupCount = 1;
 
-uint32_t mech_accel_hz = 0;               //  Hz -- Mechanical acceleration rate
-uint32_t constant_k = 0;                  //  1/3*mech_accel_hz
+uint32_t mech_accel_hz = 0;               // Hz -- Mechanical acceleration rate
+uint32_t constant_k = 0;                  // 1/3*mech_accel_hz
 
-uint32_t Time_vector_tmp = 0;             //  Startup variable
-uint32_t Time_vector_prev_tmp = 0 ;       //  Startup variable
-uint32_t T_single_step = 0;               //  Startup variable
-uint32_t T_single_step_first_value = 0;   //  Startup variable
+uint32_t Time_vector_tmp = 0;             // Startup variable
+uint32_t Time_vector_prev_tmp = 0 ;       // Startup variable
+uint32_t T_single_step = 0;               // Startup variable
+uint32_t T_single_step_first_value = 0;   // Startup variable
 
-int32_t delta = 0;                        //  Startup variable
-uint16_t index_array = 1;                 //  Speed filter variable
-int16_t speed_tmp_array[FILTER_DEEP];     //  Speed filter variable
-uint16_t speed_tmp_buffer[FILTER_DEEP];   //  Potentiometer filter variable
-bool array_completed = false;             //  Speed filter variable
-bool buffer_completed = false;            //  Potentiometer filter variable
+int32_t delta = 0;                        // Startup variable
+uint16_t index_array = 1;                 // Speed filter variable
+int16_t speed_tmp_array[FILTER_DEEP];     // Speed filter variable
+uint16_t speed_tmp_buffer[FILTER_DEEP];   // Potentiometer filter variable
+bool array_completed = false;             // Speed filter variable
+bool buffer_completed = false;            // Potentiometer filter variable
 
-uint16_t HFBufferIndex = 0;               //  High-Frequency Buffer Index
-uint16_t HFBuffer[HFBUFFERSIZE];          //  Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
+#define POT_VALUES_SIZE                   10
+uint16_t mPotValueIndex = 0;              // High-Frequency Buffer Index
+uint16_t mPotValues[POT_VALUES_SIZE];        // Buffer for Potentiometer Value Filtering at the High-Frequency ADC conversion
 
-uint32_t ARR_LF = 0;                      //  Autoreload LF TIM variable
-int32_t Mech_Speed_RPM = 0;               //  Mechanical motor speed
-int32_t El_Speed_Hz = 0;                  //  Electrical motor speed
+uint32_t ARR_LF = 0;                      // Autoreload LF TIM variable
+int32_t Mech_Speed_RPM = 0;               // Mechanical motor speed
+int32_t El_Speed_Hz = 0;                  // Electrical motor speed
 
 uint16_t target_speed = TARGET_SPEED > 0 ? TARGET_SPEED : -TARGET_SPEED;
 
@@ -138,15 +98,14 @@ void potSpeed() {
 
   uint32_t sum = 0;
   uint16_t max = 0;
-  for (uint16_t i = 0; i < HFBUFFERSIZE; i++) {
-    uint16_t val = HFBuffer[i];
+  for (uint16_t i = 0; i < POT_VALUES_SIZE; i++) {
+    uint16_t val = mPotValues[i];
     sum += val;
     if (val > max)
       max = val;
     }
-
   sum -= max;
-  uint16_t potMean = sum / (HFBUFFERSIZE - 1);
+  uint16_t potMean = sum / (POT_VALUES_SIZE - 1);
 
   if (!buffer_completed) {
     speed_tmp_buffer[index_pot_filt] = potMean;
@@ -530,7 +489,7 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    // up counting started
+    // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
       switch (sixStep.mStep) {
         //{{{
@@ -634,23 +593,21 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
       //printf ("%d adcU %d\n", HAL_GetTick(), sixStep.mStep);
       }
 
-    // set chan for next current/pot/vbus/temp ADC reading
-    sixStep.adcChanIndex = (sixStep.adcChanIndex+1) % 4;
-    mcNucleoAdcChan (sixStep.adcInputAdc[sixStep.adcChanIndex], sixStep.adcInputChan[sixStep.adcChanIndex]);
+    // set adc chan for next curr/temp/vbus/temp reading
+    mcNucleoAdcChan (sixStep.mAdcInputAdc[sixStep.mAdcIndex], sixStep.mAdcInputChan[sixStep.mAdcIndex]);
     }
 
   else {
-    // down counting started
-    sixStep.mAdcBuffer[sixStep.adcChanIndex] = value;
-
-    if (sixStep.adcChanIndex == 1) {
-      HFBuffer[HFBufferIndex] = value;
-      HFBufferIndex = (HFBufferIndex+1) % HFBUFFERSIZE;
+    // tim1 pwm down counting
+    if (sixStep.mAdcIndex == 1) {
+      mPotValues[mPotValueIndex] = value;
+      mPotValueIndex = (mPotValueIndex+1) % POT_VALUES_SIZE;
       }
-    //printf ("%d i:%d %d\n", HAL_GetTick(), sixStep.adcChanIndex, value);
+    sixStep.mAdcBuffer[sixStep.mAdcIndex] = value;
+    sixStep.mAdcIndex = (sixStep.mAdcIndex+1) % 4;
 
-    // set Chan for next bemf ADC reading
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex], sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    // set adc chan for next bemf ADC reading
+    mcNucleoAdcChan (sixStep.mBemfInputAdc[sixStep.mBemfIndex], sixStep.mBemfInputChan[sixStep.mBemfIndex]);
     }
   }
 //}}}
@@ -698,7 +655,7 @@ void mcTim6Tick() {
   sixStepTable (sixStep.mStep);
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     // step request during downCount, change adc Chan
-    mcNucleoAdcChan (sixStep.bemfInputAdc[sixStep.mBemfIndex], sixStep.bemfInputChan[sixStep.mBemfIndex]);
+    mcNucleoAdcChan (sixStep.mBemfInputAdc[sixStep.mBemfIndex], sixStep.mBemfInputChan[sixStep.mBemfIndex]);
     //printf ("step request during downCount\n");
     }
 
@@ -824,26 +781,26 @@ void mcReset() {
   // PB1 -> ADC3_IN1   pot
   // PA1 -> ADC1_IN2   vbus
   // PC2 -> ADC12_IN8  temp
-  sixStep.adcChanIndex = 0;
-  sixStep.adcInputAdc[0] = &hAdc1;
-  sixStep.adcInputChan[0] = ADC_CHANNEL_7;
-  sixStep.adcInputAdc[1] = &hAdc3;
-  sixStep.adcInputChan[1] = ADC_CHANNEL_1;
-  sixStep.adcInputAdc[2] = &hAdc1;
-  sixStep.adcInputChan[2] = ADC_CHANNEL_2;
-  sixStep.adcInputAdc[3] = &hAdc1;
-  sixStep.adcInputChan[3] = ADC_CHANNEL_8;
+  sixStep.mAdcIndex = 0;
+  sixStep.mAdcInputAdc[0] = &hAdc1;
+  sixStep.mAdcInputChan[0] = ADC_CHANNEL_7;
+  sixStep.mAdcInputAdc[1] = &hAdc3;
+  sixStep.mAdcInputChan[1] = ADC_CHANNEL_1;
+  sixStep.mAdcInputAdc[2] = &hAdc1;
+  sixStep.mAdcInputChan[2] = ADC_CHANNEL_2;
+  sixStep.mAdcInputAdc[3] = &hAdc1;
+  sixStep.mAdcInputChan[3] = ADC_CHANNEL_8;
 
   // PC3 -> ADC12_IN9  bemf1
   // PA7 -> ADC2_IN4   bemf3
   // PB0 -> ADC3_IN12  bemf2
   sixStep.mBemfIndex = 0;
-  sixStep.bemfInputAdc[0] = &hAdc1;
-  sixStep.bemfInputChan[0] = ADC_CHANNEL_9;
-  sixStep.bemfInputAdc[1] = &hAdc2;
-  sixStep.bemfInputChan[1] = ADC_CHANNEL_4;
-  sixStep.bemfInputAdc[2] = &hAdc3;
-  sixStep.bemfInputChan[2] = ADC_CHANNEL_12;
+  sixStep.mBemfInputAdc[0] = &hAdc1;
+  sixStep.mBemfInputChan[0] = ADC_CHANNEL_9;
+  sixStep.mBemfInputAdc[1] = &hAdc2;
+  sixStep.mBemfInputChan[1] = ADC_CHANNEL_4;
+  sixStep.mBemfInputAdc[2] = &hAdc3;
+  sixStep.mBemfInputChan[2] = ADC_CHANNEL_12;
 
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
@@ -885,9 +842,9 @@ void mcReset() {
   counter_ARR_Bemf = 0;
   constant_multiplier_tmp = 0;
 
-  HFBufferIndex =0;
-  for (uint16_t i = 0; i < HFBUFFERSIZE;i++)
-    HFBuffer[i]=0;
+  mPotValueIndex = 0;
+  for (uint16_t i = 0; i < POT_VALUES_SIZE; i++)
+    mPotValues[i] = 0;
 
   array_completed = false;
   buffer_completed = false;
