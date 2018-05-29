@@ -828,7 +828,6 @@
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
   <BreakpointListItem trigger="" line="56" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/X-NUCLEO-IHM07M1.c" useHWbreakpoint="false"/>
-  <Exceptions set="MemManage;UsageFault_Coprocessor;UsageFault_CheckingError;UsageFault_StateError;BusFault;ExceptionEntryReturnFault;HardFault"/>
  </Breakpoints>
  <ExecutionProfileWindow/>
  <FrameBufferWindow>
@@ -939,8 +938,6 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="336" useTextEdit="1" useBinaryEdit="0" left="0" path="spn7/main.cpp" selected="1" top="315" codecName="Default"/>
- </Files>
- <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
+ <Files/>
+ <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

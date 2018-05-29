@@ -1,7 +1,6 @@
 #pragma once
 
 #define NUM_POLE_PAIRS                       4   // Number of Motor Pole pairs
-#define DIRECTION                        false   // Set motor direction CW = false and CCW = true
 #define TARGET_SPEED                      2000   // Target speed in closed loop control
 
 #define STARTUP_CURRENT_REFERENCE         2000   // startUP CurrentReference 2000 = 2.2A

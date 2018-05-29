@@ -8,7 +8,6 @@
 
 enum eSixStepStatus { IDLE, STARTUP, VALIDATION, STOP, START, RUN, ALIGNMENT,
                       SPEEDFBKERROR, OVERCURRENT, STARTUP_FAILURE, STARTUP_BEMF_FAILURE };
-
 //{{{
 class cSixStep {
 public:
@@ -21,8 +20,8 @@ public:
   bool ARR_OK = false;                 // ARR flag control for Accell status
   bool SPEED_VALIDATED = false;        // Validation flag for Speed before closed loop control
   bool VALIDATION_OK = false;          // Validation flag for Closed loop control begin
-  bool BEMF_OK = false;                //
-  bool CL_READY = false;               //
+  bool BEMF_OK = false;
+  bool CL_READY = false;
 
   bool CW_CCW = false;                 // Set the motor direction
 
@@ -32,21 +31,23 @@ public:
   uint32_t HF_TIMx_ARR = 0;            // ARR variable for high frequency timer
   uint32_t HF_TIMx_CCR = 0;            // CCR variable for high frequency timer
 
-  uint8_t step_position = 0;           // Step number for SixStep algorithm
-  uint8_t prev_step_position = 0;      // Previous step number for SixStep algorithm
+  uint8_t mStep = 0;
+  uint8_t mPrevStep = 0;               // Previous step number for SixStep algorithm
   uint16_t pulse_value = 0;            // CCR value for SixStep algorithm
   uint16_t ARR_value = 0;              // ARR vector for Accell compute
-
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;        // Number of elements
 
-  uint16_t adcChannelIndex = 0;        // Index of ADC channel selector for measuring
-  uint32_t adcInputChannel[4];         // channel 1-4 looks up adc current/pot/vbus/temp input channel
-  uint32_t mAdcBuffer[4];              // ADC values channel
+  uint16_t adcChannelIndex = 0;        // current/pot/vbus/temp adc channel index
+  ADC_HandleTypeDef* adcInputAdc[4];   // channel 0-3 looks up current/pot/vbus/temp input adc
+  uint32_t adcInputChannel[4];         // channel 0-3 looks up current/pot/vbus/temp adc channel
+  uint32_t mAdcBuffer[4];              // channel 0-3 lastReadValue
 
-  uint32_t curBemfInputChannel = 0;    // ADC bemf intput channel
-  uint32_t bemfInputChannel[3];        // channel 1-3 looks up adc bemf input channel
-  uint32_t mBemfInputBuffer[3];        // channel 1-3 value
+  uint32_t mBemfIndex = 0;             // bemf adc channel index
+  ADC_HandleTypeDef* bemfInputAdc[3];  // channel 0-2 looks up BEMF adc
+  uint32_t bemfInputChannel[3];        // channel 0-2 looks up BEMF adc channel
+  uint32_t mBemfInputBuffer[3];        // channel 0-2 lastReadValue
+
   uint16_t ADC_BEMF_threshold_UP = 0;  // Voltage threshold for BEMF detection in up direction
   uint16_t ADC_BEMF_threshold_DOWN = 0;// Voltage threshold for BEMF detection in down direction
 
