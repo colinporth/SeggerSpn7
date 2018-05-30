@@ -765,7 +765,6 @@ uint64_t constant_multiplier_tmp = 0;
 //}}}
 cSixStep sixStep;
 cPiParam piParam;
-std::string gStateString = "init";
 
 
 //{{{
@@ -1002,7 +1001,6 @@ void arrStep() {
         sixStep.STATUS = STARTUP_FAILURE;
         mcStopMotor();
         printf ("startup failure\n");
-        gStateString = "startup failure";
         }
       }
     }
@@ -1393,7 +1391,6 @@ void mcSysTick() {
     mAlignTicks++;
     if (mAlignTicks >= TIME_FOR_ALIGN + 1) {
       printf ("%d aligned\n", HAL_GetTick());
-      gStateString = "aligned";
       sixStep.mAligned = true;
       sixStep.STATUS = STARTUP;
       hTim6.Init.Prescaler = sixStep.prescaler_value;
@@ -1419,7 +1416,6 @@ void mcSysTick() {
 
     sixStep.STATUS = STARTUP_BEMF_FAILURE;
     printf ("startup Bemf failure\n");
-    gStateString = "startup Bemf failure";
     mOpenLoopBemfEvent = 0;
     }
 
@@ -1427,7 +1423,6 @@ void mcSysTick() {
     mcStopMotor();
     sixStep.STATUS = SPEED_FEEDBACK_FAILURE;
     printf ("speed feedback failure\n");
-    gStateString = "speed feedback failure";
     }
   }
 //}}}
@@ -1644,7 +1639,6 @@ void mcPanic() {
   mcStopMotor();
   sixStep.STATUS = OVERCURRENT_FAILURE;
   printf ("mcPanic\n");
-  gStateString = "mcPanic";
   }
 //}}}
 
@@ -1802,8 +1796,6 @@ int main() {
                     dec (sixStep.mBemfInputBuffer[1], 4) + " " +
                     dec (sixStep.mBemfInputBuffer[2], 4),
                     cPoint(0,40));
-
-    lcd.drawString (cLcd::eOff, cLcd::eMedium, cLcd::eLeft, gStateString, cPoint(0,70));
 
     lcd.present();
     }
