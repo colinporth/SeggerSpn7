@@ -56,6 +56,8 @@
       <file file_name="spn7/ihm07m1.h" />
       <file file_name="spn7/sixStepLib.h" />
       <file file_name="spn7/sixStepParam.h" />
+      <file file_name="spn7/cLcd.h" />
+      <file file_name="spn7/font.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">
@@ -201,6 +203,7 @@
     <file file_name="spn7/utils.cpp" />
     <file file_name="spn7/font18.c" />
     <file file_name="spn7/font36.c" />
+    <file file_name="spn7/cLcd.cpp" />
   </project>
   <configuration
     Name="Debug"

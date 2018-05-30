@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <math.h>
 
 class cPoint {
 public:
