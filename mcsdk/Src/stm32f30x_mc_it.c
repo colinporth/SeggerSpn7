@@ -23,11 +23,7 @@
 __attribute__((section ("ccmram")))
 #endif
 #endif
-/**
-  * @brief  This function handles ADC1/ADC2 interrupt request.
-  * @param  None
-  * @retval None
-  */
+//{{{
 void ADC1_2_IRQHandler(void)
 {
   /* USER CODE BEGIN ADC1_2_IRQn 0 */
@@ -45,6 +41,7 @@ void ADC1_2_IRQHandler(void)
 
   /* USER CODE END ADC1_2_IRQn 1 */
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -53,6 +50,7 @@ void ADC1_2_IRQHandler(void)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  This function handles ADC3 interrupt request.
   * @param  None
@@ -67,6 +65,7 @@ void ADC3_IRQHandler(void)
 
  /* USER CODE END  ADC3_IRQn 1 */
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -75,6 +74,7 @@ void ADC3_IRQHandler(void)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  This function handles ADC4 interrupt request.
   * @param  None
@@ -90,7 +90,9 @@ void ADC4_IRQHandler(void)
 
  /* USER CODE END  ADC4_IRQn 1 */
 }
+//}}}
 
+//{{{
 /**
   * @brief  This function handles first motor TIMx Update interrupt request.
   * @param  None
@@ -108,7 +110,8 @@ void TIMx_UP_M1_IRQHandler(void)
 
  /* USER CODE END  TIMx_UP_M1_IRQn 1 */
 }
-
+//}}}
+//{{{
 void TIMx_BRK_M1_IRQHandler(void)
 {
   /* USER CODE BEGIN TIMx_BRK_M1_IRQn 0 */
@@ -131,7 +134,9 @@ void TIMx_BRK_M1_IRQHandler(void)
 
   /* USER CODE END TIMx_BRK_M1_IRQn 1 */
 }
+//}}}
 
+//{{{
 /*Start here***********************************************************/
 /*GUI, this section is present only if serial communication is enabled*/
 /**
@@ -182,13 +187,9 @@ void USART_IRQHandler(void)
 
   /* USER CODE END USART_IRQn 1 */
 }
-/*End here***********************************************************/
+//}}}
 
-/**
-  * @brief  This function handles Hard Fault exception.
-  * @param  None
-  * @retval None
-  */
+//{{{
 void HardFault_Handler(void)
 {
  /* USER CODE BEGIN HardFault_IRQn 0 */
@@ -234,7 +235,8 @@ void HardFault_Handler(void)
  /* USER CODE END HardFault_IRQn 1 */
 
 }
-
+//}}}
+//{{{
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
@@ -248,3 +250,4 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 2 */
   /* USER CODE END SysTick_IRQn 2 */
 }
+//}}}

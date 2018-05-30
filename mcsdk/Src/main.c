@@ -239,7 +239,8 @@ static void MX_ADC2_Init(void)
   }
 
 }
-
+//}}}
+//{{{
 /* DAC1 init function */
 static void MX_DAC1_Init(void)
 {

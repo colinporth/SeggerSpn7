@@ -1,62 +1,6 @@
-/**
- ******************************************************************************
- * @file    pid_regulator.c
- * @author  Motor Control SDK Team, ST Microelectronics
- * @brief   This file provides firmware functions that implement the following features
- *          of the PID regulator component of the Motor Control SDK:
- *
- *           * proportional, integral and derivative computation funcions
- *           * read and write gain functions
- *
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
- * All rights reserved.</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
-
-/* Includes ------------------------------------------------------------------*/
 #include "pid_regulator.h"
-
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
- * @{
- */
-
+//{{{
 /**
  * @defgroup PIDRegulator PID Regulator
  * @brief PID regulator component of the Motor Control SDK
@@ -85,7 +29,9 @@
  *
  * @{
  */
+//}}}
 
+//{{{
 /**
  * @brief  It initializes the handle
  * @param  pHandle: handler of the current instance of the PID component
@@ -99,7 +45,8 @@ void PID_HandleInit(PID_Handle_t *pHandle)
   pHandle->wIntegralTerm = 0x00000000UL;
   pHandle->wPrevProcessVarError = 0x00000000UL;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It updates the Kp gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -110,7 +57,8 @@ void PID_SetKP(PID_Handle_t *pHandle, int16_t hKpGain)
 {
   pHandle->hKpGain = hKpGain;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It updates the Ki gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -121,7 +69,8 @@ void PID_SetKI(PID_Handle_t *pHandle, int16_t hKiGain)
 {
   pHandle->hKiGain = hKiGain;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Kp gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -131,7 +80,8 @@ int16_t PID_GetKP(PID_Handle_t *pHandle)
 {
   return(pHandle->hKpGain);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Ki gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -141,7 +91,8 @@ int16_t PID_GetKI(PID_Handle_t *pHandle)
 {
   return(pHandle->hKiGain);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Default Kp gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -151,7 +102,8 @@ int16_t PID_GetDefaultKP(PID_Handle_t *pHandle)
 {
   return(pHandle->hDefKpGain);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Default Ki gain of the passed PI object
  * @param  pHandle: handler of the current instance of the PID component
@@ -161,7 +113,9 @@ int16_t PID_GetDefaultKI(PID_Handle_t *pHandle)
 {
   return(pHandle->hDefKiGain);
 }
+//}}}
 
+//{{{
 /**
  * @brief  It set a new value into the PI integral term
  * pHandle: handler of the current instance of the PID component
@@ -174,7 +128,9 @@ void PID_SetIntegralTerm(PID_Handle_t *pHandle, int32_t wIntegralTermValue)
 
   return;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It returns the Kp gain divisor
  * @param  pHandle: handler of the current instance of the PID component
@@ -184,7 +140,8 @@ uint16_t PID_GetKPDivisor(PID_Handle_t *pHandle)
 {
   return (pHandle->hKpDivisor);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It updates the Kp divisor
  * @param  pHandle: handler of the current instance of the PID component
@@ -196,7 +153,8 @@ void PID_SetKPDivisorPOW2(PID_Handle_t *pHandle, uint16_t hKpDivisorPOW2)
   pHandle->hKpDivisorPOW2 = hKpDivisorPOW2;
   pHandle->hKpDivisor = ((uint16_t)(1u) << hKpDivisorPOW2);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Ki gain divisor of the passed PI object
  * @param  pHandle: handler of the current instance of the PID component
@@ -206,7 +164,8 @@ uint16_t PID_GetKIDivisor(PID_Handle_t *pHandle)
 {
   return (pHandle->hKiDivisor);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It updates the Ki divisor
  * @param  pHandle: handler of the current instance of the PID component
@@ -221,7 +180,9 @@ void PID_SetKIDivisorPOW2(PID_Handle_t *pHandle, uint16_t hKiDivisorPOW2)
   PID_SetUpperIntegralTermLimit(pHandle, (int32_t)INT16_MAX * wKiDiv);
   PID_SetLowerIntegralTermLimit(pHandle, (int32_t)-INT16_MAX * wKiDiv);
 }
+//}}}
 
+//{{{
 /**
  * @brief  It set a new value for lower integral term limit
  * @param  pHandle: handler of the current instance of the PID component
@@ -232,7 +193,8 @@ void PID_SetLowerIntegralTermLimit(PID_Handle_t *pHandle, int32_t wLowerLimit)
 {
   pHandle->wLowerIntegralLimit = wLowerLimit;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It set a new value for upper integral term limit
  * @param  pHandle: handler of the current instance of the PID component
@@ -243,7 +205,9 @@ void PID_SetUpperIntegralTermLimit(PID_Handle_t *pHandle, int32_t wUpperLimit)
 {
   pHandle->wUpperIntegralLimit = wUpperLimit;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It set a new value for lower output limit
  * @param  pHandle: handler of the current instance of the PID component
@@ -254,7 +218,8 @@ void PID_SetLowerOutputLimit(PID_Handle_t *pHandle, int16_t hLowerLimit)
 {
   pHandle->hLowerOutputLimit = hLowerLimit;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It set a new value for upper output limit
  * @param  pHandle: handler of the current instance of the PID component
@@ -265,7 +230,9 @@ void PID_SetUpperOutputLimit(PID_Handle_t *pHandle, int16_t hUpperLimit)
 {
   pHandle->hUpperOutputLimit = hUpperLimit;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It set a new value into the PID Previous error variable required to
  *         compute derivative term
@@ -279,6 +246,8 @@ void PID_SetPrevError(PID_Handle_t *pHandle, int32_t wPrevProcessVarError)
   return;
 }
 
+//}}}
+//{{{
 /**
  * @brief  It updates the Kd gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -289,7 +258,9 @@ void PID_SetKD(PID_Handle_t *pHandle, int16_t hKdGain)
 {
   pHandle->hKdGain = hKdGain;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It returns the Kd gain
  * @param  pHandle: handler of the current instance of the PID component
@@ -299,7 +270,8 @@ int16_t PID_GetKD(PID_Handle_t *pHandle)
 {
   return pHandle->hKdGain;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It returns the Kd gain divisor of the PID object passed
  * @param  pHandle: handler of the current instance of the PID component
@@ -309,10 +281,10 @@ uint16_t PID_GetKDDivisor(PID_Handle_t *pHandle)
 {
   return (pHandle->hKdDivisor);
 }
+//}}}
 
 /**
  * @brief Sets @f$K_{dd}@f$, the derivative divisor parameter of the PID component
- *
  * @param pHandle handle on the instance of the PID component to update
  * @param hKdDivisorPOW2
  */
@@ -326,6 +298,7 @@ void PID_SetKDDivisorPOW2( PID_Handle_t *pHandle, uint16_t hKdDivisorPOW2 );
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  This function compute the output of a PI regulator sum of its
  *         proportional and integral terms
@@ -416,6 +389,7 @@ int16_t PI_Controller(PID_Handle_t *pHandle, int32_t wProcessVarError)
 
   return((int16_t)(wOutput_32));
 }
+//}}}
 
 #if 0
 #if defined (CCMRAM)
@@ -425,6 +399,7 @@ int16_t PI_Controller(PID_Handle_t *pHandle, int32_t wProcessVarError)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  This function compute the output of a PID regulator sum of its
  *         proportional, integral and derivative terms
@@ -476,13 +451,5 @@ int16_t PID_Controller(PID_Handle_t *pHandle, int32_t wProcessVarError)
   }
   return((int16_t) wTemp_output);
 }
+//}}}
 #endif
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/

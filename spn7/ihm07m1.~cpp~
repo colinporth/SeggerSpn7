@@ -41,35 +41,37 @@
 //              37 PA3                                               38
 //}}}
 //{{{  F303re pins
-// uPA0  -> ADC1_IN1   curr_fdbk1/A - 3shunt
-//  PA1  -> ADC1_IN2   vbus
-//  PA4  -> currentRef DAC
-// uPA5  -> gpio/dac/pwm
-//  PA6  <- DIAG/ENABLE/BKIN1 TIM1 BRKIN
-//  PA7  -> ADC2_IN4   bemf 3/C
-//  PA8  -> TIM1 PWM UH
-//  PA9  -> TIM1 PWM VH
-//  PA10 -> TIM1 PWM WH
-//  PA12 <- CPOUT - TIM1 ETR
-// uPA15 -> TIM2_CH1   A/H1
-//  PB0  -> ADC3_IN12  bemf 2/B
-//  PB1  -> ADC3_IN1   pot
-//  PB2  -> RedLed
-// uPB3  -> TIM2_CH2   B/H2
-//  PB4  -> currentRef TIM16 CH1 PWM
-// uPB5  -> gpio/dac/pwm
-// uPB10 -> TIM2_CH4   C/H3
-// uPB13 -> gpio/dac/pwm         SPI2 CLK
-// uPB14 <- DIAG/ENABLE/BKIN1
-// uPB15 -> ADC4_IN5  bemf 3/C   SPI1 MOSI
-// uPC0  -> ADC12_IN6  curr_fdbk3/C - 3shunt
-//  PC1  -> ADC12_IN7  curr_fdbk2/B - 1shunt, 3shunt
-//  PC2  -> ADC12_IN8  temp
-//  PC3  -> ADC12_IN9  bemf 1/A
-//  PC10 -> TIM1 PWM Enable_CH1
-//  PC11 -> TIM1 PWM Enable_CH2
-//  PC12 -> TIM1 PWM Enable_CH3
-//  PC13 <- blueButton
+// PA1  -> ADC1_IN2   vbus
+// PA6  <- DIAG/ENABLE/BKIN1
+// PA7  -> ADC2_IN4   bemf 3/C
+// PA8  -> TIM1 PWM UH
+// PA9  -> TIM1 PWM VH
+// PA10 -> TIM1 PWM WH
+// PA12 <- CPOUT - TIM1 ETR
+// PA4  -> currentRef DAC
+// PB0  -> ADC3_IN12  bemf 2/B
+// PB1  -> ADC3_IN1   pot
+// PB2  -> RedLed
+// PB4  -> currentRef PWM
+// PC1  -> ADC12_IN7  curr_fdbk2/B - 1shunt, 3shunt
+// PC2  -> ADC12_IN8  temp
+// PC3  -> ADC12_IN9  bemf 1/A
+// PC10 -> TIM1 PWM Enable_CH1
+// PC11 -> TIM1 PWM Enable_CH2
+// PC12 -> TIM1 PWM Enable_CH3
+// PC13 <- blueButton
+//
+// unused
+// PA0  -> ADC1_IN1   curr_fdbk1/A - 3shunt
+// PA5  -> gpio/dac/pwm
+// PA10 -> TIM2_CH4   C/H3
+// PA15 -> TIM2_CH1   A/H1
+// PB3  -> TIM2_CH2   B/H2
+// PB5  -> gpio/dac/pwm
+// PB13 -> gpio/dac/pwm
+// PB14 <- DIAG/ENABLE/BKIN1
+// PB15 -> ADC4_IN5  bemf 3/C
+// PC0  -> ADC12_IN6  curr_fdbk3/C - 3shunt
 //}}}
 //{{{  includes
 #include "stm32f3xx_nucleo.h"

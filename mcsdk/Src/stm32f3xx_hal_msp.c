@@ -2,6 +2,7 @@
 
 extern void _Error_Handler(char *, int);
 
+//{{{
 void HAL_MspInit(void)
 {
   __HAL_RCC_SYSCFG_CLK_ENABLE();
@@ -24,54 +25,44 @@ void HAL_MspInit(void)
   /* SysTick_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(SysTick_IRQn, 4, 0);
 }
+//}}}
 
 static uint32_t HAL_RCC_ADC12_CLK_ENABLED=0;
 
+//{{{
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
-  if(hadc->Instance==ADC1)
-  {
-  /* USER CODE BEGIN ADC1_MspInit 0 */
-
-  /* USER CODE END ADC1_MspInit 0 */
+  if(hadc->Instance==ADC1) {
     /* Peripheral clock enable */
     HAL_RCC_ADC12_CLK_ENABLED++;
     if(HAL_RCC_ADC12_CLK_ENABLED==1){
       __HAL_RCC_ADC12_CLK_ENABLE();
-    }
-
+      }
     /**ADC1 GPIO Configuration
     PC1     ------> ADC1_IN7
     PC2     ------> ADC1_IN8
     PA0     ------> ADC1_IN1
     PA1     ------> ADC1_IN2
     */
-    GPIO_InitStruct.Pin = M1_CURR_AMPL_V_Pin|M1_TEMPERATURE_Pin;
+    GPIO_InitStruct.Pin = M1_CURR_AMPL_V_Pin | M1_TEMPERATURE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = M1_CURR_AMPL_U_Pin|M1_BUS_VOLTAGE_Pin;
+    GPIO_InitStruct.Pin = M1_CURR_AMPL_U_Pin | M1_BUS_VOLTAGE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    }
 
-  /* USER CODE BEGIN ADC1_MspInit 1 */
-
-  /* USER CODE END ADC1_MspInit 1 */
-  }
-  else if(hadc->Instance==ADC2)
-  {
-  /* USER CODE BEGIN ADC2_MspInit 0 */
-
-  /* USER CODE END ADC2_MspInit 0 */
+  else if(hadc->Instance==ADC2) {
     /* Peripheral clock enable */
     HAL_RCC_ADC12_CLK_ENABLED++;
     if(HAL_RCC_ADC12_CLK_ENABLED==1){
       __HAL_RCC_ADC12_CLK_ENABLE();
-    }
+      }
 
     /**ADC2 GPIO Configuration
     PC0     ------> ADC2_IN6
@@ -81,14 +72,10 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-  /* USER CODE BEGIN ADC2_MspInit 1 */
-
-  /* USER CODE END ADC2_MspInit 1 */
+    }
   }
-
-}
-
+//}}}
+//{{{
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 {
 
@@ -160,7 +147,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   }
 
 }
+//}}}
 
+//{{{
 void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
 {
 
@@ -187,7 +176,8 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
   }
 
 }
-
+//}}}
+//{{{
 void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
 {
 
@@ -210,7 +200,9 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
   }
 
 }
+//}}}
 
+//{{{
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
 
@@ -239,7 +231,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   }
 
 }
-
+//}}}
+//{{{
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 {
 
@@ -268,7 +261,8 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
   }
 
 }
-
+//}}}
+//{{{
 void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
 
@@ -296,7 +290,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   }
 
 }
+//}}}
 
+//{{{
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
 
@@ -326,7 +322,8 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   }
 
 }
-
+//}}}
+//{{{
 void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 {
 
@@ -351,3 +348,4 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   /* USER CODE END USART2_MspDeInit 1 */
   }
 }
+//}}}

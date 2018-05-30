@@ -1,76 +1,7 @@
-/**
-  ******************************************************************************
-  * @file    inrush_current_limiter.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides firmware functions implementing the 
-  *          InrushCurrentLimiter feature of the Motor Control SDK :
-  *
-  *          * ICL_Init() to initialize dedicated variables
-  *          * ICL_Exec() to manage the ICL state machine
-  *          * ICL_GetState() to get the current ICL state machine
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "inrush_current_limiter.h"
 #include "mc_type.h"
 
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @defgroup ICL Inrush Current Limiter
-  * @brief Inrush Current Limiter component of the Motor Control SDK
-  *
-  * @todo Document the Inrush Current Limiter "module".
-  *
-  * @{
-  */
-
-
-/* Private typedef -----------------------------------------------------------*/
-/* Private defines -----------------------------------------------------------*/
-/* Private macros ------------------------------------------------------------*/
-/* Global variables ----------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
+//{{{
 /**
   * @brief  It initializes all the needed ICL component variables.
   *         It shall be called only once, right after the ICL instance creation.
@@ -84,7 +15,7 @@
 void ICL_Init(ICL_Handle_t *pHandle, BusVoltageSensor_Handle_t *pVBS, DOUT_handle_t *pDOUT)
 {
   uint32_t wAux;
-  
+
   pHandle->pVBS = pVBS;
   pHandle->pDOUT = pDOUT;
   pHandle->ICLstate = ICL_ACTIVE;
@@ -104,7 +35,9 @@ void ICL_Init(ICL_Handle_t *pHandle, BusVoltageSensor_Handle_t *pVBS, DOUT_handl
   }
   pHandle->hICLTotalTicks = (uint16_t)(wAux);
 }
+//}}}
 
+//{{{
 /**
   * @brief  It clocks the Inrush Current Limiter and must be called with a
   *         frequency equal to the one set in the hEACFrequencyHz parameter.
@@ -177,8 +110,8 @@ ICL_State_t ICL_Exec(ICL_Handle_t *pHandle)
 
   return pHandle->ICLstate;
 }
-
-
+//}}}
+//{{{
 /**
   * @brief It returns the current state of the ICL state machine.
   * @param  pHandle: handler of the current instance of the ICL component
@@ -188,14 +121,4 @@ ICL_State_t ICL_GetState(ICL_Handle_t *pHandle)
 {
   return pHandle->ICLstate;
 }
-
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

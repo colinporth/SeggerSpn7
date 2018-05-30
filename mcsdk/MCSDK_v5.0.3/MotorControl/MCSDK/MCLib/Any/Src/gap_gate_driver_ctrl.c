@@ -1,88 +1,8 @@
-/**
-  ******************************************************************************
-  * @file    gap_gate_driver_ctrl.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides firmware functions that implement the following features
-  *          of the GAP_GATE_DRIVER_CTRL component of the Motor Control SDK:
-  *           < Add below the list of features, one per line.>
-  *           +
-  *           +
-  *           +
-  *           +
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
 /* Includes ------------------------------------------------------------------*/
 #include "gap_f1f3f4_gate_driver_ctrl.h"
 #include "gap_gate_driver_ctrl.h"
 
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @defgroup GAP_GATE_DRIVER_CTRL <GAP_GATE_DRIVER_CTRL>
-  * @brief GAP_GATE_DRIVER_CTRL component of the Motor Control SDK
-  *
-  * <Detailed documentation for the component. This detailed description documents the
-  * component: it is its users guide. it explains the feratures it provides, how to use
-  * it and what conditions are required fdor its usage.
-  *
-  * There shall be only one such section per component. If the implementation of a
-  * component is split among several .c files, only one of them will have this section.
-  * The others will use an @addtogroup GAP_GATE_DRIVER_CTRL instead.
-  * >
-  *
-  * @{
-  */
-
-/* Private defines -----------------------------------------------------------*/
-/**
-  * @brief Brief description same rules as for structs
-  *
-  *  Detailed description if needed.
-  *
-  * As above: be direct, avoid the obvious, tell the hidden.
-  */
 
 #define GAP_STARTCONFIG                 0x2A
 #define GAP_STOPCONFIG                  0x3A
@@ -114,14 +34,13 @@
 #define WAITTGCHK                       50   /* 8.6u */
 #define WAITTDESATCHK                   50   /* 8.6u */
 
-/* Global variables ----------------------------------------------------------*/
-
 uint8_t device;
 uint8_t dataReceived;
 volatile uint16_t wait_cnt;
 GAP_Handle_t GAP_GD_Ctrl;
 
 
+//{{{
 /**
   * @brief  Check errors of GAP devices
   * @param  pHandle related object of class CGAP_GDC
@@ -188,7 +107,8 @@ bool GAP_CheckErrors(GAP_Handle_t *pHandle, uint32_t *error_now,uint32_t *error_
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Clears the fault state of GAP devices.
   * @param  pHandle related object of class CGDC.
@@ -242,7 +162,8 @@ bool GAP_Configuration(GAP_Handle_t *pHandle)
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Checks if the GAP devices are programmed with the settled parameters.
   * @param  pHandle related object of class CGDC.
@@ -340,7 +261,8 @@ bool GAP_IsDevicesProgrammed(GAP_Handle_t *pHandle)
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Programs the GAP devices with the settled parameters.
   * @param  pHandle related object of class CGDC.
@@ -420,7 +342,8 @@ bool GAP_DevicesConfiguration(GAP_Handle_t *pHandle)
 
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Calculate CRC from data and create 16bit value with data as MSB and
   *         CRC as LSB.
@@ -462,7 +385,8 @@ uint16_t GAP_CRCCalculate(uint8_t data, uint8_t crc_initial_value)
   value |= crc;
   return value;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Verify the CRC from dataIn and extract the 8bit data value (out).
   * @param  out Reference for the extracted 8bit data value.
@@ -483,7 +407,8 @@ bool GAP_CRCCheck(uint8_t *out, uint16_t data_in)
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Wait a time interval proportional to count.
   * @param  count Number of count to be waited
@@ -495,7 +420,8 @@ void wait(uint16_t count)
   {
   }
 }
-
+//}}}
+//{{{
 /**
   * @brief  Return the register mask starting from it address.
   * @param  reg Register address.
@@ -569,7 +495,8 @@ uint8_t GAP_RegMask(GAP_Registers_Handle_t reg)
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Read all data in the daisy chain related to register reg.
   * @param  pHandle related object of class CGAP_GDC
@@ -631,7 +558,8 @@ bool GAP_ReadRegs(GAP_Handle_t *pHandle, uint8_t *pDataRead, GAP_Registers_Handl
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 void GAP_StartConfig(GAP_Handle_t *pHandle)
 {
   uint8_t index;
@@ -649,7 +577,8 @@ void GAP_StartConfig(GAP_Handle_t *pHandle)
   GAP_CS_Deactivate(pHandle);
   wait(WAITTIME);
 }
-
+//}}}
+//{{{
 void GAP_StopConfig(GAP_Handle_t *pHandle)
 {
   uint8_t index;
@@ -666,7 +595,8 @@ void GAP_StopConfig(GAP_Handle_t *pHandle)
   wait(WAITTIME);
   GAP_SD_Deactivate(pHandle);
 }
-
+//}}}
+//{{{
 /**
   * @brief  Write data in the daisy chain in to the register reg.
   * @param  pHandle related object of class CGAP_GDC
@@ -712,7 +642,8 @@ bool GAP_WriteRegs(GAP_Handle_t *pHandle, uint8_t *pDataWrite, GAP_Registers_Han
   }
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Reset all the registers to the default and releases all the failure flag.
   * @param  pHandle related object of class CGDC.
@@ -733,7 +664,8 @@ void GAP_GlobalReset(GAP_Handle_t *pHandle)
   GAP_CS_Deactivate(pHandle);
   wait(WAITTIME);
 }
-
+//}}}
+//{{{
 /**
   * @brief  Reset selected status register.
   * @param  pHandle related object of class CGAP_GDC
@@ -757,7 +689,8 @@ bool GAP_ResetStatus(GAP_Handle_t *pHandle, GAP_Registers_Handle_t reg)
   GAP_SD_Deactivate(pHandle);
   return ret_val;
 }
-
+//}}}
+//{{{
 /**
   * @brief  ** pHandle function should be called just in IDLE state. **\n
   *         It performs the selected test on each GAP devices.
@@ -858,14 +791,4 @@ bool GAP_Test(GAP_Handle_t *pHandle, GAP_TestMode_t testMode)
 
   return ret_val;
 }
-
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
-
+//}}}
