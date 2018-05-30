@@ -87,7 +87,7 @@ public:
   #define ABS(X)     ((X) > 0 ? (X) : -(X))
   //}}}
   enum eDraw { eInvert, eOff, eOn };
-  enum eFont { eSmall, eMedium, eBig, eBigger };
+  enum eFont { eSmall, eMedium, eBig };
   enum eAlign { eLeft, eCentre, eRight };
 
   //{{{
@@ -168,11 +168,11 @@ public:
     mSpiTxDma.Init.Direction           = DMA_MEMORY_TO_PERIPH;
     mSpiTxDma.Init.PeriphInc           = DMA_PINC_DISABLE;
     mSpiTxDma.Init.MemInc              = DMA_MINC_ENABLE;
-    mSpiTxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-    mSpiTxDma.Init.MemDataAlignment    = DMA_MDATAALIGN_HALFWORD;
+    mSpiTxDma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    mSpiTxDma.Init.MemDataAlignment    = DMA_PDATAALIGN_BYTE;
     mSpiTxDma.Init.Mode                = DMA_NORMAL;
     mSpiTxDma.Init.Priority            = DMA_PRIORITY_LOW;
-       HAL_DMA_Init (&mSpiTxDma);
+    HAL_DMA_Init (&mSpiTxDma);
     __HAL_LINKDMA (&mSpiHandle, hdmatx, mSpiTxDma);
 
     HAL_NVIC_SetPriority (DMA1_Channel5_IRQn, 0, 1);
@@ -615,7 +615,12 @@ public:
   // simple char clip to width
 
     const font_t* drawFont;
-    drawFont = &font18;
+    if (font == eSmall)
+      drawFont = &font18;
+    else if (font == eMedium)
+      drawFont = &font36;
+    else if (font == eBig)
+      drawFont = &font72;
 
     switch (align) {
       //{{{
@@ -753,6 +758,13 @@ private:
   SPI_HandleTypeDef mSpiHandle;
   DMA_HandleTypeDef mSpiTxDma;
   };
+//}}}
+cLcd lcd;
+//{{{
+extern "C" {
+  void SPI2_IRQHandler() { HAL_SPI_IRQHandler (lcd.getSpiHandle()); }
+  void DMA1_Channel5_IRQHandler() { HAL_DMA_IRQHandler (lcd.getSpiHandle()->hdmatx); }
+  }
 //}}}
 
 //{{{
@@ -1763,17 +1775,26 @@ int main() {
 
   mcInit();
 
-  cLcd lcd;
   lcd.init();
-  lcd.clear (cLcd::eOn);
-  lcd.present();
 
   while (1) {
-    HAL_Delay (100);
-    printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
-            ARR_LF, counter_ARR_Bemf, piParam.Reference,
-            sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
-            sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
+    lcd.clear (cLcd::eOn);
+    //printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
+    //        ARR_LF, counter_ARR_Bemf, piParam.Reference,
+    //        sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
+    //        sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
+
+    lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
+                    dec (sixStep.mAdcBuffer[0],4) + " " +
+                    dec (sixStep.mAdcBuffer[1],4) + " " +
+                    dec (sixStep.mAdcBuffer[2],4) + " " +
+                    dec (sixStep.mAdcBuffer[3],4) + " " +
+                    dec (sixStep.mBemfInputBuffer[0],4) + " " +
+                    dec (sixStep.mBemfInputBuffer[1],4) + " " +
+                    dec (sixStep.mBemfInputBuffer[2],4),
+                    cPoint(0,0));
+
+    lcd.present();
     }
   }
 //}}}

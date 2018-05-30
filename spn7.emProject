@@ -9,7 +9,7 @@
       arm_endian="Little"
       arm_fp_abi="Hard"
       arm_fpu_type="FPv4-SP-D16"
-      arm_linker_heap_size="1024"
+      arm_linker_heap_size="20000"
       arm_linker_process_stack_size="0"
       arm_linker_stack_size="1024"
       arm_simulator_memory_simulation_parameter="RX 08000000,00080000,FFFFFFFF;RWX 20000000,00010000,CDCDCDCD"
@@ -198,6 +198,10 @@
     <file file_name="spn7/main.cpp" />
     <file file_name="system/stm32f3xx_nucleo.c" />
     <file file_name="spn7/ihm07m1.cpp" />
+    <file file_name="spn7/utils.cpp" />
+    <file file_name="spn7/font18.c" />
+    <file file_name="spn7/font36.c" />
+    <file file_name="spn7/font72.c" />
   </project>
   <configuration
     Name="Debug"

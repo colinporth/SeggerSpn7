@@ -27,14 +27,14 @@
 //               9 GND                                               10
 //              11 PA5 GPIO/DAC/PWM                       CPOUT PA12 12 ->TIM1_ETR
 //       TIM1<- 13 PA6 DIAG/ENABLE/BKIN1      DIAG/ENABLE/BKIN2 PA11 14
-//   ADC2_IN4<- 15 PA7 <-BEMF3                                  PB12 16
-//              17 PB6                                          PB11 18
+//   ADC2_IN4<- 15 PA7 <-BEMF3                                  PB12 16 -> SPI CS
+//              17 PB6                                          PB11 18 -> SPI VCOM
 //              19 PC7                                           GND 20
 //              21 PA9 ->VH_PWM                          LedRed<-PB2 22
 //              23 PA8 ->UH_PWM                   POTENTIOMETER->PB1 24 ->ADC3_IN1
-//       TIM2<- 25 PB10 <-Encoder Z/Hall H3            (BEMF3)->PB15 26 removed
+//       TIM2<- 25 PB10 <-Encoder Z/Hall H3            (BEMF3)->PB15 26 removed ->SPI2 MOSI
 //              27 PB4 CurrentRef           (DIAG/ENABLE/BKIN1) PB14 28 removed
-//              29 PB5 GPIO/DAC/PWM              (GPIO/DAC/PWM) PB13 30 removed
+//              29 PB5 GPIO/DAC/PWM              (GPIO/DAC/PWM) PB13 30 removed ->SPI2 CLK
 //       TIM2<- 31 PB3 <-Encoder B/Hall H2                      AGND 32
 //              33 PA10 ->WH_PWM                                 PC4 34
 //              35 PA2                                               36

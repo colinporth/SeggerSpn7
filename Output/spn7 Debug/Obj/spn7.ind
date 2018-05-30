@@ -62,6 +62,7 @@
 "Output/spn7 Debug/Obj/stm32f3xx_ll_utils.o"
 "Output/spn7 Debug/Obj/main.o"
 "Output/spn7 Debug/Obj/stm32f3xx_nucleo.o"
+"Output/spn7 Debug/Obj/ihm07m1.o"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libdebugio_mempoll_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libm_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
 "C:/Program Files/SEGGER/SEGGER Embedded Studio for ARM 3.40/lib/libc_v7em_fpv4_sp_d16_hard_t_le_eabi.a"
