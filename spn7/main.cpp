@@ -37,7 +37,7 @@ public:
   #define ABS(X)     ((X) > 0 ? (X) : -(X))
   //}}}
   enum eDraw { eInvert, eOff, eOn };
-  enum eFont { eSmall, eMedium, eBig };
+  enum eFont { eSmall, eBig };
   enum eAlign { eLeft, eCentre, eRight };
 
   //{{{
@@ -567,10 +567,8 @@ public:
     const font_t* drawFont;
     if (font == eSmall)
       drawFont = &font18;
-    else if (font == eMedium)
+    else
       drawFont = &font36;
-    else if (font == eBig)
-      drawFont = &font72;
 
     switch (align) {
       //{{{
@@ -767,6 +765,12 @@ cSixStep sixStep;
 cPiParam piParam;
 std::string gStateString = "init";
 
+#define AVERAGE_VALUES 20
+#define NUM_VALUES 8000
+uint32_t mValueIndex = 0;
+uint8_t* mValues0 = nullptr;
+uint8_t* mValues1 = nullptr;
+uint8_t* mValues2 = nullptr;
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
@@ -1203,6 +1207,10 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
+    mValues0[mValueIndex++ % NUM_VALUES] = sixStep.mBemfIndex == 0 ? value/16 : 0;
+    mValues1[mValueIndex++ % NUM_VALUES] = sixStep.mBemfIndex == 1 ? value/16 : 0;
+    mValues2[mValueIndex++ % NUM_VALUES] = sixStep.mBemfIndex == 2 ? value/16 : 0;
+
     // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
       switch (sixStep.mStep) {
@@ -1509,15 +1517,15 @@ void mcReset() {
   sixStep.mAdcInputChan[3] = ADC_CHANNEL_8;
 
   // PC3 -> ADC12_IN9  bemf1
-  // PA7 -> ADC2_IN4   bemf3
   // PB0 -> ADC3_IN12  bemf2
+  // PA7 -> ADC2_IN4   bemf3
   sixStep.mBemfIndex = 0;
   sixStep.mBemfInputAdc[0] = &hAdc1;
   sixStep.mBemfInputChan[0] = ADC_CHANNEL_9;
-  sixStep.mBemfInputAdc[1] = &hAdc2;
-  sixStep.mBemfInputChan[1] = ADC_CHANNEL_4;
-  sixStep.mBemfInputAdc[2] = &hAdc3;
-  sixStep.mBemfInputChan[2] = ADC_CHANNEL_12;
+  sixStep.mBemfInputAdc[1] = &hAdc3;
+  sixStep.mBemfInputChan[1] = ADC_CHANNEL_12;
+  sixStep.mBemfInputAdc[2] = &hAdc2;
+  sixStep.mBemfInputChan[2] = ADC_CHANNEL_4;
 
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
@@ -1783,6 +1791,13 @@ int main() {
 
   lcd.init();
 
+  mValues0 = (uint8_t*)malloc (NUM_VALUES);
+  mValues1 = (uint8_t*)malloc (NUM_VALUES);
+  mValues2 = (uint8_t*)malloc (NUM_VALUES);
+  memset (mValues0, 0, NUM_VALUES);
+  memset (mValues1, 0, NUM_VALUES);
+  memset (mValues2, 0, NUM_VALUES);
+
   while (1) {
     lcd.clear (cLcd::eOn);
     //printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
@@ -1790,21 +1805,47 @@ int main() {
     //        sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
     //        sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
 
-    lcd.drawString (cLcd::eOff, cLcd::eMedium, cLcd::eLeft,
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
                     dec (sixStep.mAdcBuffer[0], 4) + " " +
                     dec (sixStep.mAdcBuffer[1], 4) + " " +
                     dec (sixStep.mAdcBuffer[2], 4) + " " +
                     dec (sixStep.mAdcBuffer[3], 4),
                     cPoint(0,0));
 
-    lcd.drawString (cLcd::eOff, cLcd::eMedium, cLcd::eLeft,
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
                     dec (sixStep.mBemfInputBuffer[0], 4) + " " +
                     dec (sixStep.mBemfInputBuffer[1], 4) + " " +
                     dec (sixStep.mBemfInputBuffer[2], 4),
                     cPoint(0,40));
 
-    lcd.drawString (cLcd::eOff, cLcd::eMedium, cLcd::eLeft, gStateString, cPoint(0,70));
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
 
+    int32_t valueIndex = mValueIndex - lcd.getWidth();
+    for (int i = 0; i < lcd.getWidth(); i++) {
+      int16_t height = (lcd.getHeight()/3) - 1;
+
+      int32_t value = 0;
+      for (int j = 0; j < AVERAGE_VALUES; j++)
+        value += valueIndex+j > 0 ? mValues0[(valueIndex+j) % NUM_VALUES] : 0;
+      value /= AVERAGE_VALUES * 2;
+      lcd.fillRect (cLcd::eOff, cRect (i, height - value, i+1, height));
+
+      height += (lcd.getHeight()/3) -1;
+      value = 0;
+      for (int j = 0; j < AVERAGE_VALUES; j++)
+        value += valueIndex+j > 0 ? mValues1[(valueIndex+j) % NUM_VALUES] : 0;
+      value /= AVERAGE_VALUES * 2;
+      lcd.fillRect (cLcd::eOff, cRect (i, height - value, i+1, height));
+
+      height += (lcd.getHeight()/3);
+      value = 0;
+      for (int j = 0; j < AVERAGE_VALUES; j++)
+        value += valueIndex+j > 0 ? mValues2[(valueIndex+j) % NUM_VALUES] : 0;
+      value /= AVERAGE_VALUES * 2;
+      lcd.fillRect (cLcd::eOff, cRect (i, height - value, i+1, height));
+
+      valueIndex += AVERAGE_VALUES;
+      }
     lcd.present();
     }
   }

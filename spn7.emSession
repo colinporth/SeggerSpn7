@@ -827,6 +827,7 @@
   <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
+  <BreakpointListItem trigger="" line="201" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/main.cpp" useHWbreakpoint="false"/>
   <BreakpointListItem trigger="" line="56" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/X-NUCLEO-IHM07M1.c" useHWbreakpoint="false"/>
  </Breakpoints>
  <ExecutionProfileWindow/>
@@ -937,8 +938,6 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="17" y="1766" useTextEdit="1" useBinaryEdit="0" left="0" path="spn7/main.cpp" selected="1" top="1738" codecName="Default"/>
- </Files>
- <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
+ <Files/>
+ <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

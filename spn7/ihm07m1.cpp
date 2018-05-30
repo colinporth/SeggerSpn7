@@ -142,6 +142,14 @@ void GPIO_Init() {
 //}}}
 //{{{
 void ADC_Init() {
+//   PC1  -> ADC12_IN7  curr_fdbk2/B - 1shunt, 3shunt
+//   PB1  -> ADC3_IN1   pot
+//   PA1  -> ADC1_IN2   vbus
+//   PC2  -> ADC12_IN8  temp
+
+//   PC3  -> ADC12_IN9  bemf 1/A
+//   PB0  -> ADC3_IN12  bemf 2/B
+//   PA7  -> ADC2_IN4   bemf 3/C
 
   //{{{  config clocks
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -226,38 +234,6 @@ void ADC_Init() {
     printf ("HAL_ADC_ConfigChannel failed\n");
   //}}}
 
-  //{{{  init adc2
-  hAdc2.Instance = ADC2;
-
-  hAdc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hAdc2.Init.Resolution = ADC_RESOLUTION_12B;
-
-  hAdc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hAdc2.Init.ContinuousConvMode = DISABLE;
-  hAdc2.Init.DiscontinuousConvMode = DISABLE;
-
-  hAdc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hAdc2.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
-
-  hAdc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hAdc2.Init.NbrOfConversion = 1;
-  hAdc2.Init.DMAContinuousRequests = DISABLE;
-  hAdc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-
-  hAdc2.Init.LowPowerAutoWait = DISABLE;
-  hAdc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
-
-  if (HAL_ADC_Init (&hAdc2) != HAL_OK)
-    printf ("HAL_ADC_Init failed\n");
-  //}}}
-  //{{{  config bemf feedback phase 3/C - channel 4
-  channelConfig.Channel = ADC_CHANNEL_4;
-  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
-
-  if (HAL_ADC_ConfigChannel (&hAdc2, &channelConfig) != HAL_OK)
-    printf ("HAL_ADC_ConfigChannel failed\n");
-  //}}}
-
   //{{{  init adc3
   hAdc3.Instance = ADC3;
 
@@ -294,6 +270,38 @@ void ADC_Init() {
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
 
   if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+  //}}}
+
+  //{{{  init adc2
+  hAdc2.Instance = ADC2;
+
+  hAdc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hAdc2.Init.Resolution = ADC_RESOLUTION_12B;
+
+  hAdc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hAdc2.Init.ContinuousConvMode = DISABLE;
+  hAdc2.Init.DiscontinuousConvMode = DISABLE;
+
+  hAdc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hAdc2.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
+
+  hAdc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hAdc2.Init.NbrOfConversion = 1;
+  hAdc2.Init.DMAContinuousRequests = DISABLE;
+  hAdc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+
+  hAdc2.Init.LowPowerAutoWait = DISABLE;
+  hAdc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+
+  if (HAL_ADC_Init (&hAdc2) != HAL_OK)
+    printf ("HAL_ADC_Init failed\n");
+  //}}}
+  //{{{  config bemf feedback phase 3/C - channel 4
+  channelConfig.Channel = ADC_CHANNEL_4;
+  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
+
+  if (HAL_ADC_ConfigChannel (&hAdc2, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
   //}}}
 
