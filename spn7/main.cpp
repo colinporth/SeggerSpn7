@@ -95,6 +95,7 @@ public:
 
     // config CS, DISP, init lo
     __HAL_RCC_GPIOB_CLK_ENABLE();
+
     GPIO_InitTypeDef gpioInit;
     gpioInit.Pin = CS_PIN;
     gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
@@ -1761,6 +1762,11 @@ int main() {
   HAL_NVIC_SetPriority (SysTick_IRQn, 2, 0);
 
   mcInit();
+
+  cLcd lcd;
+  lcd.init();
+  lcd.clear (cLcd::eOn);
+  lcd.present();
 
   while (1) {
     HAL_Delay (100);
