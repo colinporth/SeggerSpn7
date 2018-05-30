@@ -33,7 +33,7 @@
 //              21 PA9 ->VH_PWM                          LedRed<-PB2 22
 //              23 PA8 ->UH_PWM                   POTENTIOMETER->PB1 24 ->ADC3_IN1
 //       TIM2<- 25 PB10 <-Encoder Z/Hall H3            (BEMF3)->PB15 26 removed ->SPI2 MOSI
-//              27 PB4 CurrentRef           (DIAG/ENABLE/BKIN1) PB14 28 removed
+//              27 PB4 CurrentRef           (DIAG/ENABLE/BKIN1) PB14 28 removed ->lcd power
 //              29 PB5 GPIO/DAC/PWM              (GPIO/DAC/PWM) PB13 30 removed ->SPI2 CLK
 //       TIM2<- 31 PB3 <-Encoder B/Hall H2                      AGND 32
 //              33 PA10 ->WH_PWM                                 PC4 34

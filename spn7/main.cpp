@@ -26,6 +26,7 @@ public:
   #define MOSI_PIN       GPIO_PIN_15  //  SPI2  PB15  MOSI
   #define CS_PIN         GPIO_PIN_12  //  SPI2  PB12  CS/NSS active hi
   #define VCOM_PIN       GPIO_PIN_11  //  GPIO  PB11  VCOM - TIM2 CH4 1Hz flip
+  #define POWER_PIN      GPIO_PIN_14  //  GPIO  PB14  power
 
   #define paddingByte 0x00
   #define clearByte   0x20 // unused
@@ -43,15 +44,18 @@ public:
   //{{{
   bool init() {
 
-    // config CS, DISP, init lo
+    // config CS, POWER_PIN
     __HAL_RCC_GPIOB_CLK_ENABLE();
 
     GPIO_InitTypeDef gpioInit;
-    gpioInit.Pin = CS_PIN;
+    gpioInit.Pin = CS_PIN | POWER_PIN;
     gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
     gpioInit.Pull = GPIO_PULLUP;
     gpioInit.Speed = GPIO_SPEED_HIGH;
     HAL_GPIO_Init (GPIOB, &gpioInit);
+
+    // POWER_PIN hi
+    GPIOB->BSRR = POWER_PIN;
 
     //{{{  init tim2
     // config VCOM GPIOB as TIM2 CH4
@@ -148,6 +152,7 @@ public:
         lineAddressByte = ((lineAddressByte & 0xAA) >> 1) | ((lineAddressByte & 0x55) << 1);
         mFrameBuf [1 + (y*getPitch())] = lineAddressByte;
         }
+
       present();
       }
     else
