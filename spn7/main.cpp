@@ -497,10 +497,6 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    mTraceVec.addSample (0, sixStep.mBemfIndex == 0 ? value>>4 : 0);
-    mTraceVec.addSample (1, sixStep.mBemfIndex == 1 ? value>>4 : 0);
-    mTraceVec.addSample (2, sixStep.mBemfIndex == 2 ? value>>4 : 0);
-
     // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
       switch (sixStep.mStep) {
@@ -665,6 +661,7 @@ void mcTim6Tick() {
     }
 
   sixStepTable (sixStep.mStep);
+
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
     // step request during downCount, change adc Chan
     mcNucleoAdcChan (sixStep.mBemfInputAdc[sixStep.mBemfIndex], sixStep.mBemfInputChan[sixStep.mBemfIndex]);
@@ -679,6 +676,10 @@ void mcTim6Tick() {
 //}}}
 //{{{
 void mcSysTick() {
+
+  mTraceVec.addSample (0, sixStep.mBemfInputBuffer[0]>>4);
+  mTraceVec.addSample (1, sixStep.mBemfInputBuffer[1]>>4);
+  mTraceVec.addSample (2, sixStep.mBemfInputBuffer[2]>>4);
 
   if (sixStep.mAligning && !sixStep.mAligned) {
     //{{{  align motor
@@ -1082,9 +1083,7 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (2000, 5);
-  mTraceVec.addTrace (2000, 5);
-  mTraceVec.addTrace (2000, 5);
+  mTraceVec.addTrace (8000, 1, 3);
 
   while (1) {
     lcd.clear (cLcd::eOn);

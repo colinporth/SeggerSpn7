@@ -1,13 +1,14 @@
 // cLcd.cpp
-//   -------------------------------------------
-//   | GND   EXTMODE   5v   VCOM   MOSI   3.3v |
-//   | GND     5v     DISP   CS    SCLK    GND |
-// -----------------------------------------------
 // LCD  PB14 3.3v power
 // SPI2 PB12 CS
 //      PB13 MOSI
 //      PB15 SCLK
 // TIM2 PB11 VCOM PWM 1hz
+
+//   -------------------------------------------
+//   | GND   EXTMODE   5v   VCOM   MOSI   3.3v |
+//   | GND     5v     DISP   CS    SCLK    GND |
+// -----------------------------------------------
 
 // CN10          1 PC9                                           PC8  2
 //               3 PB8                                           PC6  4
