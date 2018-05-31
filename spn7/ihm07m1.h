@@ -26,7 +26,7 @@ void mcNucleoCurrentRefStart();
 void mcNucleoCurrentRefStop();
 void mcNucleoCurrentRefSetValue (uint16_t value);
 
-void mcNucleoAdcChan (ADC_HandleTypeDef* hAdc, uint32_t chan);
+void mcNucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
 
 void mcNucleoLedOn();
 void mcNucleoLedOff();
