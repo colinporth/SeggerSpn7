@@ -59,10 +59,11 @@ cLcd lcd;
 std::string gStateString = "init";
 
 //{{{
-class cTraceChan {
+class cTrace {
 public:
   //{{{
-  cTraceChan (int numSamples, int averageSamples) : mNumSamples(numSamples), mAverageSamples(averageSamples) {
+  cTrace (int numSamples, int averageSamples, int height)
+     : mNumSamples(numSamples), mAverageSamples(averageSamples), mHeight(height) {
     mSamples = (uint8_t*)malloc (numSamples);
     memset (mSamples, 0, numSamples);
     }
@@ -74,26 +75,29 @@ public:
   //}}}
   //{{{
   void draw (cLcd* lcd, int y) {
+
     for (int i = 0; i < lcd->getWidth(); i++) {
-      int32_t value = 0;
+      uint32_t value = 0;
       for (int j = 0; j < mAverageSamples; j++)
         value += mCurSample+j > 0 ? mSamples[(mCurSample+j) % mNumSamples] : 0;
-      value /= mAverageSamples * 2;
+      value = (value * mHeight) / (255 * mAverageSamples);
+
       lcd->fillRect (cLcd::eOff, cRect (i, y - value, i+1, y));
       }
     }
   //}}}
 
 private:
+  int mHeight = 0;
   int mCurSample = 0;
   int mNumSamples = 0;
   int mAverageSamples = 1;
   uint8_t* mSamples = nullptr;
   };
 //}}}
-cTraceChan* mChan1 = nullptr;
-cTraceChan* mChan2 = nullptr;
-cTraceChan* mChan3 = nullptr;
+cTrace* mTrace1 = nullptr;
+cTrace* mTrace2 = nullptr;
+cTrace* mTrace3 = nullptr;
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
@@ -531,9 +535,9 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    mChan1->addSample (sixStep.mBemfIndex == 0 ? value/16 : 0);
-    mChan2->addSample (sixStep.mBemfIndex == 1 ? value/16 : 0);
-    mChan3->addSample (sixStep.mBemfIndex == 2 ? value/16 : 0);
+    mTrace1->addSample (sixStep.mBemfIndex == 0 ? value>>4 : 0);
+    mTrace2->addSample (sixStep.mBemfIndex == 1 ? value>>4 : 0);
+    mTrace3->addSample (sixStep.mBemfIndex == 2 ? value>>4 : 0);
 
     // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
@@ -1117,9 +1121,9 @@ int main() {
 
   lcd.init();
 
-  mChan1 = new cTraceChan (2000, 5);
-  mChan2 = new cTraceChan (2000, 5);
-  mChan3 = new cTraceChan (2000, 5);
+  mTrace1 = new cTrace (2000, 5, lcd.getHeight()/3);
+  mTrace2 = new cTrace (2000, 5, lcd.getHeight()/3);
+  mTrace3 = new cTrace (2000, 5, lcd.getHeight()/3);
 
   while (1) {
     lcd.clear (cLcd::eOn);
@@ -1144,9 +1148,9 @@ int main() {
     lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
 
 
-    mChan1->draw (&lcd, lcd.getHeight()/3);
-    mChan2->draw (&lcd, lcd.getHeight()*2/3);
-    mChan3->draw (&lcd, lcd.getHeight());
+    mTrace1->draw (&lcd, lcd.getHeight()/3);
+    mTrace2->draw (&lcd, lcd.getHeight()*2/3);
+    mTrace3->draw (&lcd, lcd.getHeight());
     lcd.present();
     }
   }
