@@ -176,6 +176,50 @@ void ADC_Init() {
   HAL_GPIO_Init (GPIOC, &gpioInit);
   //}}}
 
+  //{{{  init adc3
+  hAdc3.Instance = ADC3;
+
+  hAdc3.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hAdc3.Init.Resolution = ADC_RESOLUTION_12B;
+
+  hAdc3.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hAdc3.Init.ContinuousConvMode = DISABLE;
+  hAdc3.Init.DiscontinuousConvMode = DISABLE;
+
+  hAdc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hAdc3.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
+
+  hAdc3.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hAdc3.Init.NbrOfConversion = 1;
+  hAdc3.Init.DMAContinuousRequests = DISABLE;
+  hAdc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+
+  hAdc3.Init.LowPowerAutoWait = DISABLE;
+  hAdc3.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+
+  if (HAL_ADC_Init (&hAdc3) != HAL_OK)
+    printf ("HAL_ADC_Init failed\n");
+  //}}}
+  //{{{  config potentiometer - channel 1
+  ADC_ChannelConfTypeDef channelConfig3;
+  channelConfig3.Rank = 1;
+  channelConfig3.SingleDiff = ADC_SINGLE_ENDED;
+  channelConfig3.OffsetNumber = ADC_OFFSET_NONE;
+  channelConfig3.Channel = ADC_CHANNEL_1;
+  channelConfig3.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
+  channelConfig3.Offset = 0;
+
+  if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig3) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel3 failed\n");
+  //}}}
+  //{{{  config bemf feedback phase 2/B - channel 12
+  channelConfig3.Channel = ADC_CHANNEL_12;
+  channelConfig3.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
+
+  if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig3) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel failed\n");
+  //}}}
+
   //{{{  init adc1
   hAdc1.Instance = ADC1;
 
@@ -231,45 +275,6 @@ void ADC_Init() {
   channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
 
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
-    printf ("HAL_ADC_ConfigChannel failed\n");
-  //}}}
-
-  //{{{  init adc3
-  hAdc3.Instance = ADC3;
-
-  hAdc3.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  hAdc3.Init.Resolution = ADC_RESOLUTION_12B;
-
-  hAdc3.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  hAdc3.Init.ContinuousConvMode = DISABLE;
-  hAdc3.Init.DiscontinuousConvMode = DISABLE;
-
-  hAdc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  hAdc3.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
-
-  hAdc3.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hAdc3.Init.NbrOfConversion = 1;
-  hAdc3.Init.DMAContinuousRequests = DISABLE;
-  hAdc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-
-  hAdc3.Init.LowPowerAutoWait = DISABLE;
-  hAdc3.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
-
-  if (HAL_ADC_Init (&hAdc3) != HAL_OK)
-    printf ("HAL_ADC_Init failed\n");
-  //}}}
-  //{{{  config potentiometer - channel 1
-  channelConfig.Channel = ADC_CHANNEL_1;
-  channelConfig.SamplingTime = ADC_SAMPLETIME_181CYCLES_5;
-
-  if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig) != HAL_OK)
-    printf ("HAL_ADC_ConfigChannel failed\n");
-  //}}}
-  //{{{  config bemf feedback phase 2/B - channel 12
-  channelConfig.Channel = ADC_CHANNEL_12;
-  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
-
-  if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
   //}}}
 

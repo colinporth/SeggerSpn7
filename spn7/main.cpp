@@ -677,9 +677,12 @@ void mcTim6Tick() {
 //{{{
 void mcSysTick() {
 
-  mTraceVec.addSample (0, sixStep.mBemfInputBuffer[0]>>4);
-  mTraceVec.addSample (1, sixStep.mBemfInputBuffer[1]>>4);
-  mTraceVec.addSample (2, sixStep.mBemfInputBuffer[2]>>4);
+  if (sixStep.mMotorRunning) {
+    mTraceVec.addSample (0, sixStep.mBemfInputBuffer[0]>>4);
+    mTraceVec.addSample (1, sixStep.mBemfInputBuffer[1]>>4);
+    mTraceVec.addSample (2, sixStep.mBemfInputBuffer[2]>>4);
+    mTraceVec.addSample (3, __HAL_TIM_GetCounter (&hTim6)>>8);
+    }
 
   if (sixStep.mAligning && !sixStep.mAligned) {
     //{{{  align motor
@@ -1083,7 +1086,7 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (8000, 1, 3);
+  mTraceVec.addTrace (10000, 1, 4);
 
   while (1) {
     lcd.clear (cLcd::eOn);
