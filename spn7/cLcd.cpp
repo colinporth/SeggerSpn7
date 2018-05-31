@@ -1,16 +1,42 @@
 // cLcd.cpp
-//   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//   x  GND   EXTMODE   5v   VCOM   MOSI   3.3v  x
-//   x  GND     5v     DISP   CS    SCLK    GND  x
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//   -------------------------------------------
+//   | GND   EXTMODE   5v   VCOM   MOSI   3.3v |
+//   | GND     5v     DISP   CS    SCLK    GND |
+// -----------------------------------------------
+// LCD  PB14 3.3v power
+// SPI2 PB12 CS
+//      PB13 MOSI
+//      PB15 SCLK
+// TIM2 PB11 VCOM PWM 1hz
+
+// CN10          1 PC9                                           PC8  2
+//               3 PB8                                           PC6  4
+//               5 PB9                                           PC5  6
+//               7 AVDD                                          U5V  8
+//               9 GND                                               10
+//              11 PA5 GPIO/DAC/PWM                       CPOUT PA12 12 ->TIM1_ETR
+//       TIM1<- 13 PA6 DIAG/ENABLE/BKIN1      DIAG/ENABLE/BKIN2 PA11 14
+//   ADC2_IN4<- 15 PA7 <-BEMF3                                  PB12 16 -> SPI CS
+//              17 PB6                                          PB11 18 -> SPI VCOM
+//              19 PC7                                           GND 20
+//              21 PA9 ->VH_PWM                          LedRed<-PB2 22
+//              23 PA8 ->UH_PWM                   POTENTIOMETER->PB1 24 ->ADC3_IN1
+//       TIM2<- 25 PB10 <-Encoder Z/Hall H3            (BEMF3)->PB15 26 removed ->SPI2 MOSI
+//              27 PB4 CurrentRef           (DIAG/ENABLE/BKIN1) PB14 28 removed ->lcd power
+//              29 PB5 GPIO/DAC/PWM              (GPIO/DAC/PWM) PB13 30 removed ->SPI2 CLK
+//       TIM2<- 31 PB3 <-Encoder B/Hall H2                      AGND 32
+//              33 PA10 ->WH_PWM                                 PC4 34
+//              35 PA2                                               36
+//              37 PA3                                               38
+
 #include "cLcd.h"
 #include "font.h"
 //{{{  defines
-#define VCOM_PIN    GPIO_PIN_11  // GPIO PB11  VCOM - TIM2 CH4 1Hz flip
-#define CS_PIN      GPIO_PIN_12  // SPI2 PB12  CS/NSS active hi
-#define SCK_PIN     GPIO_PIN_13  // SPI2 PB13  spi2 SCK
-#define POWER_PIN   GPIO_PIN_14  // GPIO PB14  lcd power
-#define MOSI_PIN    GPIO_PIN_15  // SPI2 PB15  spi2 MOSI
+#define VCOM_PIN    GPIO_PIN_11  // GPIO PB11  TIM2 VCOM - TIM2 CH4 1Hz flip
+#define CS_PIN      GPIO_PIN_12  // SPI2 PB12  SPI2 CS/NSS active hi
+#define SCK_PIN     GPIO_PIN_13  // SPI2 PB13  SPI2 SCK
+#define POWER_PIN   GPIO_PIN_14  // GPIO PB14  LCD power
+#define MOSI_PIN    GPIO_PIN_15  // SPI2 PB15  SPI2 MOSI
 
 #define paddingByte 0x00
 #define clearByte   0x20 // unused
@@ -50,7 +76,7 @@ bool cLcd::init() {
   // POWER_PIN hi
   GPIOB->BSRR = POWER_PIN;
 
-  //{{{  config VCOM as tim2 1Hz pwm
+  //{{{  config VCOM as TIM2 1Hz pwm
   __HAL_RCC_TIM2_CLK_ENABLE();
 
   // config VCOM GPIOB as TIM2 CH4

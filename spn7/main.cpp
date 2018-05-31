@@ -56,9 +56,9 @@ uint64_t constant_multiplier_tmp = 0;
 //}}}
 cSixStep sixStep;
 cPiParam piParam;
-cLcd lcd;
 std::string gStateString = "init";
 
+cLcd lcd;
 cTraceVec mTraceVec;
 
 //{{{
@@ -1082,7 +1082,6 @@ int main() {
   mcInit();
 
   lcd.init();
-
   mTraceVec.addTrace (2000, 5);
   mTraceVec.addTrace (2000, 5);
   mTraceVec.addTrace (2000, 5);
