@@ -58,6 +58,7 @@
       <file file_name="spn7/sixStepParam.h" />
       <file file_name="spn7/cLcd.h" />
       <file file_name="spn7/font.h" />
+      <file file_name="spn7/cTrace.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">

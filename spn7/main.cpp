@@ -4,6 +4,7 @@
 
 #include "ihm07m1.h"
 #include "sixStepLib.h"
+#include "cTrace.h"
 #include "cLcd.h"
 //}}}
 
@@ -58,45 +59,7 @@ cPiParam piParam;
 cLcd lcd;
 std::string gStateString = "init";
 
-//{{{
-class cTrace {
-public:
-  //{{{
-  cTrace (int numSamples, int averageSamples)
-     : mNumSamples(numSamples), mAverageSamples(averageSamples) {
-    mSamples = (uint8_t*)malloc (numSamples);
-    memset (mSamples, 0, numSamples);
-    }
-  //}}}
-  //{{{
-  void addSample (uint8_t value) {
-    mSamples[mCurSample++ % mNumSamples] = value;
-    }
-  //}}}
-  //{{{
-  void draw (cLcd* lcd, int y, int height) {
-
-    for (int i = 0; i < lcd->getWidth(); i++) {
-      uint32_t value = 0;
-      for (int j = 0; j < mAverageSamples; j++)
-        value += mCurSample+j > 0 ? mSamples[(mCurSample+j) % mNumSamples] : 0;
-      value = (value * height) / (255 * mAverageSamples);
-
-      lcd->fillRect (cLcd::eOff, cRect (i, y - value, i+1, y));
-      }
-    }
-  //}}}
-
-private:
-  int mCurSample = 0;
-  int mNumSamples = 0;
-  int mAverageSamples = 1;
-  uint8_t* mSamples = nullptr;
-  };
-//}}}
-cTrace* mTrace1 = nullptr;
-cTrace* mTrace2 = nullptr;
-cTrace* mTrace3 = nullptr;
+cTraceVec mTraceVec;
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
@@ -534,9 +497,9 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    mTrace1->addSample (sixStep.mBemfIndex == 0 ? value>>4 : 0);
-    mTrace2->addSample (sixStep.mBemfIndex == 1 ? value>>4 : 0);
-    mTrace3->addSample (sixStep.mBemfIndex == 2 ? value>>4 : 0);
+    mTraceVec.addSample (0, sixStep.mBemfIndex == 0 ? value>>4 : 0);
+    mTraceVec.addSample (1, sixStep.mBemfIndex == 1 ? value>>4 : 0);
+    mTraceVec.addSample (2, sixStep.mBemfIndex == 2 ? value>>4 : 0);
 
     // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
@@ -1120,9 +1083,9 @@ int main() {
 
   lcd.init();
 
-  mTrace1 = new cTrace (2000, 5);
-  mTrace2 = new cTrace (2000, 5);
-  mTrace3 = new cTrace (2000, 5);
+  mTraceVec.addTrace (2000, 5);
+  mTraceVec.addTrace (2000, 5);
+  mTraceVec.addTrace (2000, 5);
 
   while (1) {
     lcd.clear (cLcd::eOn);
@@ -1146,10 +1109,7 @@ int main() {
 
     lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
 
-
-    mTrace1->draw (&lcd, lcd.getHeight()/3, lcd.getHeight()/3);
-    mTrace2->draw (&lcd, lcd.getHeight()*2/3, lcd.getHeight()/3);
-    mTrace3->draw (&lcd, lcd.getHeight(), lcd.getHeight()/3);
+    mTraceVec.draw (&lcd);
     lcd.present();
     }
   }

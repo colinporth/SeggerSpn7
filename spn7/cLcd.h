@@ -1,4 +1,5 @@
 // cLcd.h
+#pragma once
 #include "cPointRect.h"
 #include "utils.h"
 #include "stm32f3xx_hal.h"
