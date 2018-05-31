@@ -6,7 +6,7 @@
 // TIM2 PB11 VCOM PWM 1hz
 
 //   -------------------------------------------
-//   | GND   EXTMODE   5v   VCOM   MOSI   3.3v |
+//   | GND   EXTMODE   5v   VCOM   MOSI     5v |
 //   | GND     5v     DISP   CS    SCLK    GND |
 // -----------------------------------------------
 
