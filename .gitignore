@@ -60,3 +60,4 @@ dkms.conf
 *.~cpp
 *.~cpp
 *.bin
+*.~cpp~

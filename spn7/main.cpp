@@ -1092,22 +1092,22 @@ int main() {
     //        sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
     //        sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
 
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+    lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
                     dec (sixStep.mAdcBuffer[0], 4) + " " +
                     dec (sixStep.mAdcBuffer[1], 4) + " " +
                     dec (sixStep.mAdcBuffer[2], 4) + " " +
                     dec (sixStep.mAdcBuffer[3], 4),
                     cPoint(0,0));
 
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+    lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
                     dec (sixStep.mBemfInputBuffer[0], 4) + " " +
                     dec (sixStep.mBemfInputBuffer[1], 4) + " " +
                     dec (sixStep.mBemfInputBuffer[2], 4),
-                    cPoint(0,40));
+                    cPoint(0,20));
 
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
+    lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft, gStateString, cPoint(0,40));
 
-    mTraceVec.draw (&lcd);
+    mTraceVec.draw (&lcd, 60, lcd.getHeight());
     lcd.present();
     }
   }
