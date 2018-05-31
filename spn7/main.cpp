@@ -62,8 +62,8 @@ std::string gStateString = "init";
 class cTrace {
 public:
   //{{{
-  cTrace (int numSamples, int averageSamples, int height)
-     : mNumSamples(numSamples), mAverageSamples(averageSamples), mHeight(height) {
+  cTrace (int numSamples, int averageSamples)
+     : mNumSamples(numSamples), mAverageSamples(averageSamples) {
     mSamples = (uint8_t*)malloc (numSamples);
     memset (mSamples, 0, numSamples);
     }
@@ -74,13 +74,13 @@ public:
     }
   //}}}
   //{{{
-  void draw (cLcd* lcd, int y) {
+  void draw (cLcd* lcd, int y, int height) {
 
     for (int i = 0; i < lcd->getWidth(); i++) {
       uint32_t value = 0;
       for (int j = 0; j < mAverageSamples; j++)
         value += mCurSample+j > 0 ? mSamples[(mCurSample+j) % mNumSamples] : 0;
-      value = (value * mHeight) / (255 * mAverageSamples);
+      value = (value * height) / (255 * mAverageSamples);
 
       lcd->fillRect (cLcd::eOff, cRect (i, y - value, i+1, y));
       }
@@ -88,7 +88,6 @@ public:
   //}}}
 
 private:
-  int mHeight = 0;
   int mCurSample = 0;
   int mNumSamples = 0;
   int mAverageSamples = 1;
@@ -1121,9 +1120,9 @@ int main() {
 
   lcd.init();
 
-  mTrace1 = new cTrace (2000, 5, lcd.getHeight()/3);
-  mTrace2 = new cTrace (2000, 5, lcd.getHeight()/3);
-  mTrace3 = new cTrace (2000, 5, lcd.getHeight()/3);
+  mTrace1 = new cTrace (2000, 5);
+  mTrace2 = new cTrace (2000, 5);
+  mTrace3 = new cTrace (2000, 5);
 
   while (1) {
     lcd.clear (cLcd::eOn);
@@ -1148,9 +1147,9 @@ int main() {
     lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
 
 
-    mTrace1->draw (&lcd, lcd.getHeight()/3);
-    mTrace2->draw (&lcd, lcd.getHeight()*2/3);
-    mTrace3->draw (&lcd, lcd.getHeight());
+    mTrace1->draw (&lcd, lcd.getHeight()/3, lcd.getHeight()/3);
+    mTrace2->draw (&lcd, lcd.getHeight()*2/3, lcd.getHeight()/3);
+    mTrace3->draw (&lcd, lcd.getHeight(), lcd.getHeight()/3);
     lcd.present();
     }
   }
