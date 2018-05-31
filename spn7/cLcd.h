@@ -1,32 +1,11 @@
 // cLcd.h
 #include "cPointRect.h"
 #include "utils.h"
-#include "font.h"
-#include "stm32f3xx_nucleo.h"
+#include "stm32f3xx_hal.h"
 
+struct font_t;
 class cLcd {
 public:
-  //{{{  defines
-  //    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-  //    x  GND   EXTMODE   5v   VCOM   MOSI   3.3v  x
-  //    x  GND     5v     DISP   CS    SCLK    GND  x
-  //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-  #define SCK_PIN        GPIO_PIN_13  //  SPI2  PB13  SCK
-  #define MOSI_PIN       GPIO_PIN_15  //  SPI2  PB15  MOSI
-  #define CS_PIN         GPIO_PIN_12  //  SPI2  PB12  CS/NSS active hi
-  #define VCOM_PIN       GPIO_PIN_11  //  GPIO  PB11  VCOM - TIM2 CH4 1Hz flip
-  #define POWER_PIN      GPIO_PIN_14  //  GPIO  PB14  power
-
-  #define paddingByte 0x00
-  #define clearByte   0x20 // unused
-  #define vcomByte    0x40 // unused
-  #define commandByte 0x80
-
-  #define POLY_X(Z)  ((int32_t)((points + Z)->x))
-  #define POLY_Y(Z)  ((int32_t)((points + Z)->y))
-  #define ABS(X)     ((X) > 0 ? (X) : -(X))
-  //}}}
   enum eDraw { eInvert, eOff, eOn };
   enum eFont { eSmall, eBig };
   enum eAlign { eLeft, eCentre, eRight };

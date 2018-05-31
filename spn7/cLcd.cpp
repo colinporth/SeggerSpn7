@@ -1,14 +1,16 @@
 // cLcd.cpp
+//   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//   x  GND   EXTMODE   5v   VCOM   MOSI   3.3v  x
+//   x  GND     5v     DISP   CS    SCLK    GND  x
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #include "cLcd.h"
-//    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//    x  GND   EXTMODE   5v   VCOM   MOSI   3.3v  x
-//    x  GND     5v     DISP   CS    SCLK    GND  x
-//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-#define SCK_PIN        GPIO_PIN_13  //  SPI2  PB13  SCK
-#define MOSI_PIN       GPIO_PIN_15  //  SPI2  PB15  MOSI
-#define CS_PIN         GPIO_PIN_12  //  SPI2  PB12  CS/NSS active hi
-#define VCOM_PIN       GPIO_PIN_11  //  GPIO  PB11  VCOM - TIM2 CH4 1Hz flip
-#define POWER_PIN      GPIO_PIN_14  //  GPIO  PB14  power
+#include "font.h"
+//{{{  defines
+#define VCOM_PIN    GPIO_PIN_11  // GPIO PB11  VCOM - TIM2 CH4 1Hz flip
+#define CS_PIN      GPIO_PIN_12  // SPI2 PB12  CS/NSS active hi
+#define SCK_PIN     GPIO_PIN_13  // SPI2 PB13  spi2 SCK
+#define POWER_PIN   GPIO_PIN_14  // GPIO PB14  lcd power
+#define MOSI_PIN    GPIO_PIN_15  // SPI2 PB15  spi2 MOSI
 
 #define paddingByte 0x00
 #define clearByte   0x20 // unused
@@ -18,18 +20,26 @@
 #define POLY_X(Z)  ((int32_t)((points + Z)->x))
 #define POLY_Y(Z)  ((int32_t)((points + Z)->y))
 #define ABS(X)     ((X) > 0 ? (X) : -(X))
+//}}}
 
 const uint8_t kFirstMask[8] = { 0xFF, 0x7F, 0x3F, 0x1F, 0x0f, 0x07, 0x03, 0x01 };
 const uint8_t kLastMask[8] =  { 0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF };
+
+cLcd* cLcd::mLcd = nullptr;
+
+extern "C" {
+  void SPI2_IRQHandler() { HAL_SPI_IRQHandler (cLcd::mLcd->getSpiHandle()); }
+  void DMA1_Channel5_IRQHandler() { HAL_DMA_IRQHandler (cLcd::mLcd->getSpiHandle()->hdmatx); }
+  }
 
 //{{{
 bool cLcd::init() {
 
   mLcd = this;
 
-  // config CS, POWER_PIN
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
+  // config CS, POWER_PIN
   GPIO_InitTypeDef gpioInit;
   gpioInit.Pin = CS_PIN | POWER_PIN;
   gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
@@ -40,14 +50,14 @@ bool cLcd::init() {
   // POWER_PIN hi
   GPIOB->BSRR = POWER_PIN;
 
-  //{{{  init tim2
+  //{{{  config VCOM as tim2 1Hz pwm
+  __HAL_RCC_TIM2_CLK_ENABLE();
+
   // config VCOM GPIOB as TIM2 CH4
   gpioInit.Pin = VCOM_PIN;
   gpioInit.Mode = GPIO_MODE_AF_PP;
   gpioInit.Alternate = GPIO_AF1_TIM2;
   HAL_GPIO_Init (GPIOB, &gpioInit);
-
-  __HAL_RCC_TIM2_CLK_ENABLE();
 
   TIM_HandleTypeDef timHandle = {0};
   timHandle.Instance = TIM2;
@@ -55,13 +65,11 @@ bool cLcd::init() {
   timHandle.Init.Prescaler = (uint32_t) ((SystemCoreClock /2) / 10000) - 1;
   timHandle.Init.ClockDivision = 0;
   timHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-
   if (HAL_TIM_Base_Init (&timHandle))
     printf ("HAL_TIM_Base_Init failed\n");
 
   // init timOcInit
   TIM_OC_InitTypeDef timOcInit = {0};
-
   timOcInit.OCMode       = TIM_OCMODE_PWM1;
   timOcInit.OCPolarity   = TIM_OCPOLARITY_HIGH;
   timOcInit.OCFastMode   = TIM_OCFAST_DISABLE;
@@ -69,14 +77,12 @@ bool cLcd::init() {
   timOcInit.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   timOcInit.OCIdleState  = TIM_OCIDLESTATE_RESET;
   timOcInit.Pulse = 10000 / 2;
-
   if (HAL_TIM_PWM_ConfigChannel (&timHandle, &timOcInit, TIM_CHANNEL_4))
     printf ("HAL_TIM_PWM_ConfigChannel failed\n");
 
-  //}}}
   if (HAL_TIM_PWM_Start (&timHandle, TIM_CHANNEL_4))
     printf ("HAL_TIM2_PWM_Start failed\n");
-
+  //}}}
   //{{{  config SPI2 tx
   // config SPI2 GPIOB
   gpioInit.Pin = SCK_PIN | MOSI_PIN;
@@ -629,6 +635,7 @@ void cLcd::present() {
 
   if (HAL_SPI_Transmit_DMA (&mSpiHandle, mFrameBuf, 1 + getHeight() * getPitch() + 1))
     printf ("HAL_SPI_Transmit failed\n");
+
   while (HAL_SPI_GetState (&mSpiHandle) != HAL_SPI_STATE_READY)
     HAL_Delay (1);
 
@@ -645,10 +652,12 @@ void cLcd::present() {
 // private:
 //{{{
 uint16_t cLcd::getCharWidth (const font_t* font, char ascii) {
+
   if ((ascii >= font->firstChar) && (ascii <= font->lastChar)) {
     auto char8 = (uint8_t*)(font->glyphsBase + font->glyphOffsets[ascii - font->firstChar]);
     return char8[4];
     }
+
   return font->spaceWidth;
   }
 //}}}
@@ -666,10 +675,3 @@ void cLcd::drawPix (eDraw draw, cPoint p) {
     *framePtr++ |= mask;
   }
 //}}}
-
-cLcd* cLcd::mLcd = nullptr;
-
-extern "C" {
-  void SPI2_IRQHandler() { HAL_SPI_IRQHandler (cLcd::mLcd->getSpiHandle()); }
-  void DMA1_Channel5_IRQHandler() { HAL_DMA_IRQHandler (cLcd::mLcd->getSpiHandle()->hdmatx); }
-  }

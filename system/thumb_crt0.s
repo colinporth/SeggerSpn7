@@ -28,7 +28,7 @@
 //
 // INITIALIZE_TCM_SECTIONS
 //
-//   If defined, the .data_tcm, .text_tcm, .rodata_tcm and .bss_tcm sections 
+//   If defined, the .data_tcm, .text_tcm, .rodata_tcm and .bss_tcm sections
 //   will be initialized.
 //
 // INITIALIZE_USER_SECTIONS
@@ -39,11 +39,11 @@
 //
 // FULL_LIBRARY
 //
-//  If defined then 
+//  If defined then
 //    - argc, argv are setup by the debug_getargs.
 //    - the exit symbol is defined and executes on return from main.
 //    - the exit symbol calls destructors, atexit functions and then debug_exit.
-//  
+//
 //  If not defined then
 //    - argc and argv are zero.
 //    - the exit symbol is defined, executes on return from main and loops
@@ -137,6 +137,7 @@ _start:
   ldr r1, =__tdata_start__
   ldr r2, =__tdata_end__
   bl memory_copy
+
 #ifdef INITIALIZE_SECONDARY_SECTIONS
   ldr r0, =__data2_load_start__
   ldr r1, =__data2_start__
@@ -151,6 +152,7 @@ _start:
   ldr r2, =__rodata2_end__
   bl memory_copy
 #endif /* #ifdef INITIALIZE_SECONDARY_SECTIONS */
+
 #ifdef INITIALIZE_TCM_SECTIONS
   ldr r0, =__data_tcm_load_start__
   ldr r1, =__data_tcm_start__
@@ -175,12 +177,14 @@ _start:
   ldr r1, =__tbss_end__
   movs r2, #0
   bl memory_set
+
 #ifdef INITIALIZE_SECONDARY_SECTIONS
   ldr r0, =__bss2_start__
   ldr r1, =__bss2_end__
   mov r2, #0
   bl memory_set
 #endif /* #ifdef INITIALIZE_SECONDARY_SECTIONS */
+
 #ifdef INITIALIZE_TCM_SECTIONS
   ldr r0, =__bss_tcm_start__
   ldr r1, =__bss_tcm_end__
@@ -213,7 +217,7 @@ ctor_loop:
   beq ctor_end
   ldr r2, [r0]
   adds r0, #4
-  push {r0-r1}  
+  push {r0-r1}
   blx r2
   pop {r0-r1}
   b ctor_loop
@@ -227,22 +231,25 @@ ctor_end:
   .type start, function
 start:
   /* Jump to application entry point */
+
 #ifdef FULL_LIBRARY
   movs r0, #ARGSSPACE
   ldr r1, =args
-  ldr r2, =debug_getargs  
+  ldr r2, =debug_getargs
   blx r2
   ldr r1, =args
 #else
   movs r0, #0
   movs r1, #0
 #endif
+
   ldr r2, =APP_ENTRY_POINT
   blx r2
 
   .thumb_func
 exit:
-#ifdef FULL_LIBRARY  
+
+#ifdef FULL_LIBRARY
   mov r5, r0 // save the exit parameter/return result
 
   /* Call destructors */
@@ -260,12 +267,12 @@ dtor_loop:
 dtor_end:
 
   /* Call atexit functions */
-  ldr r2, =_execute_at_exit_fns  
+  ldr r2, =_execute_at_exit_fns
   blx r2
 
   /* Call debug_exit with return result/exit parameter */
   mov r0, r5
-  ldr r2, =debug_exit  
+  ldr r2, =debug_exit
   blx r2
 #endif
 
@@ -304,7 +311,7 @@ memory_set:
 .macro HELPER helper_name
   .section .text.\helper_name, "ax", %progbits
   .global \helper_name
-  .weak \helper_name  
+  .weak \helper_name
 \helper_name:
   .thumb_func
 .endm
@@ -378,15 +385,15 @@ HELPER __open
   JUMPTO debug_fopen
 HELPER __close
   JUMPTO debug_fclose
-HELPER __write   
+HELPER __write
   mov r3, r0
   mov r0, r1
-  movs r1, #1  
+  movs r1, #1
   JUMPTO debug_fwrite
-HELPER __read  
+HELPER __read
   mov r3, r0
   mov r0, r1
-  movs r1, #1 
+  movs r1, #1
   JUMPTO debug_fread
 HELPER __seek
   push {r4, lr}

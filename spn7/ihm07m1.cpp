@@ -308,6 +308,7 @@ void ADC_Init() {
   // ADC1,2,3 interrupts
   HAL_NVIC_SetPriority (ADC1_2_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ (ADC1_2_IRQn);
+
   HAL_NVIC_SetPriority (ADC3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ (ADC3_IRQn);
   }

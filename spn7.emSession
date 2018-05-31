@@ -939,6 +939,9 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files/>
- <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
+ <Files>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" useBinaryEdit="0" left="0" path="Output/spn7 Release/Obj/spn7.ld" selected="1" top="259" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" useBinaryEdit="0" left="0" path="Output/spn7 Release/Obj/spn7.ind" selected="0" top="0" codecName="Default"/>
+ </Files>
+ <ARMCrossStudioWindow activeProject="spn7" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>

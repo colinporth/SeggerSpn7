@@ -1757,7 +1757,7 @@ const static uint16_t glyphOffsets[] = {
   0x0768, // char 7f -  offset
 };
 
-const font_t font18 = {
+const struct font_t font18 = {
   .fixedWidth     = 0,
   .height         = 18,
   .spaceWidth     = 4,

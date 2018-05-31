@@ -58,21 +58,17 @@ cPiParam piParam;
 cLcd lcd;
 std::string gStateString = "init";
 
-//{{{
 class cTraceChan {
 public:
-  //{{{
   cTraceChan (int numSamples, int averageSamples) : mNumSamples(numSamples), mAverageSamples(averageSamples) {
     mSamples = (uint8_t*)malloc (numSamples);
     memset (mSamples, 0, numSamples);
     }
-  //}}}
-  //{{{
-  void addSample (uint8_t value) {
+
+  void addValue (uint8_t value) {
     mSamples[mCurSample++ % mNumSamples] = value;
     }
-  //}}}
-  //{{{
+
   void draw (cLcd* lcd, int y) {
     for (int i = 0; i < lcd->getWidth(); i++) {
       int32_t value = 0;
@@ -82,7 +78,6 @@ public:
       lcd->fillRect (cLcd::eOff, cRect (i, y - value, i+1, y));
       }
     }
-  //}}}
 
 private:
   int mCurSample = 0;
@@ -90,10 +85,8 @@ private:
   int mAverageSamples = 1;
   uint8_t* mSamples = nullptr;
   };
-//}}}
+
 cTraceChan* mChan1 = nullptr;
-cTraceChan* mChan2 = nullptr;
-cTraceChan* mChan3 = nullptr;
 
 //{{{
 uint64_t fastSqrt (uint64_t wInput) {
@@ -531,9 +524,9 @@ void mcAdcSample (ADC_HandleTypeDef* hAdc) {
   uint16_t value = HAL_ADC_GetValue (hAdc);
 
   if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    mChan1->addSample (sixStep.mBemfIndex == 0 ? value/16 : 0);
-    mChan2->addSample (sixStep.mBemfIndex == 1 ? value/16 : 0);
-    mChan3->addSample (sixStep.mBemfIndex == 2 ? value/16 : 0);
+    mChan1->addValue (sixStep.mBemfIndex == 0 ? value/16 : 0);
+    //mValues1[mValueIndex++ % NUM_VALUES] = sixStep.mBemfIndex == 1 ? value/16 : 0;
+    //mValues2[mValueIndex++ % NUM_VALUES] = sixStep.mBemfIndex == 2 ? value/16 : 0;
 
     // tim1 pwm up counting
     if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT)) {
@@ -1117,9 +1110,7 @@ int main() {
 
   lcd.init();
 
-  mChan1 = new cTraceChan (2000, 5);
-  mChan2 = new cTraceChan (2000, 5);
-  mChan3 = new cTraceChan (2000, 5);
+  mChan1 = new (cTraceChan (2000, 5));
 
   while (1) {
     lcd.clear (cLcd::eOn);
@@ -1143,10 +1134,8 @@ int main() {
 
     lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, gStateString, cPoint(0,80));
 
-
-    mChan1->draw (&lcd, lcd.getHeight()/3);
-    mChan2->draw (&lcd, lcd.getHeight()*2/3);
-    mChan3->draw (&lcd, lcd.getHeight());
+    
+    mChan1->draw (&lcd, (lcd.getHeight()/3));
     lcd.present();
     }
   }
