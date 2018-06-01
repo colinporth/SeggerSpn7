@@ -1,7 +1,7 @@
 #pragma once
 
 #define NUM_POLE_PAIR                        4   // Number of Motor Pole pairs
-#define TARGET_SPEED                      2000   // Target speed in closed loop control
+#define TARGET_SPEED                      1000   // Target speed in closed loop control
 
 #define STARTUP_CURRENT_REFERENCE         2000   // startUP CurrentReference 2000 = 2.2A
 #define TIME_FOR_ALIGN                     500   // align ms
@@ -17,8 +17,8 @@
 #define KI_DIV                            4096   // Ki parameter divider for PI regulator
 #define LOWER_OUT_LIMIT                    120   // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000   // High Out value of PI regulator
-#define MAX_POT_SPEED                     6000   // Maximum Speed regulated by potentiometer
-#define MIN_POT_SPEED                     1500   // Minimum Speed regulated by potentiometer
+#define MAX_POT_SPEED                     5000   // Maximum Speed regulated by potentiometer
+#define MIN_POT_SPEED                      500   // Minimum Speed regulated by potentiometer
 #define VAL_POT_SPEED_DIV                    2   // Validation potentiometer speed divider
 #define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection
 
