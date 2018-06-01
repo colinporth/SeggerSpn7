@@ -41,8 +41,9 @@ public:
   uint32_t LF_TIMx_PSC = 0;            // Prescaler variable for low frequency timer
   uint32_t LF_TIMx_ARR = 0;            // ARR variable for low frequency timer
 
-  uint8_t mStep = 0;
-  uint8_t mPrevStep = 0;               // Previous step number for SixStep algorithm
+  int16_t mStep = -1;
+  int16_t mPrevStep = -1;
+
   uint16_t pulse_value = 0;            // CCR value for SixStep algorithm
   uint16_t ARR_value = 0;              // ARR vector for Accell compute
   uint32_t prescaler_value = 0;        // Prescaler value for low freq timer
@@ -55,7 +56,7 @@ public:
   uint16_t demagn_value = 0;           // Demagnetization value
 
   int16_t speed_fdbk = 0;              // Motor speed variable
-  int16_t speed_fdbk_filtered = 0;     // Filtered Motor speed variable
+  int16_t mFilteredSpeed = 0;          // Filtered Motor speed variable
   int16_t filter_depth = 0;            // Filter depth for speed measuring
 
   uint16_t Current_Reference = 0;      // Currrent reference for SixStep algorithm

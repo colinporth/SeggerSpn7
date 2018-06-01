@@ -46,6 +46,7 @@ private:
       memset (mSamples, 0, numSamples);
       }
     //}}}
+
     //{{{
     void addSample (uint8_t value) {
 

@@ -53,7 +53,6 @@
       <file file_name="system/system_stm32f3xx.c" />
     </folder>
     <folder Name="inc">
-      <file file_name="spn7/ihm07m1.h" />
       <file file_name="spn7/sixStepLib.h" />
       <file file_name="spn7/sixStepParam.h" />
       <file file_name="spn7/cLcd.h" />
@@ -200,7 +199,6 @@
     </folder>
     <file file_name="spn7/main.cpp" />
     <file file_name="system/stm32f3xx_nucleo.c" />
-    <file file_name="spn7/ihm07m1.cpp" />
     <file file_name="spn7/utils.cpp" />
     <file file_name="spn7/font18.c" />
     <file file_name="spn7/font36.c" />
