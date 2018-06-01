@@ -1,4 +1,5 @@
 // main.c
+//{{{  adcs
 // PC1 -> ADC12_IN7  curr_fdbk2 - 1shunt
 // uPA1 -> ADC1_IN2   vbus
 // PC2 -> ADC12_IN8  temp
@@ -7,6 +8,7 @@
 // PC3 -> ADC12_IN9  bemf1
 // PB0 -> ADC3_IN12  bemf2
 // PA7 -> ADC2_IN4   bemf3
+//}}}
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
 
@@ -15,8 +17,6 @@
 #include "cTrace.h"
 #include "cLcd.h"
 //}}}
-
-
 //{{{  vars
 uint32_t mLastButtonPress = 0;
 uint16_t mAlignTicks = 1;
@@ -125,10 +125,26 @@ void potSpeedTarget() {
 //{{{
 void potSpeed() {
 
-  auto potMean = getPotValue();
+  auto potValue = getPotValue();
 
-  if (!buffer_completed) {
-    speed_tmp_buffer[index_pot_filt] = potMean;
+  if (buffer_completed) {
+    index_pot_filt++;
+    if (index_pot_filt >= FILTER_DEEP)
+      index_pot_filt = 1;
+    speed_sum_pot_filt = 0;
+    speed_tmp_buffer[index_pot_filt] = potValue;
+    uint16_t speed_max = 0;
+    for (uint16_t i = 1; i < FILTER_DEEP;i++) {
+      uint16_t val = speed_tmp_buffer[i];
+      if (val > speed_max)
+        speed_max = val;
+      speed_sum_pot_filt += val;
+      }
+    speed_sum_pot_filt -= speed_max;
+    potent_filtered = speed_sum_pot_filt / (FILTER_DEEP - 2);
+    }
+  else {
+    speed_tmp_buffer[index_pot_filt] = potValue;
     speed_sum_pot_filt = 0;
     for (uint16_t i = 1; i <= index_pot_filt;i++)
       speed_sum_pot_filt = speed_sum_pot_filt + speed_tmp_buffer[i];
@@ -141,25 +157,7 @@ void potSpeed() {
       }
     }
 
-  else {
-     index_pot_filt++;
-     if (index_pot_filt >= FILTER_DEEP)
-       index_pot_filt = 1;
-
-     speed_sum_pot_filt = 0;
-     speed_tmp_buffer[index_pot_filt] = potMean;
-     uint16_t speed_max = 0;
-     for (uint16_t i = 1; i < FILTER_DEEP;i++) {
-       uint16_t val = speed_tmp_buffer[i];
-       if (val > speed_max)
-         speed_max = val;
-       speed_sum_pot_filt += val;
-       }
-     speed_sum_pot_filt -= speed_max;
-     potent_filtered = speed_sum_pot_filt / (FILTER_DEEP-2);
-    }
-
-  if (potent_filtered==0)
+  if (potent_filtered == 0)
     potent_filtered = 1;
 
   sixStep.Speed_Ref_filtered = potent_filtered;
@@ -272,6 +270,9 @@ void arrStep() {
 //}}}
 //{{{
 void arrBemf (bool up) {
+
+   if (up)
+     sixStep.BEMF_Tdown_count = 0;
 
   if (sixStep.mPrevStep != sixStep.mStep) {
     sixStep.mPrevStep = sixStep.mStep;
@@ -461,10 +462,11 @@ void taskSpeed() {
 //{{{
 void mcAdcSample (ADC_HandleTypeDef* adc) {
 
-  uint16_t value = HAL_ADC_GetValue (adc);
+  bool upCountStarted = __HAL_TIM_DIRECTION_STATUS (&hTim1);
 
   if (adc == &hAdc2) {
-    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {  // up
+    uint16_t value = HAL_ADC_GetValue (adc);
+    if (upCountStarted) {
       if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
         switch (sixStep.mStep) {
           //{{{
@@ -473,12 +475,10 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
               if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
+                arrBemf (false);
               }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
+            else if (value > sixStep.ADC_BEMF_threshold_UP)
+              arrBemf (true);
 
             sixStep.mBemfValue = value;
             break;
@@ -488,13 +488,11 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             if (sixStep.demagn_counter >= sixStep.demagn_value)
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
+              if (value > sixStep.ADC_BEMF_threshold_UP)
+                arrBemf (true);
               }
-             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-               arrBemf (0);
+            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+              arrBemf (false);
 
             sixStep.mBemfValue = value;
             break;
@@ -505,12 +503,10 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
               if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
+                arrBemf (false);
               }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
+            else if (value > sixStep.ADC_BEMF_threshold_UP)
+              arrBemf (true);
 
             sixStep.mBemfValue = value;
             break;
@@ -520,19 +516,18 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             if (sixStep.demagn_counter < sixStep.demagn_value)
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
+              if (value > sixStep.ADC_BEMF_threshold_UP)
+                arrBemf (true);
               }
             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-               arrBemf (0);
+               arrBemf (false);
 
             sixStep.mBemfValue = value;
             break;
           //}}}
           }
 
+      // set adc2Sample curr:temp
       mcNucleoAdcChan (&hAdc2, sixStep.mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
       }
     else {
@@ -541,15 +536,16 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
 
       switch (sixStep.mStep) {
         case 3:
-        case 6: mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break;
+        case 6: mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // set adc2Sample bemf1
         case 1:
-        case 4: mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break;
+        case 4: mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // set adc2Sample bemf3
         }
       }
     }
 
-  else if (adc == &hAdc3) {
-    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {  // up
+  else { // adc == &hAdc3
+    uint16_t value = HAL_ADC_GetValue (adc);
+    if (upCountStarted) {
       if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
         switch (sixStep.mStep) {
           //{{{
@@ -557,13 +553,11 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             if (sixStep.demagn_counter < sixStep.demagn_value)
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
+              if (value > sixStep.ADC_BEMF_threshold_UP)
+                arrBemf (true);
               }
             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-              arrBemf (0);
+              arrBemf (false);
 
             sixStep.mBemfValue = value;
             break;
@@ -574,23 +568,24 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
               if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
+                arrBemf (false);
               }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
+            else if (value > sixStep.ADC_BEMF_threshold_UP)
+              arrBemf (true);
 
             sixStep.mBemfValue = value;
             break;
           //}}}
           }
+      // set adc3Sample pot
       mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
       }
     else {
       sixStep.mAdcValue[2] = value;
       mPotValues[mPotValueIndex] = value;
       mPotValueIndex = (mPotValueIndex+1) % POT_VALUES_SIZE;
+
+      // set adc3Sample bemf2
       mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       }
     }
@@ -640,42 +635,42 @@ void mcTim6Tick() {
     case 1:
       mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
       mcNucleoEnableInputChan12();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
       break;
 
     case 2:
       mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
       mcNucleoEnableInputChan13();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
         mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 3:
       mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
       mcNucleoEnableInputChan23();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
 
     case 4:
       mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
       mcNucleoEnableInputChan12();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
      break;
 
     case 5:
       mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
       mcNucleoEnableInputChan13();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
         mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 6:
       mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
       mcNucleoEnableInputChan23();
-      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
      }
@@ -690,9 +685,8 @@ void mcTim6Tick() {
 void mcSysTick() {
 
   if (sixStep.mMotorRunning) {
-    mTraceVec.addSample (0, sixStep.mBemfValue>>4);
+    mTraceVec.addSample (0, sixStep.mBemfValue >> 4);
     mTraceVec.addSample (1, sixStep.mStep);
-    mTraceVec.addSample (2, __HAL_TIM_GetCounter (&hTim6)>>8);
     }
 
   if (sixStep.mAligning && !sixStep.mAligned) {
@@ -1046,7 +1040,8 @@ void systemClockConfig() {
   HAL_RCC_EnableCSS();
 
   // config Systick interrupt time
-  HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 10000);
+  HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 2000);
+  //HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 1000);
 
   // config Systick
   HAL_SYSTICK_CLKSourceConfig (SYSTICK_CLKSOURCE_HCLK);
@@ -1074,7 +1069,7 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (1000, 1, 3);
+  mTraceVec.addTrace (1000, 1, 2);
 
   while (1) {
     lcd.clear (cLcd::eOn);
@@ -1086,7 +1081,7 @@ int main() {
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
                     "cur:" + dec (sixStep.mAdcValue[0], 4) +
                     " temp:" + dec (sixStep.mAdcValue[1], 4) +
-                    " pot:" + dec (sixStep.mAdcValue[2], 4),
+                    " pot:" + dec (getPotValue(), 4),
                     cPoint(0,0));
 
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft, gStateString, cPoint(0,20));

@@ -17,8 +17,8 @@
 #define KI_DIV                            4096   // Ki parameter divider for PI regulator
 #define LOWER_OUT_LIMIT                    120   // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000   // High Out value of PI regulator
-#define MAX_POT_SPEED                     5000   // Maximum Speed regulated by potentiometer
-#define MIN_POT_SPEED                      500   // Minimum Speed regulated by potentiometer
+#define MAX_POT_SPEED                     4000   // Maximum Speed regulated by potentiometer
+#define MIN_POT_SPEED                      200   // Minimum Speed regulated by potentiometer
 #define VAL_POT_SPEED_DIV                    2   // Validation potentiometer speed divider
 #define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection
 
