@@ -50,7 +50,6 @@ public:
 
   uint16_t mAdcIndex = 0;              // adc current/pot/vbus/temp index
   uint16_t mAdcValue[4];               // chan 0-3 lastReadValue
-  uint16_t mBemfValue;                 // bemf lastReadValue
 
   uint16_t demagn_counter = 0;         // Demagnetization counter
   uint16_t demagn_value = 0;           // Demagnetization value

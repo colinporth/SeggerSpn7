@@ -480,7 +480,8 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value > sixStep.ADC_BEMF_threshold_UP)
               arrBemf (true);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           //{{{
@@ -494,7 +495,8 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
               arrBemf (false);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           //{{{
@@ -508,7 +510,8 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value > sixStep.ADC_BEMF_threshold_UP)
               arrBemf (true);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           //{{{
@@ -522,7 +525,8 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
                arrBemf (false);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           }
@@ -559,7 +563,8 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value < sixStep.ADC_BEMF_threshold_DOWN)
               arrBemf (false);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           //{{{
@@ -573,10 +578,12 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             else if (value > sixStep.ADC_BEMF_threshold_UP)
               arrBemf (true);
 
-            sixStep.mBemfValue = value;
+            mTraceVec.addSample (0, value >> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
             break;
           //}}}
           }
+
       // set adc3Sample pot
       mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
       }
@@ -683,11 +690,6 @@ void mcTim6Tick() {
 //}}}
 //{{{
 void mcSysTick() {
-
-  if (sixStep.mMotorRunning) {
-    mTraceVec.addSample (0, sixStep.mBemfValue >> 4);
-    mTraceVec.addSample (1, sixStep.mStep);
-    }
 
   if (sixStep.mAligning && !sixStep.mAligned) {
     //{{{  align motor
@@ -1040,8 +1042,7 @@ void systemClockConfig() {
   HAL_RCC_EnableCSS();
 
   // config Systick interrupt time
-  HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 2000);
-  //HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 1000);
+  HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq() / 1000);
 
   // config Systick
   HAL_SYSTICK_CLKSourceConfig (SYSTICK_CLKSOURCE_HCLK);
@@ -1069,15 +1070,10 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (1000, 1, 2);
+  mTraceVec.addTrace (1000, 5, 2);
 
   while (1) {
     lcd.clear (cLcd::eOn);
-    //printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
-    //        ARR_LF, counter_ARR_Bemf, piParam.Reference,
-    //        sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
-    //        sixStep.mBemfValue[0], sixStep.mBemfValue[1] ,sixStep.mBemfValue[2]);
-
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
                     "cur:" + dec (sixStep.mAdcValue[0], 4) +
                     " temp:" + dec (sixStep.mAdcValue[1], 4) +

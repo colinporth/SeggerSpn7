@@ -88,7 +88,7 @@ TIM_HandleTypeDef hTim16;
 //{{{
 extern "C" {
   void ADC1_2_IRQHandler() { HAL_ADC_IRQHandler (&hAdc2); }
-  void ADC3_IRQHandler() { HAL_ADC_IRQHandler (&hAdc3); }
+  void ADC3_IRQHandler()   { HAL_ADC_IRQHandler (&hAdc3); }
 
   void TIM6_DAC_IRQHandler() { HAL_TIM_IRQHandler (&hTim6); }
   void EXTI15_10_IRQHandler() { HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13); }
