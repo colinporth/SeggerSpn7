@@ -1,4 +1,12 @@
 // main.c
+// PC1 -> ADC12_IN7  curr_fdbk2 - 1shunt
+// PA1 -> ADC1_IN2   vbus
+// PC2 -> ADC12_IN8  temp
+// PB1 -> ADC3_IN1   pot
+//
+// PC3 -> ADC12_IN9  bemf1
+// PB0 -> ADC3_IN12  bemf2
+// PA7 -> ADC2_IN4   bemf3
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
 
@@ -7,6 +15,7 @@
 #include "cTrace.h"
 #include "cLcd.h"
 //}}}
+
 
 //{{{  vars
 uint32_t mLastButtonPress = 0;
@@ -85,6 +94,7 @@ uint64_t fastSqrt (uint64_t wInput) {
   return tempRootNew;
   }
 //}}}
+//{{{
 uint16_t getPotValue() {
 
   uint32_t sum = 0;
@@ -98,11 +108,12 @@ uint16_t getPotValue() {
   sum -= max;
   return sum / (POT_VALUES_SIZE - 1);
   }
+//}}}
 
 //{{{
 void potSpeedTarget() {
 
-  target_speed = sixStep.mAdcBuffer[1] * MAX_POT_SPEED / 4096;
+  target_speed = sixStep.mAdcValue[1] * MAX_POT_SPEED / 4096;
 
   if (target_speed < MIN_POT_SPEED)
     target_speed = MIN_POT_SPEED;
@@ -185,48 +196,6 @@ void speedFilter() {
   }
 //}}}
 
-//{{{
-void sixStepTable (uint8_t step_number) {
-
-  switch (step_number) {
-    case 1:
-      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
-      mcNucleoEnableInputChan12();
-      sixStep.mBemfIndex = 2;
-      break;
-
-    case 2:
-      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
-      mcNucleoEnableInputChan13();
-      sixStep.mBemfIndex = 1;
-      break;
-
-    case 3:
-      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
-      mcNucleoEnableInputChan23();
-      sixStep.mBemfIndex = 0;
-      break;
-
-    case 4:
-      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
-      mcNucleoEnableInputChan12();
-      sixStep.mBemfIndex = 2;
-     break;
-
-    case 5:
-      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
-      mcNucleoEnableInputChan13();
-      sixStep.mBemfIndex = 1;
-      break;
-
-    case 6:
-      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
-      mcNucleoEnableInputChan23();
-      sixStep.mBemfIndex = 0;
-      break;
-     }
-  }
-//}}}
 //{{{
 void rampMotor() {
 
@@ -494,21 +463,15 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
 
   uint16_t value = HAL_ADC_GetValue (adc);
 
-  if (adc == &hAdc3) {
-    sixStep.mAdcBuffer[3] = value;
-    mPotValues[mPotValueIndex] = value;
-    mPotValueIndex = (mPotValueIndex+1) % POT_VALUES_SIZE;
-    }
-  else if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-    // tim1 pwm up counting
-
-    sixStep.mBemfInputBuffer[0] = value;
-
-    //if (adc == &hAdc1)
+  if (adc == &hAdc1) {
+    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) { // up
+      sixStep.mBemfValue[0] = value;
+      sixStep.mBemfValue[1] = 0;
+      sixStep.mBemfValue[2] = 0;
       if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
         switch (sixStep.mStep) {
           //{{{
-          case 1:
+          case 3:
             if (sixStep.demagn_counter < sixStep.demagn_value)
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
@@ -522,6 +485,42 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
 
             break;
           //}}}
+          //{{{
+          case 6:
+            if (sixStep.demagn_counter < sixStep.demagn_value)
+              sixStep.demagn_counter++;
+            else if (piParam.Reference >= 0) {
+              if (value > sixStep.ADC_BEMF_threshold_UP) {
+                arrBemf (1);
+                sixStep.BEMF_Tdown_count = 0;
+                }
+              }
+            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
+               arrBemf (0);
+            break;
+          //}}}
+          }
+
+      switch (sixStep.mAdcIndex) {
+        case 0: mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_7); break;
+        case 1: mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_2); break;
+        case 2: mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_8); break;
+        }
+      }
+    else {
+      sixStep.mAdcValue[sixStep.mAdcIndex] = value;
+      sixStep.mAdcIndex = (sixStep.mAdcIndex+1) % 3;
+      mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_9);
+      }
+    }
+
+  else if (adc == &hAdc3) {
+    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {  // up
+      sixStep.mBemfValue[0] = 0;
+      sixStep.mBemfValue[1] = value;
+      sixStep.mBemfValue[2] = 0;
+      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
+        switch (sixStep.mStep) {
           //{{{
           case 2:
             if (sixStep.demagn_counter < sixStep.demagn_value)
@@ -538,7 +537,40 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
             break;
           //}}}
           //{{{
-          case 3:
+          case 5:
+            if (sixStep.demagn_counter < sixStep.demagn_value)
+              sixStep.demagn_counter++;
+            else if (piParam.Reference >= 0) {
+              if (value < sixStep.ADC_BEMF_threshold_DOWN)
+                arrBemf (0);
+              }
+            else if (value > sixStep.ADC_BEMF_threshold_UP) {
+              arrBemf (1);
+              sixStep.BEMF_Tdown_count = 0;
+              }
+
+           break;
+          //}}}
+          }
+      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
+      }
+    else {
+      sixStep.mAdcValue[3] = value;
+      mPotValues[mPotValueIndex] = value;
+      mPotValueIndex = (mPotValueIndex+1) % POT_VALUES_SIZE;
+      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+      }
+    }
+
+  else if (adc == &hAdc2) {
+    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {  // up
+      sixStep.mBemfValue[0] = 0;
+      sixStep.mBemfValue[1] = 0;
+      sixStep.mBemfValue[2] = value;
+      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
+        switch (sixStep.mStep) {
+          //{{{
+          case 1:
             if (sixStep.demagn_counter < sixStep.demagn_value)
               sixStep.demagn_counter++;
             else if (piParam.Reference >= 0) {
@@ -567,49 +599,14 @@ void mcAdcSample (ADC_HandleTypeDef* adc) {
 
            break;
           //}}}
-          //{{{
-          case 5:
-            if (sixStep.demagn_counter < sixStep.demagn_value)
-              sixStep.demagn_counter++;
-            else if (piParam.Reference >= 0) {
-              if (value < sixStep.ADC_BEMF_threshold_DOWN)
-                arrBemf (0);
-              }
-            else if (value > sixStep.ADC_BEMF_threshold_UP) {
-              arrBemf (1);
-              sixStep.BEMF_Tdown_count = 0;
-              }
-
-           break;
-          //}}}
-          //{{{
-          case 6:
-            if (sixStep.demagn_counter < sixStep.demagn_value)
-              sixStep.demagn_counter++;
-            else if (piParam.Reference >= 0) {
-              if (value > sixStep.ADC_BEMF_threshold_UP) {
-                arrBemf (1);
-                sixStep.BEMF_Tdown_count = 0;
-                }
-              }
-            else if (value < sixStep.ADC_BEMF_threshold_DOWN)
-               arrBemf (0);
-            break;
-          //}}}
           }
-
-    // set adc chan for next curr/temp/vbus/temp reading
-    mcNucleoAdcChan (&hAdc1, sixStep.mAdcInputChan[sixStep.mAdcIndex]);
+      mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
+      }
+    else
+      mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
     }
-
-  else {
-    // tim1 pwm down counting
-    sixStep.mAdcBuffer[sixStep.mAdcIndex] = value;
-    sixStep.mAdcIndex = (sixStep.mAdcIndex+1) % 3;
-
-    // set adc chan for next bemf ADC reading
-    mcNucleoAdcChan (&hAdc1, sixStep.mBemfInputChan[sixStep.mBemfIndex]);
-    }
+  else
+    printf ("unrecognised adc\n");
   }
 //}}}
 //{{{
@@ -652,11 +649,49 @@ void mcTim6Tick() {
       __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
     }
 
-  sixStepTable (sixStep.mStep);
+  switch (sixStep.mStep) {
+    case 1:
+      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
+      mcNucleoEnableInputChan12();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
+      break;
 
-  if (__HAL_TIM_DIRECTION_STATUS (&hTim1))
-    // step request during downCount, change adc Chan
-    mcNucleoAdcChan (sixStep.mBemfInputAdc[sixStep.mBemfIndex], sixStep.mBemfInputChan[sixStep.mBemfIndex]);
+    case 2:
+      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
+      mcNucleoEnableInputChan13();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+      break;
+
+    case 3:
+      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
+      mcNucleoEnableInputChan23();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_9);
+      break;
+
+    case 4:
+      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
+      mcNucleoEnableInputChan12();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
+     break;
+
+    case 5:
+      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
+      mcNucleoEnableInputChan13();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+      break;
+
+    case 6:
+      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
+      mcNucleoEnableInputChan23();
+      if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // step request during downCount, change adc Chan
+        mcNucleoAdcChan (&hAdc1, ADC_CHANNEL_9);
+      break;
+     }
 
   if (!sixStep.ARR_OK) // STEP frequency changing
     arrStep();
@@ -668,9 +703,11 @@ void mcTim6Tick() {
 void mcSysTick() {
 
   if (sixStep.mMotorRunning) {
-    mTraceVec.addSample (0, sixStep.mBemfInputBuffer[0]>>4);
-    mTraceVec.addSample (2, sixStep.mStep);
-    mTraceVec.addSample (1, __HAL_TIM_GetCounter (&hTim6)>>8);
+    mTraceVec.addSample (0, sixStep.mBemfValue[0]>>4);
+    mTraceVec.addSample (1, sixStep.mBemfValue[1]>>4);
+    mTraceVec.addSample (2, sixStep.mBemfValue[2]>>4);
+    mTraceVec.addSample (3, sixStep.mStep);
+    mTraceVec.addSample (4, __HAL_TIM_GetCounter (&hTim6)>>8);
     }
 
   if (sixStep.mAligning && !sixStep.mAligned) {
@@ -782,31 +819,6 @@ void mcReset() {
 
   mcNucleoSetChanCCR (0,0,0);
 
-  // PC1 -> ADC12_IN7  curr_fdbk2 - 1shunt
-  // PA1 -> ADC1_IN2   vbus
-  // PC2 -> ADC12_IN8  temp
-  // PB1 -> ADC3_IN1   pot
-  sixStep.mAdcIndex = 0;
-  sixStep.mAdcInputAdc[0] = &hAdc1;
-  sixStep.mAdcInputChan[0] = ADC_CHANNEL_7;
-  sixStep.mAdcInputAdc[1] = &hAdc1;
-  sixStep.mAdcInputChan[1] = ADC_CHANNEL_2;
-  sixStep.mAdcInputAdc[2] = &hAdc1;
-  sixStep.mAdcInputChan[2] = ADC_CHANNEL_8;
-  sixStep.mAdcInputAdc[3] = &hAdc3;
-  sixStep.mAdcInputChan[3] = ADC_CHANNEL_1;
-
-  // PC3 -> ADC12_IN9  bemf1
-  // PB0 -> ADC3_IN12  bemf2
-  // PA7 -> ADC2_IN4   bemf3
-  sixStep.mBemfIndex = 0;
-  sixStep.mBemfInputAdc[0] = &hAdc1;
-  sixStep.mBemfInputChan[0] = ADC_CHANNEL_9;
-  sixStep.mBemfInputAdc[1] = &hAdc1;
-  sixStep.mBemfInputChan[1] = ADC_CHANNEL_3;
-  sixStep.mBemfInputAdc[2] = &hAdc1;
-  sixStep.mBemfInputChan[2] = ADC_CHANNEL_4;
-
   sixStep.ADC_BEMF_threshold_UP = BEMF_THRSLD_UP;
   sixStep.ADC_BEMF_threshold_DOWN = BEMF_THRSLD_DOWN;
   sixStep.demagn_counter = 0;
@@ -902,7 +914,7 @@ void mcStartMotor() {
 
   HAL_TIM_Base_Start_IT (&hTim6);
   HAL_ADC_Start_IT (&hAdc1);
-  //HAL_ADC_Start_IT (&hAdc2);
+  HAL_ADC_Start_IT (&hAdc2);
   HAL_ADC_Start_IT (&hAdc3);
 
   mcNucleoLedOn();
@@ -921,7 +933,7 @@ void mcStopMotor() {
 
   HAL_TIM_Base_Stop_IT (&hTim6);
   HAL_ADC_Stop_IT (&hAdc1);
-  //HAL_ADC_Stop_IT (&hAdc2);
+  HAL_ADC_Stop_IT (&hAdc2);
   HAL_ADC_Stop_IT (&hAdc3);
 
   mcNucleoCurrentRefStop();
@@ -1077,26 +1089,26 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (10000, 1, 3);
+  mTraceVec.addTrace (1000, 1, 5);
 
   while (1) {
     lcd.clear (cLcd::eOn);
     //printf ("%d %d %d i:%d p:%d v:%d t:%d 1:%d 2:%d 3:%d\n",
     //        ARR_LF, counter_ARR_Bemf, piParam.Reference,
     //        sixStep.mAdcBuffer[0], sixStep.mAdcBuffer[1] ,sixStep.mAdcBuffer[2] ,sixStep.mAdcBuffer[3],
-    //        sixStep.mBemfInputBuffer[0], sixStep.mBemfInputBuffer[1] ,sixStep.mBemfInputBuffer[2]);
+    //        sixStep.mBemfValue[0], sixStep.mBemfValue[1] ,sixStep.mBemfValue[2]);
 
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
-                    dec (sixStep.mAdcBuffer[0], 4) + " " +
-                    dec (sixStep.mAdcBuffer[1], 4) + " " +
-                    dec (sixStep.mAdcBuffer[2], 4) + " " +
-                    dec (sixStep.mAdcBuffer[3], 4),
+                    "cur:" + dec (sixStep.mAdcValue[0], 4) +
+                    " vbus:" + dec (sixStep.mAdcValue[1], 4) +
+                    " temp:" + dec (sixStep.mAdcValue[2], 4) +
+                    " pot:" + dec (sixStep.mAdcValue[3], 4),
                     cPoint(0,0));
 
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft,
-                    dec (sixStep.mBemfInputBuffer[0], 4) + " " +
-                    dec (sixStep.mBemfInputBuffer[1], 4) + " " +
-                    dec (sixStep.mBemfInputBuffer[2], 4),
+                    dec (sixStep.mBemfValue[0], 4) + " " +
+                    dec (sixStep.mBemfValue[1], 4) + " " +
+                    dec (sixStep.mBemfValue[2], 4),
                     cPoint(0,20));
 
     lcd.drawString (cLcd::eOff, cLcd::eSmall, cLcd::eLeft, gStateString, cPoint(0,40));

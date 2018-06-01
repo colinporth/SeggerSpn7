@@ -79,15 +79,15 @@
 //}}}
 
 ADC_HandleTypeDef hAdc1;
-//ADC_HandleTypeDef hAdc2;
+ADC_HandleTypeDef hAdc2;
 ADC_HandleTypeDef hAdc3;
+
 TIM_HandleTypeDef hTim1;
 TIM_HandleTypeDef hTim6;
 TIM_HandleTypeDef hTim16;
 //{{{
 extern "C" {
-  void ADC1_IRQHandler() { HAL_ADC_IRQHandler (&hAdc1); }
-  //void ADC2_IRQHandler() { HAL_ADC_IRQHandler (&hAdc2); }
+  void ADC1_2_IRQHandler() { HAL_ADC_IRQHandler (&hAdc1); }
   void ADC3_IRQHandler() { HAL_ADC_IRQHandler (&hAdc3); }
 
   void TIM6_DAC_IRQHandler() { HAL_TIM_IRQHandler (&hTim6); }
@@ -143,10 +143,8 @@ void GPIO_Init() {
 //{{{
 void ADC_Init() {
 //   PC3  -> ADC12_IN9  bemf1
-//   PA2  -> ADC1_IN3   bemf2
-//   PA3  -> ADC1_IN4   bemf3
-//  uPB0  -> ADC3_IN12  bemf2
-//  uPA7  -> ADC2_IN4   bemf3
+//   PB0  -> ADC3_IN12  bemf2
+//   PA7  -> ADC2_IN4   bemf3
 
 //   PC1  -> ADC12_IN7  currFdbk2 - 1shunt, 3shunt
 //   PA1  -> ADC1_IN2   vbus
@@ -161,9 +159,9 @@ void ADC_Init() {
   __HAL_RCC_ADC12_CLK_ENABLE();
   __HAL_RCC_ADC34_CLK_ENABLE();
   //}}}
-  //{{{  config PA1 PA2 PA3 PA7 analog input pin
+  //{{{  config PA1 PA7 analog input pin
   GPIO_InitTypeDef gpioInit;
-  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_7;
+  gpioInit.Pin = GPIO_PIN_1 | GPIO_PIN_7;
   gpioInit.Mode = GPIO_MODE_ANALOG;
   gpioInit.Pull = GPIO_NOPULL;
 
@@ -215,20 +213,6 @@ void ADC_Init() {
   if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel failed\n");
   //}}}
-  //{{{  config PA2 bemf2 - adc1 chan 3
-  channelConfig.Channel = ADC_CHANNEL_3;
-  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
-
-  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
-    printf ("HAL_ADC_ConfigChannel failed\n");
-  //}}}
-  //{{{  config PA3 bemf3 - adc1 chan 4
-  channelConfig.Channel = ADC_CHANNEL_4;
-  channelConfig.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
-
-  if (HAL_ADC_ConfigChannel (&hAdc1, &channelConfig) != HAL_OK)
-    printf ("HAL_ADC_ConfigChannel failed\n");
-  //}}}
   //{{{  config PC1 curr  - adc1 chan 7
   channelConfig.Channel = ADC_CHANNEL_7;
   channelConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
@@ -251,40 +235,40 @@ void ADC_Init() {
   //}}}
 
   //{{{  init adc2
-  //hAdc2.Instance = ADC2;
+  hAdc2.Instance = ADC2;
 
-  //hAdc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
-  //hAdc2.Init.Resolution = ADC_RESOLUTION_12B;
+  hAdc2.Init.ClockPrescaler = ADC_CLOCK_ASYNC_DIV1;
+  hAdc2.Init.Resolution = ADC_RESOLUTION_12B;
 
-  //hAdc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
-  //hAdc2.Init.ContinuousConvMode = DISABLE;
-  //hAdc2.Init.DiscontinuousConvMode = DISABLE;
+  hAdc2.Init.ScanConvMode = ADC_SCAN_DISABLE;
+  hAdc2.Init.ContinuousConvMode = DISABLE;
+  hAdc2.Init.DiscontinuousConvMode = DISABLE;
 
-  //hAdc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
-  //hAdc2.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
+  hAdc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
+  hAdc2.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T1_TRGO;
 
-  //hAdc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  //hAdc2.Init.NbrOfConversion = 1;
-  //hAdc2.Init.DMAContinuousRequests = DISABLE;
-  //hAdc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  hAdc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hAdc2.Init.NbrOfConversion = 1;
+  hAdc2.Init.DMAContinuousRequests = DISABLE;
+  hAdc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
 
-  //hAdc2.Init.LowPowerAutoWait = DISABLE;
-  //hAdc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
+  hAdc2.Init.LowPowerAutoWait = DISABLE;
+  hAdc2.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
 
-  //if (HAL_ADC_Init (&hAdc2) != HAL_OK)
-    //printf ("HAL_ADC_Init failed\n");
+  if (HAL_ADC_Init (&hAdc2) != HAL_OK)
+    printf ("HAL_ADC_Init failed\n");
   //}}}
-  //{{{  config bemf feedback phase 3/C - channel 4
-  //ADC_ChannelConfTypeDef channelConfig2;
-  //channelConfig2.Rank = 1;
-  //channelConfig2.SingleDiff = ADC_SINGLE_ENDED;
-  //channelConfig2.OffsetNumber = ADC_OFFSET_NONE;
-  //channelConfig2.Offset = 0;
-  //channelConfig2.Channel = ADC_CHANNEL_4;
-  //channelConfig2.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
+  //{{{  config PA7 bemf3 - adc2 chan 4
+  ADC_ChannelConfTypeDef channelConfig2;
+  channelConfig2.Channel = ADC_CHANNEL_4;
+  channelConfig2.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
+  channelConfig2.Rank = 1;
+  channelConfig2.SingleDiff = ADC_SINGLE_ENDED;
+  channelConfig2.OffsetNumber = ADC_OFFSET_NONE;
+  channelConfig2.Offset = 0;
 
-  //if (HAL_ADC_ConfigChannel (&hAdc2, &channelConfig2) != HAL_OK)
-    //printf ("HAL_ADC_ConfigChannel2 failed\n");
+  if (HAL_ADC_ConfigChannel (&hAdc2, &channelConfig2) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel2 failed\n");
   //}}}
 
   //{{{  init adc3
@@ -323,12 +307,16 @@ void ADC_Init() {
   if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig3) != HAL_OK)
     printf ("HAL_ADC_ConfigChannel3 failed\n");
   //}}}
+  //{{{  config PB0 bemf2 - adc3 chan 12
+  channelConfig3.Channel = ADC_CHANNEL_12;
+  channelConfig3.SamplingTime = ADC_SAMPLETIME_61CYCLES_5;
+  if (HAL_ADC_ConfigChannel (&hAdc3, &channelConfig3) != HAL_OK)
+    printf ("HAL_ADC_ConfigChannel3 failed\n");
+  //}}}
 
   // ADC1,2,3 interrupts
-  HAL_NVIC_SetPriority (ADC1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ (ADC1_IRQn);
-  //HAL_NVIC_SetPriority (ADC1_2_IRQn, 0, 0);
-  //HAL_NVIC_EnableIRQ (ADC1_2_IRQn);
+  HAL_NVIC_SetPriority (ADC1_2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ (ADC1_2_IRQn);
 
   HAL_NVIC_SetPriority (ADC3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ (ADC3_IRQn);
