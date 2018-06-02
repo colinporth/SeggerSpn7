@@ -107,8 +107,11 @@ uint16_t index_ARR_step = 1;
 uint32_t mNumZeroCrossing = 0;
 
 int16_t mPotArray[32];
+uint16_t mPotArrayValues = 0;
 uint16_t mPotArrayIndex = 0;
+
 int16_t mSpeedArray[32];
+uint16_t mSpeedArrayValues = 0;
 uint16_t mSpeedArrayIndex = 0;
 
 uint16_t mOpenLoopBemfEvent = 0;
@@ -669,18 +672,18 @@ void rampMotor() {
     int32_t delta = timeVector - mTimeVectorPrev;
     if (mStartupStepCount == 0) {
       mFirstSingleStep = (2 * 3141 * delta) / 1000;
-      sixStep.ARR_value = (uint32_t)(0xFFFF);
+      sixStep.mArrValue = (uint32_t)(0xFFFF);
       }
     else {
       uint32_t singleStep = (2 * 3141* delta) / 1000;
-      sixStep.ARR_value = (uint32_t)(0xFFFF * singleStep) / mFirstSingleStep;
+      sixStep.mArrValue = (uint32_t)(0xFFFF * singleStep) / mFirstSingleStep;
       }
     }
   else
     mStartupStepCount = 0;
 
   if (mStartupStepCount == 0)
-    sixStep.prescaler_value = (((sixStep.SYSCLK_frequency / 1000000) * mFirstSingleStep) / 0xFFFF) - 1;
+    sixStep.prescaler_value = (((sixStep.mSysClkFrequency / 1000000) * mFirstSingleStep) / 0xFFFF) - 1;
 
   if ((sixStep.STATUS != ALIGNMENT) && (sixStep.STATUS != START))
     mStartupStepCount++;
@@ -694,7 +697,7 @@ void rampMotor() {
 void arrBemf (bool up) {
 
   if (up)
-    sixStep.BEMF_Tdown_count = 0;
+    sixStep.mBemfDownCount = 0;
 
   if (sixStep.mPrevStep != sixStep.mStep) {
     sixStep.mPrevStep = sixStep.mStep;
@@ -749,23 +752,23 @@ int16_t piController (cPiParam* PI_PARAM, int16_t speed_fdb) {
   int32_t wIntegral_Term = 0;
   int32_t wIntegral_sum_temp = 0;
   if (PI_PARAM->Ki_Gain == 0)
-    sixStep.Integral_Term_sum = 0;
+    sixStep.mIntegralTermSum = 0;
   else {
     wIntegral_Term = PI_PARAM->Ki_Gain * Error;
-    wIntegral_sum_temp = sixStep.Integral_Term_sum + wIntegral_Term;
-    sixStep.Integral_Term_sum = wIntegral_sum_temp;
+    wIntegral_sum_temp = sixStep.mIntegralTermSum + wIntegral_Term;
+    sixStep.mIntegralTermSum = wIntegral_sum_temp;
     }
 
-  if (sixStep.Integral_Term_sum > KI_DIV * PI_PARAM->Upper_Limit_Output)
-    sixStep.Integral_Term_sum = KI_DIV * PI_PARAM->Upper_Limit_Output;
+  if (sixStep.mIntegralTermSum > KI_DIV * PI_PARAM->Upper_Limit_Output)
+    sixStep.mIntegralTermSum = KI_DIV * PI_PARAM->Upper_Limit_Output;
 
-  if (sixStep.Integral_Term_sum < -KI_DIV * PI_PARAM->Upper_Limit_Output)
-    sixStep.Integral_Term_sum = -KI_DIV * PI_PARAM->Upper_Limit_Output;
+  if (sixStep.mIntegralTermSum < -KI_DIV * PI_PARAM->Upper_Limit_Output)
+    sixStep.mIntegralTermSum = -KI_DIV * PI_PARAM->Upper_Limit_Output;
 
   // WARNING: the below instruction is not MISRA compliant, user should verify
   //          that Cortex-M3 assembly instruction ASR (arithmetic shift right)
   //          is used by the compiler to perform the shifts (instead of LSR logical shift right)
-  int32_t wOutput_32 = (wProportional_Term / KP_DIV) + (sixStep.Integral_Term_sum / KI_DIV);
+  int32_t wOutput_32 = (wProportional_Term / KP_DIV) + (sixStep.mIntegralTermSum / KI_DIV);
 
   if (PI_PARAM->Reference > 0) {
     if (wOutput_32 > PI_PARAM->Upper_Limit_Output)
@@ -1062,42 +1065,42 @@ void mcTim6Tick() {
 
   switch (sixStep.mStep) {
     case 0:
-      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
+      mcNucleoSetChanCCR (sixStep.mPulseValue, 0, 0);
       mcNucleoEnableInputChan12();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
       break;
 
     case 1:
-      mcNucleoSetChanCCR (sixStep.pulse_value, 0, 0);
+      mcNucleoSetChanCCR (sixStep.mPulseValue, 0, 0);
       mcNucleoEnableInputChan13();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
         mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 2:
-      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
+      mcNucleoSetChanCCR (0, sixStep.mPulseValue, 0);
       mcNucleoEnableInputChan23();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
 
     case 3:
-      mcNucleoSetChanCCR (0, sixStep.pulse_value, 0);
+      mcNucleoSetChanCCR (0, sixStep.mPulseValue, 0);
       mcNucleoEnableInputChan12();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
      break;
 
     case 4:
-      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
+      mcNucleoSetChanCCR (0, 0, sixStep.mPulseValue);
       mcNucleoEnableInputChan13();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
         mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 5:
-      mcNucleoSetChanCCR (0, 0, sixStep.pulse_value);
+      mcNucleoSetChanCCR (0, 0, sixStep.mPulseValue);
       mcNucleoEnableInputChan23();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
@@ -1106,7 +1109,7 @@ void mcTim6Tick() {
 
   if (sixStep.VALIDATION_OK) {
     // motorStall detection
-    if (sixStep.BEMF_Tdown_count++ > BEMF_CONSEC_DOWN_MAX)
+    if (sixStep.mBemfDownCount++ > BEMF_CONSEC_DOWN_MAX)
       mSpeedMeasuredFail = true;
     else
       __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
@@ -1127,7 +1130,7 @@ void mcTim6Tick() {
         sixStep.STATUS = STARTUP;
         rampMotor();
         if (index_ARR_step < sixStep.numberofitemArr) {
-          hTim6.Init.Period = sixStep.ARR_value;
+          hTim6.Init.Period = sixStep.mArrValue;
           hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
           index_ARR_step++;
           }
@@ -1147,11 +1150,13 @@ void mcTim6Tick() {
     //}}}
 
   mSpeedArray[mSpeedArrayIndex] = sixStep.mSpeedMeasured;
+  if (mSpeedArrayValues < 32)
+    mSpeedArrayValues++;
   mSpeedArrayIndex = (mSpeedArrayIndex+1) % 32;
   int32_t sum = 0;
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < mSpeedArrayValues; i++)
     sum += mSpeedArray[i];
-  sixStep.mSpeedFiltered = sum / 32;
+  sixStep.mSpeedFiltered = sum / mSpeedArrayValues;
   }
 //}}}
 //{{{
@@ -1162,7 +1167,7 @@ void mcSysTick() {
     sixStep.STATUS = ALIGNMENT;
     sixStep.mStep = 5;
 
-    hTim6.Init.Period = sixStep.ARR_value;
+    hTim6.Init.Period = sixStep.mArrValue;
     hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
 
     mAlignTicks++;
@@ -1180,11 +1185,13 @@ void mcSysTick() {
 
   if (sixStep.VALIDATION_OK) {
     mPotArray[mPotArrayIndex] = sixStep.mAdcValue[2];
+    if (mPotArrayValues < 32)
+      mPotArrayValues++;
     mPotArrayIndex = (mPotArrayIndex+1) % 32;
     int32_t sum = 0;
-    for (int i = 0; i < 32; i++)
+    for (int i = 0; i < mPotArrayValues; i++)
       sum += mPotArray[i];
-    sixStep.mSpeedRef = sum / 32;
+    sixStep.mSpeedRef = sum / mPotArrayValues;
     }
 
   if (sixStep.STATUS != SPEED_FEEDBACK_FAIL)
@@ -1224,8 +1231,11 @@ void mcInit() {
   sixStep.LF_TIMx_ARR = hTim6.Instance->ARR;
   sixStep.LF_TIMx_PSC = hTim6.Instance->PSC;
 
-  sixStep.mStartupCurrent = STARTUP_CURRENT_REFERENCE;
   sixStep.mNumPolePair = NUM_POLE_PAIR;
+  sixStep.mStartupCurrent = STARTUP_CURRENT_REFERENCE;
+
+  sixStep.mBemfUpThreshold = BEMF_THRSLD_UP;
+  sixStep.mBemfDownThreshold = BEMF_THRSLD_DOWN;
 
   sixStep.ACCEL = ACC;
   sixStep.KP = KP_GAIN;
@@ -1251,8 +1261,8 @@ void mcReset() {
   sixStep.numberofitemArr = NUMBER_OF_STEPS;
   sixStep.mStartupCurrent = STARTUP_CURRENT_REFERENCE;
 
-  sixStep.pulse_value = sixStep.HF_TIMx_CCR;
-  sixStep.Speed_target_ramp = MAX_POT_SPEED;
+  sixStep.mPulseValue = sixStep.HF_TIMx_CCR;
+  sixStep.mSpeedTargetRamp = MAX_POT_SPEED;
   sixStep.mDemagnValue = INITIAL_DEMAGN_DELAY;
 
   hTim1.Init.Prescaler = sixStep.HF_TIMx_PSC;
@@ -1266,22 +1276,18 @@ void mcReset() {
   hTim6.Init.Period =    sixStep.LF_TIMx_ARR;
   hTim6.Instance->ARR =  sixStep.LF_TIMx_ARR;
 
-  sixStep.SYSCLK_frequency = HAL_RCC_GetSysClockFreq();
+  sixStep.mSysClkFrequency = HAL_RCC_GetSysClockFreq();
 
   mcNucleoSetChanCCR (0,0,0);
 
-  sixStep.mBemfUpThreshold = BEMF_THRSLD_UP;
-  sixStep.mBemfDownThreshold = BEMF_THRSLD_DOWN;
   sixStep.mDemagnCounter = 0;
 
   sixStep.mSpeedMeasured = 0;
   sixStep.mSpeedFiltered = 0;
   sixStep.mSpeedRef = 0;
   sixStep.mCurrentReference = 0;
-
-  sixStep.BEMF_Tdown_count = 0;   // Reset of the Counter to detect Stop motor condition when a stall condition occurs
-
-  sixStep.Integral_Term_sum = 0;
+  sixStep.mBemfDownCount = 0; 
+  sixStep.mIntegralTermSum = 0;
 
   mLastButtonPress = 0;
   mStartupStepCount = 0;
@@ -1316,7 +1322,7 @@ void mcReset() {
 //{{{
 int32_t mcGetSpeedRPM() {
 
-  int32_t speedHz = sixStep.SYSCLK_frequency / (hTim6.Instance->PSC * __HAL_TIM_GetAutoreload (&hTim6) * 6);
+  int32_t speedHz = sixStep.mSysClkFrequency / (hTim6.Instance->PSC * __HAL_TIM_GetAutoreload (&hTim6) * 6);
 
   if (piParam.Reference < 0)
     speedHz = -speedHz;
@@ -1371,11 +1377,11 @@ void mcPanic() {
 //{{{
 void mcSetSpeed() {
 
-  if (((sixStep.mSpeedRef > sixStep.Speed_target_ramp) &&
-       ((sixStep.mSpeedRef - sixStep.Speed_target_ramp) > ADC_SPEED_TH)) ||
-      ((sixStep.mSpeedRef <= sixStep.Speed_target_ramp) &&
-       ((sixStep.Speed_target_ramp - sixStep.mSpeedRef) > ADC_SPEED_TH))) {
-    sixStep.Speed_target_ramp = sixStep.mSpeedRef;
+  if (((sixStep.mSpeedRef > sixStep.mSpeedTargetRamp) &&
+       ((sixStep.mSpeedRef - sixStep.mSpeedTargetRamp) > ADC_SPEED_TH)) ||
+      ((sixStep.mSpeedRef <= sixStep.mSpeedTargetRamp) &&
+       ((sixStep.mSpeedTargetRamp - sixStep.mSpeedRef) > ADC_SPEED_TH))) {
+    sixStep.mSpeedTargetRamp = sixStep.mSpeedRef;
     if (sixStep.CW_CCW) {
       int16_t reference_tmp = -(sixStep.mSpeedRef * MAX_POT_SPEED / 4096);
       piParam.Reference = (reference_tmp >=- MIN_POT_SPEED) ? -MIN_POT_SPEED : reference_tmp;

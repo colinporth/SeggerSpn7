@@ -32,7 +32,7 @@ public:
   uint16_t mBemfDownThreshold = 0; // Voltage threshold for BEMF detection in down direction
 
   // unchanging values
-  uint32_t SYSCLK_frequency = 0;  // System clock main frequency
+  uint32_t mSysClkFrequency = 0;  // System clock main frequency
 
   // odd reg addresses
   uint32_t HF_TIMx_PSC = 0;       // Prescaler variable for high frequency timer
@@ -44,8 +44,8 @@ public:
   int16_t mStep = -1;
   int16_t mPrevStep = -1;
 
-  uint16_t pulse_value = 0;       // CCR value for SixStep algorithm
-  uint16_t ARR_value = 0;         // ARR vector for Accell compute
+  uint16_t mPulseValue = 0;       // CCR value for SixStep algorithm
+  uint16_t mArrValue = 0;         // ARR vector for Accell compute
   uint32_t prescaler_value = 0;   // Prescaler value for low freq timer
   uint16_t numberofitemArr = 0;   // Number of elements
 
@@ -61,13 +61,11 @@ public:
 
   uint16_t mCurrentReference = 0; // Currrent reference for SixStep algorithm
 
-  int32_t Integral_Term_sum = 0;  // Global Integral part for PI
+  int32_t mIntegralTermSum = 0;   // Global Integral part for PI
 
-  uint16_t Speed_target_ramp = 0; // Target Motor Speed
-  uint16_t Speed_target_time = 0; // Target Motor Ramp time
+  uint16_t mSpeedTargetRamp = 0;  // Target Motor Speed
 
-  uint16_t Bemf_delay_start = 0;  // Bemf variable
-  uint8_t BEMF_Tdown_count = 0;   // BEMF Consecutive Threshold Falling Crossings Counter
+  uint8_t mBemfDownCount = 0;     // BEMF Consecutive Threshold Falling Crossings Counter
 
   uint32_t ACCEL = 0;             // Acceleration start-up parameter
   uint16_t KP = 0;                // KP parameter for PI regulator
