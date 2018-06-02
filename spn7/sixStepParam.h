@@ -7,6 +7,7 @@
 #define TIME_FOR_ALIGN                     500   // align ms
 #define NUMBER_OF_STEPS                  20000   // Number of elements for motor start-UP (max value 65535)
 #define NUMBER_ZCR                          12   // Number of zero crossing event during the startup for closed loop control begin
+#define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection
 
 #define ACC                             600000   // Mechanical acceleration rate (setting available in manual mode, LOAD_TYPE = 0)
 #define MINIMUM_ACC                        500   // Mechanical acceleration rate for BIG load application
@@ -17,10 +18,9 @@
 #define KI_DIV                            4096   // Ki parameter divider for PI regulator
 #define LOWER_OUT_LIMIT                    120   // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000   // High Out value of PI regulator
+
 #define MAX_POT_SPEED                     4000   // Maximum Speed regulated by potentiometer
 #define MIN_POT_SPEED                      500   // Minimum Speed regulated by potentiometer
-#define VAL_POT_SPEED_DIV                    2   // Validation potentiometer speed divider
-#define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection
 
 // zeroCrossing parameters
 #define BEMF_THRSLD_DOWN                    200  // Zero Crossing threshold

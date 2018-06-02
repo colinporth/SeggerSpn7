@@ -25,11 +25,11 @@ public:
   bool mClosedLoopReady = false;
 
   // init from parameters
-  bool CW_CCW = false;                  // Set the motor direction
-  uint16_t mStartupCurrent = 0;         // Currrent reference
-  uint16_t mNumPolePair = 0;            // Number of motor pole pairs
-  uint16_t ADC_BEMF_threshold_UP = 0;   // Voltage threshold for BEMF detection in up direction
-  uint16_t ADC_BEMF_threshold_DOWN = 0; // Voltage threshold for BEMF detection in down direction
+  bool CW_CCW = false;             // Set the motor direction
+  uint16_t mStartupCurrent = 0;    // Currrent reference
+  uint16_t mNumPolePair = 0;       // Number of motor pole pairs
+  uint16_t mBemfUpThreshold = 0;   // Voltage threshold for BEMF detection in up direction
+  uint16_t mBemfDownThreshold = 0; // Voltage threshold for BEMF detection in down direction
 
   // unchanging values
   uint32_t SYSCLK_frequency = 0;  // System clock main frequency
@@ -52,10 +52,10 @@ public:
   uint16_t mAdcIndex = 0;         // adc current/pot/vbus/temp index
   uint16_t mAdcValue[4];          // chan 0-3 lastReadValue
 
-  uint16_t demagn_counter = 0;    // Demagnetization counter
-  uint16_t demagn_value = 0;      // Demagnetization value
+  uint16_t mDemagnCounter = 0;    // Demagnetization counter
+  uint16_t mDemagnValue = 0;      // Demagnetization value
 
-  int16_t mSpeedMeaure = 0;       // measured speed
+  int16_t mSpeedMeasured = 0;     // measured speed
   int16_t mSpeedFiltered = 0;     // filtered speed
   int16_t mSpeedRef = 0;          // reference speed
 
@@ -94,8 +94,7 @@ public:
 void mcInit();
 void mcReset();
 
-int32_t mcGetElSpeedHz();
-int32_t mcGetMechSpeedRPM();
+int32_t mcGetSpeedRPM();
 
 void mcStartMotor();
 void mcStopMotor();

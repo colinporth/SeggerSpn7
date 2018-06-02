@@ -26,10 +26,10 @@ public:
   //{{{
   void draw (cLcd* lcd, int16_t top, int16_t bottom) {
 
-    int16_t height = (bottom-top) / mTraces.size();
+    int16_t height = (bottom - top - mTraces.size()) / mTraces.size();
     for (auto trace : mTraces) {
       trace->draw (lcd, top, top + height);
-      top += height;
+      top += height + 1;
       }
     }
   //}}}
