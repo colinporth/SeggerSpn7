@@ -84,14 +84,15 @@ private:
 
   // init from params
   bool CW_CCW = false;                                  // Set the motor direction
-  uint16_t mNumPolePair = NUM_POLE_PAIR;                // Number of motor pole pairs
-  uint16_t mStartupCurrent = STARTUP_CURRENT_REFERENCE; // Currrent reference
-  uint16_t mBemfUpThreshold = BEMF_THRSLD_UP;           // Voltage threshold for BEMF detection in up direction
-  uint16_t mBemfDownThreshold = BEMF_THRSLD_DOWN;       // Voltage threshold for BEMF detection in down direction
+  const uint16_t mNumPolePair = NUM_POLE_PAIR;                // Number of motor pole pairs
+  const uint16_t mStartupCurrent = STARTUP_CURRENT_REFERENCE; // Currrent reference
+  const uint16_t mBemfUpThreshold = BEMF_THRSLD_UP;           // Voltage threshold for BEMF detection in up direction
+  const uint16_t mBemfDownThreshold = BEMF_THRSLD_DOWN;       // Voltage threshold for BEMF detection in down direction
+
+  const uint16_t KP = KP_GAIN;    // KP parameter for PI regulator
+  const uint16_t KI = KI_GAIN;    // KI parameter for PI regulator
 
   uint32_t ACCEL = ACC;           // Acceleration start-up parameter
-  uint16_t KP = KP_GAIN;          // KP parameter for PI regulator
-  uint16_t KI = KI_GAIN;          // KI parameter for PI regulator
 
   // unchanging values
   uint32_t mSysClkFrequency = 0;  // System clock main frequency
@@ -116,15 +117,11 @@ private:
   uint16_t mDemagnValue = 0;      // Demagnetization value
 
   uint16_t mCurrentReference = 0; // Currrent reference for SixStep algorithm
-
-  int32_t mIntegralTermSum = 0;   // Global Integral part for PI
-
-  uint16_t mSpeedTargetRamp = 0;  // Target Motor Speed
-
-  uint8_t mBemfDownCount = 0;     // BEMF Consecutive Threshold Falling Crossings Counter
-
   uint16_t mAlignTicks = 1;
   uint16_t mStartupStepCount = 0;
+  uint16_t mSpeedTargetRamp = 0;  // Target Motor Speed
+  uint8_t mBemfDownCount = 0;     // BEMF Consecutive Threshold Falling Crossings Counter
+  int32_t mIntegralTermSum = 0;   // Global Integral part for PI
 
   uint32_t constant_k = 0;
   uint32_t mTimeVectorPrev = 0 ;

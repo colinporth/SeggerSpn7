@@ -526,6 +526,11 @@ void cSixStep::reset() {
   mPrevStep = -1;
   mStep = 5;
 
+  mPotArrayValues = 0;
+  mPotArrayIndex = 0;
+  mSpeedArrayValues = 0;
+  mSpeedArrayIndex = 0;
+
   mTargetSpeed = TARGET_SPEED;
   setPiParam (&piParam);
 
@@ -1421,8 +1426,8 @@ int main() {
                     " p:" + dec (mSixStep.mAdcValue[2], 4),
                     cPoint(0,0));
     lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
-                    std::string(kStatusStr[mSixStep.mStatus]) + " " + 
-                    dec (mSixStep.mSpeedFiltered,4) + " " + 
+                    std::string(kStatusStr[mSixStep.mStatus]) + " " +
+                    dec (mSixStep.mSpeedFiltered,4) + " " +
                     dec (mSixStep.mSpeedRef,4),
                     cPoint(0,40));
     mTraceVec.draw (&lcd, 80, lcd.getHeight());
