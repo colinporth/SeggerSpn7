@@ -23,7 +23,7 @@ void _Error_Handler(char *file, int line)
 //}}}
 
 //{{{
-void SystemClock_Config(void)
+void SystemClock_Config()
 {
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -83,7 +83,7 @@ void SystemClock_Config(void)
 }
 //}}}
 //{{{
-static void MX_NVIC_Init(void)
+static void MX_NVIC_Init()
 {
   /* TIM1_BRK_TIM15_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 4, 1);
@@ -97,7 +97,7 @@ static void MX_NVIC_Init(void)
 }
 //}}}
 //{{{
-static void MX_ADC1_Init(void)
+static void MX_ADC1_Init()
 {
 
   ADC_MultiModeTypeDef multimode;
@@ -186,7 +186,7 @@ static void MX_ADC1_Init(void)
 }
 //}}}
 //{{{
-static void MX_ADC2_Init(void)
+static void MX_ADC2_Init()
 {
 
   ADC_InjectionConfTypeDef sConfigInjected;
@@ -242,7 +242,7 @@ static void MX_ADC2_Init(void)
 //}}}
 //{{{
 /* DAC1 init function */
-static void MX_DAC1_Init(void)
+static void MX_DAC1_Init()
 {
 
   DAC_ChannelConfTypeDef sConfig;
@@ -267,7 +267,7 @@ static void MX_DAC1_Init(void)
 }
 //}}}
 //{{{
-static void MX_TIM1_Init(void)
+static void MX_TIM1_Init()
 {
 
   TIM_SlaveConfigTypeDef sSlaveConfig;
@@ -357,7 +357,7 @@ static void MX_TIM1_Init(void)
 }
 //}}}
 //{{{
-static void MX_USART2_UART_Init(void)
+static void MX_USART2_UART_Init()
 {
 
   huart2.Instance = USART2;
@@ -378,7 +378,7 @@ static void MX_USART2_UART_Init(void)
 }
 //}}}
 //{{{
-static void MX_GPIO_Init(void)
+static void MX_GPIO_Init()
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -418,27 +418,12 @@ static void MX_GPIO_Init(void)
 //}}}
 
 //{{{
-int main(void)
+int main()
 {
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
-  /* MCU Configuration----------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
@@ -451,21 +436,8 @@ int main(void)
 
   /* Initialize interrupts */
   MX_NVIC_Init();
-  /* USER CODE BEGIN 2 */
 
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-
-  /* USER CODE END WHILE */
-
-  /* USER CODE BEGIN 3 */
-
-  }
-  /* USER CODE END 3 */
-
+  while (1) {
+    }
 }
 //}}}

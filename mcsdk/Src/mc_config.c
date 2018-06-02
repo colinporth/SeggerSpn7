@@ -195,6 +195,7 @@ PID_Handle_t PIDIdHandle_M1 =
   .hKdDivisorPOW2       = 0x0000U,
 };
 //}}}
+
 //{{{
 /**
   * @brief  SpeednTorque Controller parameters Motor 1
@@ -271,6 +272,7 @@ RevUpCtrl_Handle_t RevUpControlM1 =
                             },
 };
 //}}}
+
 //{{{
 /**
   * @brief  Internal OPAMP parameters Motor 1 - three shunt - F30x - Independent Resources
@@ -422,6 +424,7 @@ PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
   .pParams_str = &R3_4_F30XParamsM1,
 };
 //}}}
+
 //{{{
 /**
   * @brief  SpeedNPosition sensor parameters Motor 1 - Base Class
@@ -465,6 +468,7 @@ VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
                               */
 };
 //}}}
+
 //{{{
 /**
   * @brief  SpeedNPosition sensor parameters Motor 1 - State Observer + PLL
@@ -639,6 +643,7 @@ STO_Handle_t STO_M1 =
 ,
 };
 //}}}
+
 //{{{
 NTC_Handle_t TempSensorParamsM1 =
 {
@@ -709,6 +714,7 @@ RDivider_Handle_t RealBusVoltageSensorParamsM1 =
                                                                                 / hConversionFactor */
 };
 //}}}
+
 //{{{
 UI_Handle_t UI_Params =
 {
@@ -721,6 +727,7 @@ UI_Handle_t UI_Params =
         .pFctDACGetUserChannelValue = &DAC_GetUserChannelValue,
 };
 //}}}
+
 //{{{
 DAC_UI_Handle_t DAC_UI_Params =
 {
@@ -730,12 +737,14 @@ DAC_UI_Handle_t DAC_UI_Params =
                         otherwise set DISABLE */
 };
 //}}}
+
 //{{{
 RampExtMngr_Handle_t RampExtMngrHFParamsM1 =
 {
   .FrequencyHz = TF_REGULATION_RATE /*!< Execution frequency expressed in Hz */
 };
 //}}}
+
 //{{{
 /**
   * @brief  CircleLimitation Component parameters Motor 1 - Base Component
@@ -749,11 +758,11 @@ CircleLimitation_Handle_t CircleLimitationM1 =
                          start */
 };
 //}}}
+
 //{{{
 UFCP_Handle_t pUSART =
 {
     ._Super.RxTimeout = 0,
-
     .USARTx              = USART,
     .UIIRQn              = UI_IRQ_USART,
 };

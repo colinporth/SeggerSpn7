@@ -1494,7 +1494,7 @@ int main() {
   mcInit();
 
   lcd.init();
-  mTraceVec.addTrace (3200, 8, 2);
+  mTraceVec.addTrace (3200, 4, 2);
 
   while (true) {
     lcd.clear (cLcd::eOn);
