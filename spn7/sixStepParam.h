@@ -19,8 +19,8 @@
 #define LOWER_OUT_LIMIT                    120   // Low Out value of PI regulator
 #define UPPER_OUT_LIMIT                   2000   // High Out value of PI regulator
 
-#define MAX_POT_SPEED                     4000   // Maximum Speed regulated by potentiometer
 #define MIN_POT_SPEED                      500   // Minimum Speed regulated by potentiometer
+#define MAX_POT_SPEED                     4000   // Maximum Speed regulated by potentiometer
 
 // zeroCrossing parameters
 #define BEMF_THRSLD_DOWN                    200  // Zero Crossing threshold

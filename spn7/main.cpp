@@ -1191,7 +1191,7 @@ void mcSysTick() {
     int32_t sum = 0;
     for (int i = 0; i < mPotArrayValues; i++)
       sum += mPotArray[i];
-    sixStep.mSpeedRef = sum / mPotArrayValues;
+    sixStep.mSpeedRef = MIN_POT_SPEED + (((MAX_POT_SPEED - MIN_POT_SPEED) * (sum / mPotArrayValues)) / 4096);
     }
 
   if (sixStep.STATUS != SPEED_FEEDBACK_FAIL)
@@ -1286,7 +1286,7 @@ void mcReset() {
   sixStep.mSpeedFiltered = 0;
   sixStep.mSpeedRef = 0;
   sixStep.mCurrentReference = 0;
-  sixStep.mBemfDownCount = 0; 
+  sixStep.mBemfDownCount = 0;
   sixStep.mIntegralTermSum = 0;
 
   mLastButtonPress = 0;
@@ -1382,14 +1382,7 @@ void mcSetSpeed() {
       ((sixStep.mSpeedRef <= sixStep.mSpeedTargetRamp) &&
        ((sixStep.mSpeedTargetRamp - sixStep.mSpeedRef) > ADC_SPEED_TH))) {
     sixStep.mSpeedTargetRamp = sixStep.mSpeedRef;
-    if (sixStep.CW_CCW) {
-      int16_t reference_tmp = -(sixStep.mSpeedRef * MAX_POT_SPEED / 4096);
-      piParam.Reference = (reference_tmp >=- MIN_POT_SPEED) ? -MIN_POT_SPEED : reference_tmp;
-      }
-    else {
-      int16_t reference_tmp = sixStep.mSpeedRef * MAX_POT_SPEED / 4096;
-      piParam.Reference = (reference_tmp <= MIN_POT_SPEED) ? MIN_POT_SPEED : reference_tmp;
-      }
+    piParam.Reference = sixStep.CW_CCW ? -sixStep.mSpeedRef : sixStep.mSpeedRef;
     }
   }
 //}}}
