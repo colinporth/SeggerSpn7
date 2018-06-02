@@ -7,30 +7,25 @@
 //}}}
 
 enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
-                      STOP, IDLE, 
-                      START, ALIGNMENT, STARTUP, VALIDATION, RUN };
+                      STOPPED, START, ALIGN, STARTUP, VALIDATION, SPEED_OK, BEMF_OK, RUN };
 //{{{
 class cSixStep {
 public:
-  // states
-  eSixStepStatus STATUS = IDLE;        // Status variable for SixStep algorithm
+  // state
+  eSixStepStatus STATUS = STOPPED;  // Status variable for SixStep algorithm
 
-  bool mMotorRunning = false;
-  bool mPmwRunning  = false;
-  bool mAligning = false;
-  bool mAligned = false;
-  bool ARR_OK = false;                 // ARR flag control for Accell status
-  bool SPEED_VALIDATED = false;        // Validation flag for Speed before closed loop control
-  bool VALIDATION_OK = false;          // Validation flag for Closed loop control begin
-  bool BEMF_OK = false;
-  bool mClosedLoopReady = false;
+  bool ARR_OK = false;             // ARR flag control for Accell status
 
-  // init from parameters
-  bool CW_CCW = false;             // Set the motor direction
-  uint16_t mStartupCurrent = 0;    // Currrent reference
-  uint16_t mNumPolePair = 0;       // Number of motor pole pairs
-  uint16_t mBemfUpThreshold = 0;   // Voltage threshold for BEMF detection in up direction
-  uint16_t mBemfDownThreshold = 0; // Voltage threshold for BEMF detection in down direction
+  // init from params
+  bool CW_CCW = false;                                  // Set the motor direction
+  uint16_t mNumPolePair = NUM_POLE_PAIR;                // Number of motor pole pairs
+  uint16_t mStartupCurrent = STARTUP_CURRENT_REFERENCE; // Currrent reference
+  uint16_t mBemfUpThreshold = BEMF_THRSLD_UP;           // Voltage threshold for BEMF detection in up direction
+  uint16_t mBemfDownThreshold = BEMF_THRSLD_DOWN;       // Voltage threshold for BEMF detection in down direction
+
+  uint32_t ACCEL = ACC;           // Acceleration start-up parameter
+  uint16_t KP = KP_GAIN;          // KP parameter for PI regulator
+  uint16_t KI = KI_GAIN;          // KI parameter for PI regulator
 
   // unchanging values
   uint32_t mSysClkFrequency = 0;  // System clock main frequency
@@ -67,10 +62,6 @@ public:
   uint16_t mSpeedTargetRamp = 0;  // Target Motor Speed
 
   uint8_t mBemfDownCount = 0;     // BEMF Consecutive Threshold Falling Crossings Counter
-
-  uint32_t ACCEL = 0;             // Acceleration start-up parameter
-  uint16_t KP = 0;                // KP parameter for PI regulator
-  uint16_t KI = 0;                // KI parameter for PI regulator
   };
 //}}}
 //{{{
@@ -96,7 +87,7 @@ void mcReset();
 int32_t mcGetSpeedRPM();
 
 void mcStartMotor();
-void mcStopMotor();
+void mcStopMotor (eSixStepStatus status);
 void mcPanic();
 
 void mcSetSpeed();
