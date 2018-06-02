@@ -6,13 +6,79 @@
 #endif
 //}}}
 
-enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
-                      STOPPED, START, ALIGN, STARTUP, VALIDATION, SPEED_OK, BEMF_OK, RUN };
-//{{{
 class cSixStep {
 public:
+  enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
+                        STOPPED, START, ALIGN, STARTUP, VALIDATION, SPEED_OK, BEMF_OK, RUN };
+  //{{{
+  class cPiParam {
+  public:
+    int16_t Reference;          // refence value for PI regulator
+
+    int16_t Kp_Gain;            // Kp value for PI regulator
+    int16_t Ki_Gain;            // Ki value for PI regulator
+
+    int16_t Lower_Limit_Output; // min output value for PI regulator
+    int16_t Upper_Limit_Output; // max output value for PI regulator
+
+    bool Max_PID_Output;        // max saturation indicator flag
+    bool Min_PID_Output;        // min saturation indicator flag
+    };
+  //}}}
+
+  void init();
+  void reset();
+
+  void startMotor();
+  void stopMotor (eSixStepStatus status);
+
+  int32_t getSpeedRPM();
+  void setSpeed();
+
+  void adcSample (ADC_HandleTypeDef* hadc);
+  void tim6Tick();
+  void sysTick();
+
   // state
-  eSixStepStatus STATUS = STOPPED;  // Status variable for SixStep algorithm
+  eSixStepStatus mStatus = STOPPED;  // Status variable for SixStep algorithm
+
+  uint16_t mAdcValue[4];          // chan 0-3 lastReadValue
+  int16_t mSpeedMeasured = 0;     // measured speed
+  int16_t mSpeedFiltered = 0;     // filtered speed
+  int16_t mSpeedRef = 0;          // reference speed
+
+private:
+  //{{{  methods
+  void GPIO_Init();
+  void ADC_Init();
+  void TIM1_Init();
+  void TIM6_Init();
+  void TIM16_Init();
+  void mcNucleoDisableChan();
+  void mcNucleoEnableInputChan12();
+  void mcNucleoEnableInputChan13();
+  void mcNucleoEnableInputChan23();
+  void mcNucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
+  void mcNucleoStartPwm();
+  void mcNucleoStopPwm();
+  void mcNucleoCurrentRefStart();
+  void mcNucleoCurrentRefStop();
+  void mcNucleoCurrentRefSetValue (uint16_t value);
+  void mcNucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
+  void mcNucleoLedOn();
+  void mcNucleoLedOff();
+  void mcNucleoInit();
+
+  uint64_t fastSqrt (uint64_t input);
+  void rampMotor();
+  void arrBemf (bool up);
+  void setPiParam (cPiParam* piParam);
+  int16_t piController (cPiParam* PI_PARAM, int16_t speed_fdb);
+  uint16_t getDemagnValue (uint16_t piReference);
+  void taskSpeed();
+  //}}}
+  //{{{  vars
+  cPiParam piParam;
 
   bool ARR_OK = false;             // ARR flag control for Accell status
 
@@ -46,14 +112,8 @@ public:
   uint16_t numberofitemArr = 0;   // Number of elements
 
   uint16_t mAdcIndex = 0;         // adc current/pot/vbus/temp index
-  uint16_t mAdcValue[4];          // chan 0-3 lastReadValue
-
   uint16_t mDemagnCounter = 0;    // Demagnetization counter
   uint16_t mDemagnValue = 0;      // Demagnetization value
-
-  int16_t mSpeedMeasured = 0;     // measured speed
-  int16_t mSpeedFiltered = 0;     // filtered speed
-  int16_t mSpeedRef = 0;          // reference speed
 
   uint16_t mCurrentReference = 0; // Currrent reference for SixStep algorithm
 
@@ -62,36 +122,31 @@ public:
   uint16_t mSpeedTargetRamp = 0;  // Target Motor Speed
 
   uint8_t mBemfDownCount = 0;     // BEMF Consecutive Threshold Falling Crossings Counter
+
+  uint16_t mAlignTicks = 1;
+  uint16_t mStartupStepCount = 0;
+
+  uint32_t constant_k = 0;
+  uint32_t mTimeVectorPrev = 0 ;
+  uint32_t mFirstSingleStep = 0;
+  uint16_t mTargetSpeed = 0;
+  uint32_t mArrLF = 0;
+  uint16_t index_ARR_step = 1;
+  uint32_t mNumZeroCrossing = 0;
+
+  int16_t mPotArray[32];
+  uint16_t mPotArrayValues = 0;
+  uint16_t mPotArrayIndex = 0;
+
+  int16_t mSpeedArray[32];
+  uint16_t mSpeedArrayValues = 0;
+  uint16_t mSpeedArrayIndex = 0;
+
+  uint16_t mOpenLoopBemfEvent = 0;
+  bool mOpenLoopBemfFail = false;
+  bool mSpeedMeasuredFail = false;
+  //}}}
   };
-//}}}
-//{{{
-class cPiParam {
-public:
-  int16_t Reference;          // refence value for PI regulator
-
-  int16_t Kp_Gain;            // Kp value for PI regulator
-  int16_t Ki_Gain;            // Ki value for PI regulator
-
-  int16_t Lower_Limit_Output; // min output value for PI regulator
-  int16_t Upper_Limit_Output; // max output value for PI regulator
-
-  bool Max_PID_Output;        // max saturation indicator flag
-  bool Min_PID_Output;        // min saturation indicator flag
-  };
-//}}}
-
-// external interface
-void mcInit();
-void mcReset();
-
-int32_t mcGetSpeedRPM();
-
-void mcStartMotor();
-void mcStopMotor (eSixStepStatus status);
-void mcPanic();
-
-void mcSetSpeed();
-void mcEXTbutton();
 
 //{{{
 #ifdef __cplusplus
