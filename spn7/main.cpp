@@ -880,162 +880,6 @@ void taskSpeed() {
 
 // callback interface
 //{{{
-void mcAdcSample (ADC_HandleTypeDef* adc) {
-
-  if (adc == &hAdc2) {
-    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
-        switch (sixStep.mStep) {
-          //{{{
-          case 0: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value < sixStep.mBemfDownThreshold)
-                arrBemf (false);
-              }
-            else if (value > sixStep.mBemfUpThreshold)
-              arrBemf (true);
-
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          //{{{
-          case 3: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter >= sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value > sixStep.mBemfUpThreshold)
-                arrBemf (true);
-              }
-            else if (value < sixStep.mBemfDownThreshold)
-              arrBemf (false);
-
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          //{{{
-          case 2: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value < sixStep.mBemfDownThreshold)
-                arrBemf (false);
-              }
-            else if (value > sixStep.mBemfUpThreshold)
-              arrBemf (true);
-
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          //{{{
-          case 5: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value > sixStep.mBemfUpThreshold)
-                arrBemf (true);
-              }
-            else if (value < sixStep.mBemfDownThreshold)
-               arrBemf (false);
-
-            mTraceVec.addSample (0, value> 4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          default: {
-            //{{{
-            uint16_t value = HAL_ADC_GetValue (adc);
-            break;
-            }
-            //}}}
-          }
-      // set adc2Sample curr:temp
-      mcNucleoAdcChan (&hAdc2, sixStep.mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
-      }
-    else {
-      sixStep.mAdcValue[sixStep.mAdcIndex] = HAL_ADC_GetValue (adc);
-      sixStep.mAdcIndex = (sixStep.mAdcIndex+1) % 2;
-      switch (sixStep.mStep) {
-        case 0:
-        case 3:
-          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // set adc2Sample bemf3
-        case 2:
-        case 5:
-          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // set adc2Sample bemf1
-        }
-      }
-    }
-
-  else { // adc == &hAdc3
-    uint16_t value = HAL_ADC_GetValue (adc);
-    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
-      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
-        switch (sixStep.mStep) {
-          //{{{
-          case 1: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value > sixStep.mBemfUpThreshold)
-                arrBemf (true);
-              }
-            else if (value < sixStep.mBemfDownThreshold)
-              arrBemf (false);
-
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          //{{{
-          case 4: {
-            uint16_t value = HAL_ADC_GetValue (adc);
-            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
-              sixStep.mDemagnCounter++;
-            else if (piParam.Reference >= 0) {
-              if (value < sixStep.mBemfDownThreshold)
-                arrBemf (false);
-              }
-            else if (value > sixStep.mBemfUpThreshold)
-              arrBemf (true);
-
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, sixStep.mStep);
-            break;
-            }
-          //}}}
-          default: {
-            //{{{
-            uint16_t value = HAL_ADC_GetValue (adc);
-            break;
-            }
-            //}}}
-          }
-      // set adc3Sample pot
-      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
-      }
-    else {
-      sixStep.mAdcValue[2] = HAL_ADC_GetValue (adc);
-      // set adc3Sample bemf2
-      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
-      }
-    }
-  }
-//}}}
-//{{{
 void mcTim6Tick() {
 
   // nextStep
@@ -1048,19 +892,13 @@ void mcTim6Tick() {
   if (sixStep.mAligned) {
     sixStep.mSpeedMeasured = mcGetSpeedRPM();
     sixStep.mDemagnCounter = 1;
+
     if (sixStep.mPrevStep != sixStep.mStep)
       mNumZeroCrossing = 0;
+    sixStep.mStep = (piParam.Reference >= 0) ? (sixStep.mStep + 1) % 6 :  (sixStep.mStep + 5) % 6;
 
-    if (piParam.Reference >= 0) {
-      sixStep.mStep = (sixStep.mStep + 1) % 6;
-      if (sixStep.mClosedLoopReady)
-        sixStep.VALIDATION_OK = true;
-      }
-    else {
-      sixStep.mStep = (sixStep.mStep + 5) % 6;
-      if (sixStep.mClosedLoopReady)
-        sixStep.VALIDATION_OK = true;
-      }
+    if (sixStep.mClosedLoopReady)
+      sixStep.VALIDATION_OK = true;
     }
 
   switch (sixStep.mStep) {
@@ -1406,7 +1244,158 @@ void mcEXTbutton() {
 // callbacks
 //{{{
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
-  mcAdcSample (hadc);
+
+  if (hadc == &hAdc2) {
+    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
+      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
+        switch (sixStep.mStep) {
+          //{{{
+          case 0: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value < sixStep.mBemfDownThreshold)
+                arrBemf (false);
+              }
+            else if (value > sixStep.mBemfUpThreshold)
+              arrBemf (true);
+
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          //{{{
+          case 3: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter >= sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value > sixStep.mBemfUpThreshold)
+                arrBemf (true);
+              }
+            else if (value < sixStep.mBemfDownThreshold)
+              arrBemf (false);
+
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          //{{{
+          case 2: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value < sixStep.mBemfDownThreshold)
+                arrBemf (false);
+              }
+            else if (value > sixStep.mBemfUpThreshold)
+              arrBemf (true);
+
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          //{{{
+          case 5: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value > sixStep.mBemfUpThreshold)
+                arrBemf (true);
+              }
+            else if (value < sixStep.mBemfDownThreshold)
+               arrBemf (false);
+
+            mTraceVec.addSample (0, value> 4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          default: {
+            //{{{
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            break;
+            }
+            //}}}
+          }
+      // set adc2Sample curr:temp
+      mcNucleoAdcChan (&hAdc2, sixStep.mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
+      }
+    else {
+      sixStep.mAdcValue[sixStep.mAdcIndex] = HAL_ADC_GetValue (hadc);
+      sixStep.mAdcIndex = (sixStep.mAdcIndex+1) % 2;
+      switch (sixStep.mStep) {
+        case 0:
+        case 3:
+          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // set adc2Sample bemf3
+        case 2:
+        case 5:
+          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // set adc2Sample bemf1
+        }
+      }
+    }
+
+  else { // adc == &hAdc3
+    uint16_t value = HAL_ADC_GetValue (hadc);
+    if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) {
+      if ((sixStep.STATUS != START) && (sixStep.STATUS != ALIGNMENT))
+        switch (sixStep.mStep) {
+          //{{{
+          case 1: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value > sixStep.mBemfUpThreshold)
+                arrBemf (true);
+              }
+            else if (value < sixStep.mBemfDownThreshold)
+              arrBemf (false);
+
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          //{{{
+          case 4: {
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            if (sixStep.mDemagnCounter < sixStep.mDemagnValue)
+              sixStep.mDemagnCounter++;
+            else if (piParam.Reference >= 0) {
+              if (value < sixStep.mBemfDownThreshold)
+                arrBemf (false);
+              }
+            else if (value > sixStep.mBemfUpThreshold)
+              arrBemf (true);
+
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, sixStep.mStep);
+            break;
+            }
+          //}}}
+          default: {
+            //{{{
+            uint16_t value = HAL_ADC_GetValue (hadc);
+            break;
+            }
+            //}}}
+          }
+      // set adc3Sample pot
+      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
+      }
+    else {
+      sixStep.mAdcValue[2] = HAL_ADC_GetValue (hadc);
+      // set adc3Sample bemf2
+      mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+      }
+    }
   }
 //}}}
 //{{{

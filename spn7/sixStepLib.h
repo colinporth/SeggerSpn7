@@ -6,8 +6,9 @@
 #endif
 //}}}
 
-enum eSixStepStatus { IDLE, STARTUP, ALIGNMENT, VALIDATION, START, RUN, STOP,
-                      STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL };
+enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
+                      STOP, IDLE, 
+                      START, ALIGNMENT, STARTUP, VALIDATION, RUN };
 //{{{
 class cSixStep {
 public:

@@ -26,7 +26,7 @@
   * @param  pHandle: handler of the current instance of the encoder component
   * @retval none
   */
-void ENC_Init(ENCODER_Handle_t *pHandle)
+void ENC_Init (ENCODER_Handle_t *pHandle)
 {
 
   TIM_TypeDef* TIMx = pHandle->TIMx;
@@ -71,7 +71,7 @@ void ENC_Init(ENCODER_Handle_t *pHandle)
 * @param  pHandle: handler of the current instance of the encoder component
 * @retval none
 */
-void ENC_Clear(ENCODER_Handle_t *pHandle)
+void ENC_Clear (ENCODER_Handle_t *pHandle)
 {
   uint8_t Index;
   for (Index=0u;Index<pHandle->SpeedBufferSize;Index++)
@@ -88,7 +88,7 @@ void ENC_Clear(ENCODER_Handle_t *pHandle)
 * @param  pHandle: handler of the current instance of the encoder component
 * @retval int16_t Measured electrical angle in s16degree format.
 */
-int16_t ENC_CalcAngle(ENCODER_Handle_t *pHandle)
+int16_t ENC_CalcAngle (ENCODER_Handle_t *pHandle)
 {
   int32_t wtemp1;
   int32_t wtemp2;
@@ -128,7 +128,7 @@ int16_t ENC_CalcAngle(ENCODER_Handle_t *pHandle)
   * @retval true = sensor information is reliable
   *         false = sensor information is not reliable
   */
-bool ENC_CalcAvrgMecSpeed01Hz(ENCODER_Handle_t *pHandle, int16_t *pMecSpeed01Hz)
+bool ENC_CalcAvrgMecSpeed01Hz (ENCODER_Handle_t *pHandle, int16_t *pMecSpeed01Hz)
 {
   TIM_TypeDef* TIMx = pHandle->TIMx;
   int32_t wOverallAngleVariation = 0;
@@ -257,7 +257,7 @@ bool ENC_CalcAvrgMecSpeed01Hz(ENCODER_Handle_t *pHandle, int16_t *pMecSpeed01Hz)
   * @param  hMecAngle new value of rotor mechanical angle (s16degrees)
   * @retval none
   */
-void ENC_SetMecAngle(ENCODER_Handle_t *pHandle, int16_t hMecAngle)
+void ENC_SetMecAngle (ENCODER_Handle_t *pHandle, int16_t hMecAngle)
 {
   TIM_TypeDef* TIMx = pHandle->TIMx;
 
@@ -288,7 +288,7 @@ void ENC_SetMecAngle(ENCODER_Handle_t *pHandle, int16_t hMecAngle)
   * @param  flag used to distinguish between various IRQ sources
   * @retval none
   */
-void * ENC_IRQHandler(void *pHandleVoid)
+void * ENC_IRQHandler (void *pHandleVoid)
 {
   ENCODER_Handle_t *pHandle = (ENCODER_Handle_t *) pHandleVoid;
 

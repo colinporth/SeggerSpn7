@@ -1,32 +1,3 @@
-/**
-  ******************************************************************************
-  * @file    lcd_interface.cpp
-  * @author  STMicroelectronics - System Lab - MC Team
-  * @version 4.3.0
-  * @date    22-Sep-2016 15:29
-  * @brief   Implementation of LCD interface
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; COPYRIGHT 2016 STMicroelectronics</center></h2>
-  *
-  * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
-  * You may not use this file except in compliance with the License.
-  * You may obtain a copy of the License at:
-  *
-  *        http://www.st.com/software_license_agreement_liberty_v2
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
-/* Pre-compiler coherency check */
 #define LCD_CHK
 #include "CrossCheck.h"
 #undef LCD_CHK
@@ -38,11 +9,6 @@
 #include "drive_parameters.h"
 #include "images.h"
 
-/******************************************************************************/
-
-/*******************************************************************************
- *****************Edit here the lcd_interface Configuration*********************
- ******************************************************************************/
 
 #if ((!defined(SINGLEDRIVE)) && (!defined(DUALDRIVE)))
 #error "Invalid configuration!"
@@ -62,8 +28,6 @@
 
 #define LCDMANAGER_VERS "LCD manager version: 5.0"
 const char s_LCDfwVer[32] = LCDMANAGER_VERS;
-
-/*********Do not modify beyond this line **************************************/
 
 #ifdef LCD_UI_SINGLE
   #define MC_NBR 1
@@ -572,7 +536,7 @@ CSTMEditInt* pGUI_RUC_Stage;
 #endif
 
 /* Encoder tuning */
-CSTMButton*	pGUI_EncoderAlign;
+CSTMButton* pGUI_EncoderAlign;
 
 /* Commons */
 CSTMGroup* pGUI_SpeedMonitor;
@@ -610,73 +574,73 @@ UI_Handle_t *g_pHdl, *g_pHdlDAC;
 
 /* Numeric control */
 typedef enum {
-  GUI_DC_BUS	,	    /*	0 */
-  GUI_Temp	,	    /*	1 */
-  GUI_SpeedRampDuration	,   /*	2 */
-  GUI_SpeedKP	,	    /*	3 */
-  GUI_SpeedKI	,	    /*	4 */
-  GUI_SpeedKD	,	    /*	5 */
-  GUI_FW_BUSTarget	,   /*	6 */
-  GUI_FW_BUSMeasured	,   /*	7 */
-  GUI_FW_KP	,	    /*	8 */
-  GUI_FW_KI	,	    /*	9 */
-  GUI_Iq_Ref	,	    /*	10 */
-  GUI_Iq_Meas	,	    /*	11 */
-  GUI_Id_Ref	,	    /*	12 */
-  GUI_Id_Meas	,	    /*	13 */
-  GUI_IqKP	,	    /*	14 */
-  GUI_IqKI	,	    /*	15 */
-  GUI_IqKD	,	    /*	16 */
-  GUI_IdKP	,	    /*	17 */
-  GUI_IdKI	,	    /*	18 */
-  GUI_IdKD	,	    /*	19 */
-  GUI_STO_C1	,	    /*	20 */
-  GUI_STO_C2	,	    /*	21 */
-  GUI_STO_CR_C1	,	    /*	22 */
-  GUI_STO_CR_C2	,	    /*	23 */
-  GUI_STO_PLL_KP	,   /*	24 */
-  GUI_STO_PLL_KI	,   /*	25 */
-  GUI_RUC_Duration	,   /*	26 */
-  GUI_RUC_FinalSpeed	,   /*	27 */
-  GUI_RUC_FinalToruqe	,   /*	28 */
-  GUI_RUC_Stage ,	    /*	29 */
-  GUI_I_Ref ,		    /*	30 */
-  GUI_Eps_Ref ,		    /*	31 */
+  GUI_DC_BUS  ,     /*  0 */
+  GUI_Temp  ,     /*  1 */
+  GUI_SpeedRampDuration ,   /*  2 */
+  GUI_SpeedKP ,     /*  3 */
+  GUI_SpeedKI ,     /*  4 */
+  GUI_SpeedKD ,     /*  5 */
+  GUI_FW_BUSTarget  ,   /*  6 */
+  GUI_FW_BUSMeasured  ,   /*  7 */
+  GUI_FW_KP ,     /*  8 */
+  GUI_FW_KI ,     /*  9 */
+  GUI_Iq_Ref  ,     /*  10 */
+  GUI_Iq_Meas ,     /*  11 */
+  GUI_Id_Ref  ,     /*  12 */
+  GUI_Id_Meas ,     /*  13 */
+  GUI_IqKP  ,     /*  14 */
+  GUI_IqKI  ,     /*  15 */
+  GUI_IqKD  ,     /*  16 */
+  GUI_IdKP  ,     /*  17 */
+  GUI_IdKI  ,     /*  18 */
+  GUI_IdKD  ,     /*  19 */
+  GUI_STO_C1  ,     /*  20 */
+  GUI_STO_C2  ,     /*  21 */
+  GUI_STO_CR_C1 ,     /*  22 */
+  GUI_STO_CR_C2 ,     /*  23 */
+  GUI_STO_PLL_KP  ,   /*  24 */
+  GUI_STO_PLL_KI  ,   /*  25 */
+  GUI_RUC_Duration  ,   /*  26 */
+  GUI_RUC_FinalSpeed  ,   /*  27 */
+  GUI_RUC_FinalToruqe ,   /*  28 */
+  GUI_RUC_Stage ,     /*  29 */
+  GUI_I_Ref ,       /*  30 */
+  GUI_Eps_Ref ,       /*  31 */
 #if defined(PFC_ENABLED)
-  GUI_PFC_DCBUS_REF,	    /*	32 */
-  GUI_PFC_DCBUS_MEAS,	    /*	33 */
-  GUI_PFC_ACMAINS_FREQ,	    /*	34 */
-  GUI_PFC_ACMAINS_RMS,	    /*	35 */
-  GUI_PFC_I_KP,		    /*	36 */
-  GUI_PFC_I_KI,		    /*	37 */
-  GUI_PFC_I_KD,		    /*	38 */
-  GUI_PFC_V_KP,		    /*	39 */
-  GUI_PFC_V_KI,		    /*	40 */
-  GUI_PFC_V_KD,		    /*	41 */
-  GUI_PFC_STARTUP_DURATION, /*	42 */
+  GUI_PFC_DCBUS_REF,      /*  32 */
+  GUI_PFC_DCBUS_MEAS,     /*  33 */
+  GUI_PFC_ACMAINS_FREQ,     /*  34 */
+  GUI_PFC_ACMAINS_RMS,      /*  35 */
+  GUI_PFC_I_KP,       /*  36 */
+  GUI_PFC_I_KI,       /*  37 */
+  GUI_PFC_I_KD,       /*  38 */
+  GUI_PFC_V_KP,       /*  39 */
+  GUI_PFC_V_KI,       /*  40 */
+  GUI_PFC_V_KD,       /*  41 */
+  GUI_PFC_STARTUP_DURATION, /*  42 */
 #endif
   NUMERIC_DATA_ELEMENT
 } GUI_Values_t;
 
 typedef enum {
-  GUI_CtrlMode	,
-  GUI_DAC_Ch1	,
-  GUI_DAC_Ch2	,
-  GUI_Currents_Input	,
-  GUI_IqIdPIDGainsLink	,
-  GUI_Overcurrent	,
-  GUI_RevupFail	,
-  GUI_SpeedFdbk	,
-  GUI_SW_Error	,
-  GUI_UnderVolt	,
-  GUI_OverVolt	,
-  GUI_OverTemp	,
+  GUI_CtrlMode  ,
+  GUI_DAC_Ch1 ,
+  GUI_DAC_Ch2 ,
+  GUI_Currents_Input  ,
+  GUI_IqIdPIDGainsLink  ,
+  GUI_Overcurrent ,
+  GUI_RevupFail ,
+  GUI_SpeedFdbk ,
+  GUI_SW_Error  ,
+  GUI_UnderVolt ,
+  GUI_OverVolt  ,
+  GUI_OverTemp  ,
   NUMERIC_DATA_ELEMENT_U8
 } GUI_Values8_t;
 
 typedef enum {
-  GUI_SpeedTarget	,
-  GUI_SpeedMeasured	,
+  GUI_SpeedTarget ,
+  GUI_SpeedMeasured ,
   NUMERIC_DATA_ELEMENT_S32
 } GUI_Values32_t;
 
@@ -714,55 +678,55 @@ const GUI_Values32_t MeasuredValues32[] = {
 };
 
 const MC_Protocol_REG_t ID_Code32[] = {
-  MC_PROTOCOL_REG_UNDEFINED	,
+  MC_PROTOCOL_REG_UNDEFINED ,
   MC_PROTOCOL_REG_SPEED_MEAS
 };
 
 const MC_Protocol_REG_t ID_Code[] = {
-  MC_PROTOCOL_REG_BUS_VOLTAGE	,	/*	0	 */
-  MC_PROTOCOL_REG_HEATS_TEMP	,	/*	1	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	2	 */
-  MC_PROTOCOL_REG_SPEED_KP	,	/*	3	 */
-  MC_PROTOCOL_REG_SPEED_KI	,	/*	4	 */
-  MC_PROTOCOL_REG_SPEED_KD	,	/*	5	 */
-  MC_PROTOCOL_REG_FLUXWK_BUS	,	/*	6	 */
-  MC_PROTOCOL_REG_FLUXWK_BUS_MEAS	,	/*	7	 */
-  MC_PROTOCOL_REG_FLUXWK_KP	,	/*	8	 */
-  MC_PROTOCOL_REG_FLUXWK_KI	,	/*	9	 */
-  MC_PROTOCOL_REG_TORQUE_REF	,	/*	10	 */
-  MC_PROTOCOL_REG_TORQUE_MEAS	,	/*	11	 */
-  MC_PROTOCOL_REG_FLUX_REF	,	/*	12	 */
-  MC_PROTOCOL_REG_FLUX_MEAS	,	/*	13	 */
-  MC_PROTOCOL_REG_TORQUE_KP	,	/*	14	 */
-  MC_PROTOCOL_REG_TORQUE_KI	,	/*	15	 */
-  MC_PROTOCOL_REG_TORQUE_KD	,	/*	16	 */
-  MC_PROTOCOL_REG_FLUX_KP	,	/*	17	 */
-  MC_PROTOCOL_REG_FLUX_KI	,	/*	18	 */
-  MC_PROTOCOL_REG_FLUX_KD	,	/*	19	 */
-  MC_PROTOCOL_REG_OBSERVER_C1	,	/*	20	 */
-  MC_PROTOCOL_REG_OBSERVER_C2	,	/*	21	 */
-  MC_PROTOCOL_REG_OBSERVER_CR_C1	,	/*	22	 */
-  MC_PROTOCOL_REG_OBSERVER_CR_C2	,	/*	23	 */
-  MC_PROTOCOL_REG_PLL_KP	,	/*	24	 */
-  MC_PROTOCOL_REG_PLL_KI	,	/*	25	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	26	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	27	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	28	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	29	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	30	 */
-  MC_PROTOCOL_REG_UNDEFINED	,	/*	31	 */
+  MC_PROTOCOL_REG_BUS_VOLTAGE , /*  0  */
+  MC_PROTOCOL_REG_HEATS_TEMP  , /*  1  */
+  MC_PROTOCOL_REG_UNDEFINED , /*  2  */
+  MC_PROTOCOL_REG_SPEED_KP  , /*  3  */
+  MC_PROTOCOL_REG_SPEED_KI  , /*  4  */
+  MC_PROTOCOL_REG_SPEED_KD  , /*  5  */
+  MC_PROTOCOL_REG_FLUXWK_BUS  , /*  6  */
+  MC_PROTOCOL_REG_FLUXWK_BUS_MEAS , /*  7  */
+  MC_PROTOCOL_REG_FLUXWK_KP , /*  8  */
+  MC_PROTOCOL_REG_FLUXWK_KI , /*  9  */
+  MC_PROTOCOL_REG_TORQUE_REF  , /*  10   */
+  MC_PROTOCOL_REG_TORQUE_MEAS , /*  11   */
+  MC_PROTOCOL_REG_FLUX_REF  , /*  12   */
+  MC_PROTOCOL_REG_FLUX_MEAS , /*  13   */
+  MC_PROTOCOL_REG_TORQUE_KP , /*  14   */
+  MC_PROTOCOL_REG_TORQUE_KI , /*  15   */
+  MC_PROTOCOL_REG_TORQUE_KD , /*  16   */
+  MC_PROTOCOL_REG_FLUX_KP , /*  17   */
+  MC_PROTOCOL_REG_FLUX_KI , /*  18   */
+  MC_PROTOCOL_REG_FLUX_KD , /*  19   */
+  MC_PROTOCOL_REG_OBSERVER_C1 , /*  20   */
+  MC_PROTOCOL_REG_OBSERVER_C2 , /*  21   */
+  MC_PROTOCOL_REG_OBSERVER_CR_C1  , /*  22   */
+  MC_PROTOCOL_REG_OBSERVER_CR_C2  , /*  23   */
+  MC_PROTOCOL_REG_PLL_KP  , /*  24   */
+  MC_PROTOCOL_REG_PLL_KI  , /*  25   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  26   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  27   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  28   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  29   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  30   */
+  MC_PROTOCOL_REG_UNDEFINED , /*  31   */
 #if defined(PFC_ENABLED)
-  MC_PROTOCOL_REG_PFC_DCBUS_REF	,	/*	32	 */
-  MC_PROTOCOL_REG_PFC_DCBUS_MEAS	,	/*	33	 */
-  MC_PROTOCOL_REG_PFC_ACBUS_FREQ	,	/*	34	 */
-  MC_PROTOCOL_REG_PFC_ACBUS_RMS	,	/*	35	 */
-  MC_PROTOCOL_REG_PFC_I_KP	,	/*	36	 */
-  MC_PROTOCOL_REG_PFC_I_KI	,	/*	37	 */
-  MC_PROTOCOL_REG_PFC_I_KD	,	/*	38	 */
-  MC_PROTOCOL_REG_PFC_V_KP	,	/*	39	 */
-  MC_PROTOCOL_REG_PFC_V_KI	,	/*	40	 */
-  MC_PROTOCOL_REG_PFC_V_KD	,	/*	41	 */
-  MC_PROTOCOL_REG_PFC_STARTUP_DURATION	,	/*	42	 */
+  MC_PROTOCOL_REG_PFC_DCBUS_REF , /*  32   */
+  MC_PROTOCOL_REG_PFC_DCBUS_MEAS  , /*  33   */
+  MC_PROTOCOL_REG_PFC_ACBUS_FREQ  , /*  34   */
+  MC_PROTOCOL_REG_PFC_ACBUS_RMS , /*  35   */
+  MC_PROTOCOL_REG_PFC_I_KP  , /*  36   */
+  MC_PROTOCOL_REG_PFC_I_KI  , /*  37   */
+  MC_PROTOCOL_REG_PFC_I_KD  , /*  38   */
+  MC_PROTOCOL_REG_PFC_V_KP  , /*  39   */
+  MC_PROTOCOL_REG_PFC_V_KI  , /*  40   */
+  MC_PROTOCOL_REG_PFC_V_KD  , /*  41   */
+  MC_PROTOCOL_REG_PFC_STARTUP_DURATION  , /*  42   */
 #endif
   MC_PROTOCOL_REG_UNDEFINED
 };

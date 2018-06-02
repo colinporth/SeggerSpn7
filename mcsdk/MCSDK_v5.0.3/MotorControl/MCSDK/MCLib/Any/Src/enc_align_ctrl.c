@@ -90,6 +90,7 @@ bool EAC_Exec(EncAlign_Handle_t *pHandle)
   return retVal;
 }
 //}}}
+
 //{{{
 /**
   * @brief  It returns true if the encoder has been aligned at least
