@@ -1,7 +1,7 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
  <Bookmarks>
-  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
+  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
   <BookmarkItem objectName="" line="26" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="std::string kVersion = &quot;WebCam 27/4/18&quot;;" color="5"/>
   <BookmarkItem objectName="" line="42" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="2" extra="&quot;&lt;/html>\r\n&quot;;" color="5"/>
   <BookmarkItem objectName="" line="47" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="bool mButton = false;" color="5"/>
@@ -824,7 +824,7 @@
   <BookmarkItem objectName="" line="1500" column="-1" path="C:/projects/seggerf4/main.cpp" number="246" extra="audBuf[i] = int16_t(0x2000 * sin (((i % 64) / 128.f) * kPi));" color="5"/>
   <BookmarkItem objectName="" line="1508" column="-1" path="C:/projects/seggerf4/main.cpp" number="247" extra="__HAL_RCC_CLEAR_RESET_FLAGS();" color="5"/>
   <BookmarkItem objectName="" line="1509" column="-1" path="C:/projects/seggerf4/main.cpp" number="248" extra="printf (&quot;main pin:%d power:%d cApp size:%d\n&quot;, pinReset, powerOnReset, sizeof (cApp));" color="5"/>
-  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
+  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
   <BreakpointListItem trigger="" line="1361" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="spn7/main.cpp" useHWbreakpoint="false"/>
@@ -877,9 +877,6 @@
  </Memory4>
  <Project>
   <ProjectSessionItem path="spn7"/>
-  <ProjectSessionItem path="spn7;spn7"/>
-  <ProjectSessionItem path="spn7;spn7;inc"/>
-  <ProjectSessionItem path="spn7;spn7;System Files"/>
  </Project>
  <Register1>
   <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="Hello" decimalNodes="" octalNodes="" unsignedNodes=""/>

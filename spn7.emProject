@@ -143,8 +143,6 @@
         <file file_name="STM32F3xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h" />
       </folder>
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c" />
-      <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_adc.c" />
-      <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_adc_ex.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_comp.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_cortex.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_crc.c" />
@@ -196,6 +194,7 @@
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_tim.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_usart.c" />
       <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c" />
+      <file file_name="STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_adc.c" />
     </folder>
     <file file_name="spn7/main.cpp" />
     <file file_name="system/stm32f3xx_nucleo.c" />
@@ -380,7 +379,6 @@
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_ll_utils.c" />
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal.c" />
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_adc.c" />
-      <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_adc_ex.c" />
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_comp.c" />
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_cortex.c" />
       <file file_name="../STM32F3xx_HAL_Driver/Src/stm32f3xx_hal_crc.c" />
