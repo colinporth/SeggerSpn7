@@ -125,20 +125,20 @@ private:
   void TIM6_Init();
   void TIM16_Init();
 
-  void mcNucleoDisableChan();
-  void mcNucleoEnableInputChan12();
-  void mcNucleoEnableInputChan13();
-  void mcNucleoEnableInputChan23();
-  void mcNucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
-  void mcNucleoStartPwm();
-  void mcNucleoStopPwm();
-  void mcNucleoCurrentRefStart();
-  void mcNucleoCurrentRefStop();
-  void mcNucleoCurrentRefSetValue (uint16_t value);
-  void mcNucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
-  void mcNucleoLedOn();
-  void mcNucleoLedOff();
-  void mcNucleoInit();
+  void nucleoDisableChan();
+  void nucleoEnableInputChan12();
+  void nucleoEnableInputChan13();
+  void nucleoEnableInputChan23();
+  void nucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
+  void nucleoStartPwm();
+  void nucleoStopPwm();
+  void nucleoCurrentRefStart();
+  void nucleoCurrentRefStop();
+  void nucleoCurrentRefSetValue (uint16_t value);
+  void nucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
+  void nucleoLedOn();
+  void nucleoLedOff();
+  void nucleoInit();
 
   uint64_t fastSqrt (uint64_t input);
   uint16_t getDemagnValue (uint16_t piReference, int16_t speed);
