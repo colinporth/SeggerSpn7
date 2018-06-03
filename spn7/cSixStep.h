@@ -1,5 +1,6 @@
 #pragma once
 #include "sixStepParam.h"
+#include "cTraceVec.h"
 //{{{
 #ifdef __cplusplus
  extern "C" {
@@ -88,6 +89,7 @@ public:
 
   void init();
   void reset();
+  cTraceVec* getTraceVec() { return &mTraceVec; }
 
   void startMotor();
   void stopMotor (eSixStepStatus status);
@@ -112,6 +114,8 @@ public:
   TIM_HandleTypeDef hTim1;
   TIM_HandleTypeDef hTim6;
   TIM_HandleTypeDef hTim16;
+
+  cTraceVec mTraceVec;
 
 private:
   //{{{  methods

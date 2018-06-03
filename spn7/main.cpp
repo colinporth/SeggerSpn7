@@ -84,7 +84,6 @@
 #include "stm32f3xx_nucleo.h"
 
 #include "cSixStep.h"
-#include "cTrace.h"
 #include "cLcd.h"
 //}}}
 //{{{  const
@@ -105,9 +104,6 @@ const char* kStatusStr[12] = {
 
 cSixStep gSixStep;
 uint32_t gLastButtonPress = 0;
-
-cLcd gLcd;
-cTraceVec gTraceVec;
 
 //{{{
 extern "C" {
@@ -154,8 +150,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            gTraceVec.addSample (0, value>>4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -171,8 +167,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
               arrBemf (false);
 
-            gTraceVec.addSample (0, value>>4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -188,8 +184,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            gTraceVec.addSample (0, value>>4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -205,8 +201,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
                arrBemf (false);
 
-            gTraceVec.addSample (0, value> 4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value> 4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -251,8 +247,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
               arrBemf (false);
 
-            gTraceVec.addSample (0, value>>4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -268,8 +264,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            gTraceVec.addSample (0, value>>4);
-            gTraceVec.addSample (1, mStep);
+            mTraceVec.addSample (0, value>>4);
+            mTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -435,6 +431,8 @@ void cSixStep::sysTick() {
 // external interface
 //{{{
 void cSixStep::init() {
+
+  mTraceVec.addTrace (3200, 4, 2);
 
   GPIO_Init();
   ADC_Init();
@@ -1357,22 +1355,22 @@ int main() {
 
   gSixStep.init();
 
-  gLcd.init();
-  gTraceVec.addTrace (3200, 4, 2);
+  cLcd lcd;
+  lcd.init();
 
   while (true) {
-    gLcd.clear (cLcd::eOn);
-    gLcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+    lcd.clear (cLcd::eOn);
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
                     "c:" + dec (gSixStep.mAdcValue[0], 4) +
                     " t:" + dec (gSixStep.mAdcValue[1], 4) +
                     " p:" + dec (gSixStep.mAdcValue[2], 4),
                     cPoint(0,0));
-    gLcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
                     std::string(kStatusStr[gSixStep.mStatus]) + " " +
                     dec (gSixStep.getSpeedFiltered(), 4) + " " + dec (gSixStep.mSpeedRef,4),
                     cPoint(0,40));
-    gTraceVec.draw (&gLcd, 80, gLcd.getHeight());
-    gLcd.present();
+    gSixStep.getTraceVec()->draw (&lcd, 80, lcd.getHeight());
+    lcd.present();
     }
   }
 //}}}
