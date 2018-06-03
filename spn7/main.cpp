@@ -88,7 +88,7 @@
 #include "cLcd.h"
 //}}}
 //{{{  const
-const char* kStatusStr[12] = {
+const char* kStatusStr[11] = {
   "startupBemf FAIL",
   "overcurrent FAIL",
   "speed feedback FAIL",
@@ -97,36 +97,30 @@ const char* kStatusStr[12] = {
   "start",
   "align",
   "startup",
-  "validation",
   "speedOk",
   "bemfOk",
   "run" };
 //}}}
-ADC_HandleTypeDef hAdc2;
-ADC_HandleTypeDef hAdc3;
-TIM_HandleTypeDef hTim1;
-TIM_HandleTypeDef hTim6;
-TIM_HandleTypeDef hTim16;
 
-uint32_t mLastButtonPress = 0;
-cSixStep mSixStep;
-cLcd lcd;
-cTraceVec mTraceVec;
+cSixStep gSixStep;
+uint32_t gLastButtonPress = 0;
+cLcd gLcd;
+cTraceVec gTraceVec;
 
 //{{{
 extern "C" {
-  void ADC1_2_IRQHandler() { HAL_ADC_IRQHandler (&hAdc2); }
-  void ADC3_IRQHandler()   { HAL_ADC_IRQHandler (&hAdc3); }
+  void ADC1_2_IRQHandler() { HAL_ADC_IRQHandler (&gSixStep.hAdc2); }
+  void ADC3_IRQHandler()   { HAL_ADC_IRQHandler (&gSixStep.hAdc3); }
 
-  void TIM6_DAC_IRQHandler() { HAL_TIM_IRQHandler (&hTim6); }
+  void TIM6_DAC_IRQHandler() { HAL_TIM_IRQHandler (&gSixStep.hTim6); }
   void EXTI15_10_IRQHandler() { HAL_GPIO_EXTI_IRQHandler (GPIO_PIN_13); }
   //{{{
   void TIM1_BRK_TIM15_IRQHandler() {
 
-    if (__HAL_TIM_GET_FLAG (&hTim1, TIM_FLAG_BREAK) != RESET)
-      mSixStep.stopMotor (cSixStep::OVERCURRENT_FAIL);
+    if (__HAL_TIM_GET_FLAG (&gSixStep.hTim1, TIM_FLAG_BREAK) != RESET)
+      gSixStep.stopMotor (cSixStep::OVERCURRENT_FAIL);
 
-    HAL_TIM_IRQHandler (&hTim1);
+    HAL_TIM_IRQHandler (&gSixStep.hTim1);
     }
   //}}}
   //{{{
@@ -149,8 +143,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
           //{{{
           case 0: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter < mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount < mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value < mBemfDownThreshold)
                 arrBemf (false);
@@ -158,16 +152,16 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value>>4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
           //{{{
           case 3: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter >= mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount >= mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value > mBemfUpThreshold)
                 arrBemf (true);
@@ -175,16 +169,16 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
               arrBemf (false);
 
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value>>4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
           //{{{
           case 2: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter < mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount < mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value < mBemfDownThreshold)
                 arrBemf (false);
@@ -192,16 +186,16 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value>>4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
           //{{{
           case 5: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter < mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount < mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value > mBemfUpThreshold)
                 arrBemf (true);
@@ -209,8 +203,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
                arrBemf (false);
 
-            mTraceVec.addSample (0, value> 4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value> 4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -246,8 +240,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
           //{{{
           case 1: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter < mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount < mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value > mBemfUpThreshold)
                 arrBemf (true);
@@ -255,16 +249,16 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value < mBemfDownThreshold)
               arrBemf (false);
 
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value>>4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
           //{{{
           case 4: {
             uint16_t value = HAL_ADC_GetValue (hadc);
-            if (mDemagnCounter < mDemagnValue)
-              mDemagnCounter++;
+            if (mDemagnCount < mDemagnValue)
+              mDemagnCount++;
             else if (piParam.Reference >= 0) {
               if (value < mBemfDownThreshold)
                 arrBemf (false);
@@ -272,8 +266,8 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             else if (value > mBemfUpThreshold)
               arrBemf (true);
 
-            mTraceVec.addSample (0, value>>4);
-            mTraceVec.addSample (1, mStep);
+            gTraceVec.addSample (0, value>>4);
+            gTraceVec.addSample (1, mStep);
             break;
             }
           //}}}
@@ -298,18 +292,18 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
 //{{{
 void cSixStep::tim6Tick() {
 
-  // nextStep
   mArrLF = __HAL_TIM_GetAutoreload (&hTim6);
 
   if (mStatus >= STARTUP) {
-    mSpeedMeasured = getSpeedRPM();
-    mDemagnCounter = 1;
+    mSpeed.addValue (getSpeedRPM());
 
-    if (mPrevStep != mStep)
+    // next step
+    if (mStep != mPrevStep)
       mNumZeroCrossing = 0;
     mStep = (piParam.Reference >= 0) ? (mStep + 1) % 6 :  (mStep + 5) % 6;
+    mDemagnCount = 1;
     }
-
+  //{{{  set pwm, bemf for step
   switch (mStep) {
     case 0:
       mcNucleoSetChanCCR (mPulseValue, 0, 0);
@@ -353,52 +347,23 @@ void cSixStep::tim6Tick() {
         mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
      }
+  //}}}
 
-  if (mStatus >= SPEED_OK) {
+  if (mStatus == STARTUP) {
+    rampMotor();
+    if (mNumRampSteps < mMaxNumRampSteps) {
+      hTim6.Init.Period = mArrValue;
+      hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
+      mNumRampSteps++;
+      }
+    }
+  else if (mStatus >= SPEED_OK) {
     // motorStall detection
     if (mBemfDownCount++ > BEMF_CONSEC_DOWN_MAX)
       mSpeedMeasuredFail = true;
     else
       __HAL_TIM_SetAutoreload (&hTim6, 0xFFFF);
     }
-
-  if (!ARR_OK) {
-    //{{{  STEP frequency changing
-    if (mStatus == STARTUP) {
-      if (mStatus >= VALIDATION) {
-        ARR_OK = true;
-        mStartupStepCount = 0;
-        index_ARR_step = 1;
-        }
-      else {
-        mStatus = STARTUP;
-        rampMotor();
-        if (index_ARR_step < numberofitemArr) {
-          hTim6.Init.Period = mArrValue;
-          hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
-          index_ARR_step++;
-          }
-        else if (!ARR_OK) {
-          index_ARR_step = 1;
-          ACCEL >>= 1;
-          if (ACCEL < MINIMUM_ACC)
-            ACCEL = MINIMUM_ACC;
-
-          stopMotor (STARTUP_FAIL);
-          }
-        }
-      }
-    }
-    //}}}
-
-  mSpeedArray[mSpeedArrayIndex] = mSpeedMeasured;
-  if (mSpeedArrayValues < 32)
-    mSpeedArrayValues++;
-  mSpeedArrayIndex = (mSpeedArrayIndex+1) % 32;
-  int32_t sum = 0;
-  for (int i = 0; i < mSpeedArrayValues; i++)
-    sum += mSpeedArray[i];
-  mSpeedFiltered = sum / mSpeedArrayValues;
   }
 //}}}
 //{{{
@@ -418,25 +383,36 @@ void cSixStep::sysTick() {
   if (mStatus == ALIGN) {
     mAlignTicks++;
     if (mAlignTicks >= TIME_FOR_ALIGN + 1) {
-      mStatus = STARTUP;
+      //{{{  align time elapsed
       hTim6.Init.Prescaler = prescaler_value;
       hTim6.Instance->PSC = hTim6.Init.Prescaler;
+      mStatus = STARTUP;
       }
-    mTargetSpeed = MIN_POT_SPEED + (mAdcValue[1] * (MAX_POT_SPEED - MIN_POT_SPEED)) / 4096;
+      //}}}
+    mTargetSpeed = MIN_POT_SPEED + (mAdcValue[2] * (MAX_POT_SPEED - MIN_POT_SPEED)) / 4096;
     }
 
-  mPotArray[mPotArrayIndex] = mAdcValue[2];
-  if (mPotArrayValues < 32)
-    mPotArrayValues++;
-  mPotArrayIndex = (mPotArrayIndex+1) % 32;
-  int32_t sum = 0;
-  for (int i = 0; i < mPotArrayValues; i++)
-    sum += mPotArray[i];
+  mPot.addValue (mAdcValue[2]);
+  mSpeedRef = MIN_POT_SPEED + (((MAX_POT_SPEED - MIN_POT_SPEED) * mPot.getFilteredValue()) / 4096);
 
-  mSpeedRef = MIN_POT_SPEED + (((MAX_POT_SPEED - MIN_POT_SPEED) * (sum / mPotArrayValues)) / 4096);
+  if (mStatus != SPEED_FEEDBACK_FAIL) {
+    int16_t speedFiltered = getSpeedFiltered();
 
-  if (mStatus != SPEED_FEEDBACK_FAIL)
-    taskSpeed();
+    if ((mStatus == STARTUP) && ((speedFiltered > mTargetSpeed) || (speedFiltered < -mTargetSpeed)))
+      mStatus = SPEED_OK;
+    if (mStatus == BEMF_OK)
+      mStatus = RUN;
+
+    if (mStatus == RUN) {
+      uint16_t ref = (uint16_t)piController (&piParam, speedFiltered);
+      if (piParam.Reference < 0)
+        ref = -ref;
+      mCurrentReference = ref;
+      mcNucleoCurrentRefSetValue (mCurrentReference);
+      }
+    mDemagnValue = getDemagnValue (piParam.Reference, speedFiltered);
+    }
+
   if (mStatus >= SPEED_OK)
     setSpeed();
 
@@ -458,7 +434,11 @@ void cSixStep::sysTick() {
 //{{{
 void cSixStep::init() {
 
-  mcNucleoInit();
+  GPIO_Init();
+  ADC_Init();
+  TIM1_Init();
+  TIM6_Init();
+  TIM16_Init();
 
   HF_TIMx_ARR = hTim1.Instance->ARR;
   HF_TIMx_PSC = hTim1.Instance->PSC;
@@ -475,9 +455,6 @@ void cSixStep::init() {
 //{{{
 void cSixStep::reset() {
 
-  ARR_OK = false;
-
-  numberofitemArr = NUMBER_OF_STEPS;
   mPulseValue = HF_TIMx_CCR;
   mSpeedTargetRamp = MAX_POT_SPEED;
   mDemagnValue = INITIAL_DEMAGN_DELAY;
@@ -497,16 +474,14 @@ void cSixStep::reset() {
 
   mcNucleoSetChanCCR (0,0,0);
 
-  mDemagnCounter = 0;
+  mDemagnCount = 0;
 
-  mSpeedMeasured = 0;
-  mSpeedFiltered = 0;
   mSpeedRef = 0;
   mCurrentReference = 0;
   mBemfDownCount = 0;
   mIntegralTermSum = 0;
 
-  mLastButtonPress = 0;
+  gLastButtonPress = 0;
   mStartupStepCount = 0;
   mAlignTicks = 1;
 
@@ -518,18 +493,15 @@ void cSixStep::reset() {
   mOpenLoopBemfEvent = 0;
   mOpenLoopBemfFail = false;
   mSpeedMeasuredFail = false;
-  mSpeedArrayIndex = 0;
 
-  index_ARR_step = 1;
+  mNumRampSteps = 0;
   mNumZeroCrossing = 0;
 
   mPrevStep = -1;
   mStep = 5;
 
-  mPotArrayValues = 0;
-  mPotArrayIndex = 0;
-  mSpeedArrayValues = 0;
-  mSpeedArrayIndex = 0;
+  mPot.clear();
+  mSpeed.clear();
 
   mTargetSpeed = TARGET_SPEED;
   setPiParam (&piParam);
@@ -555,10 +527,8 @@ int32_t cSixStep::getSpeedRPM() {
 //{{{
 void cSixStep::setSpeed() {
 
-  if (((mSpeedRef > mSpeedTargetRamp) &&
-       ((mSpeedRef - mSpeedTargetRamp) > ADC_SPEED_TH)) ||
-      ((mSpeedRef <= mSpeedTargetRamp) &&
-       ((mSpeedTargetRamp - mSpeedRef) > ADC_SPEED_TH))) {
+  if (((mSpeedRef > mSpeedTargetRamp) && (mSpeedRef - mSpeedTargetRamp > ADC_SPEED_TH)) ||
+      ((mSpeedRef <= mSpeedTargetRamp) && (mSpeedTargetRamp - mSpeedRef > ADC_SPEED_TH))) {
     mSpeedTargetRamp = mSpeedRef;
     piParam.Reference = CW_CCW ? -mSpeedRef : mSpeedRef;
     }
@@ -1063,17 +1033,6 @@ void cSixStep::mcNucleoLedOff() {
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
   }
 //}}}
-
-//{{{
-void cSixStep::mcNucleoInit() {
-
-  GPIO_Init();
-  ADC_Init();
-  TIM1_Init();
-  TIM6_Init();
-  TIM16_Init();
-  }
-//}}}
 //}}}
 //{{{
 uint64_t cSixStep::fastSqrt (uint64_t input) {
@@ -1145,7 +1104,7 @@ void cSixStep::arrBemf (bool up) {
   if (up)
     mBemfDownCount = 0;
 
-  if (mPrevStep != mStep) {
+  if (mStep != mPrevStep) {
     mPrevStep = mStep;
 
     if (mStatus == SPEED_OK) {
@@ -1165,7 +1124,7 @@ void cSixStep::arrBemf (bool up) {
         }
       }
 
-    if (mStatus >= VALIDATION)
+    if (mStatus >= SPEED_OK)
       __HAL_TIM_SetAutoreload (&hTim6, __HAL_TIM_GetCounter (&hTim6) + mArrLF/2);
     }
   }
@@ -1189,10 +1148,10 @@ void cSixStep::setPiParam (cPiParam* piParam) {
 //{{{
 int16_t cSixStep::piController (cPiParam* PI_PARAM, int16_t speed_fdb) {
 
-  int32_t Error = PI_PARAM->Reference - speed_fdb;
+  int32_t error = PI_PARAM->Reference - speed_fdb;
 
   // Proportional term computation
-  int32_t wProportional_Term = PI_PARAM->Kp_Gain * Error;
+  int32_t wProportional_Term = PI_PARAM->Kp_Gain * error;
 
   // Integral term computation
   int32_t wIntegral_Term = 0;
@@ -1200,7 +1159,7 @@ int16_t cSixStep::piController (cPiParam* PI_PARAM, int16_t speed_fdb) {
   if (PI_PARAM->Ki_Gain == 0)
     mIntegralTermSum = 0;
   else {
-    wIntegral_Term = PI_PARAM->Ki_Gain * Error;
+    wIntegral_Term = PI_PARAM->Ki_Gain * error;
     wIntegral_sum_temp = mIntegralTermSum + wIntegral_Term;
     mIntegralTermSum = wIntegral_sum_temp;
     }
@@ -1234,116 +1193,96 @@ int16_t cSixStep::piController (cPiParam* PI_PARAM, int16_t speed_fdb) {
 //}}}
 
 //{{{
-uint16_t cSixStep::getDemagnValue (uint16_t piReference) {
+uint16_t cSixStep::getDemagnValue (uint16_t piReference, int16_t speed) {
 
   if (piReference >= 0) {
-    if (mSpeedFiltered > 10000)
+    if (speed > 10000)
       return DEMAGN_VAL_1;
-    if (mSpeedFiltered > 7800)
+    if (speed > 7800)
       return DEMAGN_VAL_2;
-    if (mSpeedFiltered > 6400)
+    if (speed > 6400)
       return DEMAGN_VAL_3;
-    if (mSpeedFiltered > 5400)
+    if (speed > 5400)
       return DEMAGN_VAL_4;
-    if (mSpeedFiltered > 4650)
+    if (speed > 4650)
       return DEMAGN_VAL_5;
-    if (mSpeedFiltered > 4100)
+    if (speed > 4100)
       return DEMAGN_VAL_6;
-    if (mSpeedFiltered > 3650)
+    if (speed > 3650)
       return DEMAGN_VAL_7;
-    if (mSpeedFiltered > 3300)
+    if (speed > 3300)
       return DEMAGN_VAL_8;
-    if (mSpeedFiltered > 2600)
+    if (speed > 2600)
       return DEMAGN_VAL_9;
-    if (mSpeedFiltered > 1800)
+    if (speed > 1800)
       return DEMAGN_VAL_10;
-    if (mSpeedFiltered > 1500)
+    if (speed > 1500)
       return DEMAGN_VAL_11;
-    if (mSpeedFiltered > 1300)
+    if (speed > 1300)
       return DEMAGN_VAL_12;
-    if (mSpeedFiltered > 1000)
+    if (speed > 1000)
       return DEMAGN_VAL_13;
     return DEMAGN_VAL_14;
     }
   else {
-    if (mSpeedFiltered < -10000)
+    if (speed < -10000)
       return DEMAGN_VAL_1;
-    if (mSpeedFiltered < -7800)
+    if (speed < -7800)
       return DEMAGN_VAL_2;
-    if (mSpeedFiltered < -6400)
+    if (speed < -6400)
       return DEMAGN_VAL_3;
-    if (mSpeedFiltered < -5400)
+    if (speed < -5400)
       return DEMAGN_VAL_4;
-    if (mSpeedFiltered < -4650)
+    if (speed < -4650)
       return DEMAGN_VAL_5;
-    if (mSpeedFiltered < -4100)
+    if (speed < -4100)
       return DEMAGN_VAL_6;
-    if (mSpeedFiltered < -3650)
+    if (speed < -3650)
       return DEMAGN_VAL_7;
-    if (mSpeedFiltered < -3300)
+    if (speed < -3300)
       return DEMAGN_VAL_8;
-    if (mSpeedFiltered < -2650)
+    if (speed < -2650)
       return DEMAGN_VAL_9;
-    if (mSpeedFiltered <-1800)
+    if (speed <-1800)
       return DEMAGN_VAL_10;
-    if (mSpeedFiltered < -1500)
+    if (speed < -1500)
       return DEMAGN_VAL_11;
-    if (mSpeedFiltered < -1300)
+    if (speed < -1300)
       return DEMAGN_VAL_12;
-    if (mSpeedFiltered < -1000)
+    if (speed < -1000)
       return DEMAGN_VAL_13;
     return DEMAGN_VAL_14;
     }
   }
 //}}}
-//{{{
-void cSixStep::taskSpeed() {
 
-  if ((mStatus == STARTUP) &&
-      ((mSpeedFiltered > mTargetSpeed) || (mSpeedFiltered < -mTargetSpeed)))
-    mStatus = SPEED_OK;
-
-  if (mStatus == BEMF_OK)
-    mStatus = RUN;
-
-  if (mStatus == RUN) {
-    uint16_t ref = (uint16_t)piController (&piParam, (int16_t)mSpeedFiltered);
-    if (piParam.Reference < 0)
-      ref = -ref;
-    mCurrentReference = ref;
-    mcNucleoCurrentRefSetValue (mCurrentReference);
-    }
-
-  mDemagnValue = getDemagnValue (piParam.Reference);
-  }
-//}}}
 // callbacks
 //{{{
 void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
-  mSixStep.adcSample (hadc);
+  gSixStep.adcSample (hadc);
   }
 //}}}
 //{{{
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
-  if (htim == &hTim6)
-    mSixStep.tim6Tick();
+  if (htim == &gSixStep.hTim6)
+    gSixStep.tim6Tick();
   }
 //}}}
 //{{{
 void HAL_SYSTICK_Callback() {
-  mSixStep.sysTick();
+  gSixStep.sysTick();
   }
 //}}}
 //{{{
 void HAL_GPIO_EXTI_Callback (uint16_t GPIO_Pin) {
 // blue button release
 
-  if (HAL_GetTick() > mLastButtonPress + 200) {
-    mLastButtonPress = HAL_GetTick();
-    if (mSixStep.mStatus < cSixStep::START)
-      mSixStep.startMotor();
+  if (HAL_GetTick() > gLastButtonPress + 200) {
+    gLastButtonPress = HAL_GetTick();
+    if (gSixStep.mStatus < cSixStep::START)
+      gSixStep.startMotor();
     else
-      mSixStep.stopMotor (cSixStep::STOPPED);
+      gSixStep.stopMotor (cSixStep::STOPPED);
     }
   }
 //}}}
@@ -1413,25 +1352,24 @@ int main() {
   HAL_NVIC_SetPriority (DebugMonitor_IRQn, 0, 0);
   HAL_NVIC_SetPriority (PendSV_IRQn, 0, 0);
 
-  mSixStep.init();
+  gSixStep.init();
 
-  lcd.init();
-  mTraceVec.addTrace (3200, 4, 2);
+  gLcd.init();
+  gTraceVec.addTrace (3200, 4, 2);
 
   while (true) {
-    lcd.clear (cLcd::eOn);
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
-                    "c:" + dec (mSixStep.mAdcValue[0], 4) +
-                    " t:" + dec (mSixStep.mAdcValue[1], 4) +
-                    " p:" + dec (mSixStep.mAdcValue[2], 4),
+    gLcd.clear (cLcd::eOn);
+    gLcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+                    "c:" + dec (gSixStep.mAdcValue[0], 4) +
+                    " t:" + dec (gSixStep.mAdcValue[1], 4) +
+                    " p:" + dec (gSixStep.mAdcValue[2], 4),
                     cPoint(0,0));
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
-                    std::string(kStatusStr[mSixStep.mStatus]) + " " +
-                    dec (mSixStep.mSpeedFiltered,4) + " " +
-                    dec (mSixStep.mSpeedRef,4),
+    gLcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+                    std::string(kStatusStr[gSixStep.mStatus]) + " " +
+                    dec (gSixStep.getSpeedFiltered(), 4) + " " + dec (gSixStep.mSpeedRef,4),
                     cPoint(0,40));
-    mTraceVec.draw (&lcd, 80, lcd.getHeight());
-    lcd.present();
+    gTraceVec.draw (&gLcd, 80, gLcd.getHeight());
+    gLcd.present();
     }
   }
 //}}}

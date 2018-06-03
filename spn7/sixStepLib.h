@@ -9,7 +9,7 @@
 class cSixStep {
 public:
   enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
-                        STOPPED, START, ALIGN, STARTUP, VALIDATION, SPEED_OK, BEMF_OK, RUN };
+                        STOPPED, START, ALIGN, STARTUP, SPEED_OK, BEMF_OK, RUN };
   //{{{
   class cPiParam {
   public:
@@ -25,6 +25,34 @@ public:
     bool Min_PID_Output;        // min saturation indicator flag
     };
   //}}}
+  //{{{
+  class cFilter {
+  public:
+    void addValue (int16_t value) {
+      mArray[mArrayIndex] = value;
+      if (mArrayValues < 32)
+        mArrayValues++;
+      mArrayIndex = (mArrayIndex+1) % 32;
+      }
+
+    int16_t getFilteredValue() {
+      int32_t sum = 0;
+      for (int i = 0; i < mArrayValues; i++)
+        sum += mArray[i];
+      return sum / mArrayValues;
+      }
+
+    void clear() {
+      mArrayValues = 0;
+      mArrayIndex = 0;
+      }
+
+
+    int16_t mArray[32];
+    uint16_t mArrayValues = 0;
+    uint16_t mArrayIndex = 0;
+    };
+  //}}}
 
   void init();
   void reset();
@@ -33,6 +61,8 @@ public:
   void stopMotor (eSixStepStatus status);
 
   int32_t getSpeedRPM();
+  int16_t getSpeedFiltered() { return mSpeed.getFilteredValue(); }
+
   void setSpeed();
 
   void adcSample (ADC_HandleTypeDef* hadc);
@@ -40,12 +70,16 @@ public:
   void sysTick();
 
   // state
-  eSixStepStatus mStatus = STOPPED;  // Status variable for SixStep algorithm
+  eSixStepStatus mStatus = STOPPED;
 
-  uint16_t mAdcValue[4];          // chan 0-3 lastReadValue
-  int16_t mSpeedMeasured = 0;     // measured speed
-  int16_t mSpeedFiltered = 0;     // filtered speed
-  int16_t mSpeedRef = 0;          // reference speed
+  uint16_t mAdcValue[4];  // chan 0-3 lastReadValue
+  int16_t mSpeedRef = 0;  // reference speed
+
+  ADC_HandleTypeDef hAdc2;
+  ADC_HandleTypeDef hAdc3;
+  TIM_HandleTypeDef hTim1;
+  TIM_HandleTypeDef hTim6;
+  TIM_HandleTypeDef hTim16;
 
 private:
   //{{{  methods
@@ -74,13 +108,11 @@ private:
   void arrBemf (bool up);
   void setPiParam (cPiParam* piParam);
   int16_t piController (cPiParam* PI_PARAM, int16_t speed_fdb);
-  uint16_t getDemagnValue (uint16_t piReference);
+  uint16_t getDemagnValue (uint16_t piReference, int16_t speed);
   void taskSpeed();
   //}}}
   //{{{  vars
   cPiParam piParam;
-
-  bool ARR_OK = false;             // ARR flag control for Accell status
 
   // init from params
   bool CW_CCW = false;                                  // Set the motor direction
@@ -88,6 +120,7 @@ private:
   const uint16_t mStartupCurrent = STARTUP_CURRENT_REFERENCE; // Currrent reference
   const uint16_t mBemfUpThreshold = BEMF_THRSLD_UP;           // Voltage threshold for BEMF detection in up direction
   const uint16_t mBemfDownThreshold = BEMF_THRSLD_DOWN;       // Voltage threshold for BEMF detection in down direction
+  const uint16_t mMaxNumRampSteps = NUMBER_OF_STEPS;
 
   const uint16_t KP = KP_GAIN;    // KP parameter for PI regulator
   const uint16_t KI = KI_GAIN;    // KI parameter for PI regulator
@@ -110,10 +143,9 @@ private:
   uint16_t mPulseValue = 0;       // CCR value for SixStep algorithm
   uint16_t mArrValue = 0;         // ARR vector for Accell compute
   uint32_t prescaler_value = 0;   // Prescaler value for low freq timer
-  uint16_t numberofitemArr = 0;   // Number of elements
 
   uint16_t mAdcIndex = 0;         // adc current/pot/vbus/temp index
-  uint16_t mDemagnCounter = 0;    // Demagnetization counter
+  uint16_t mDemagnCount = 0;    // Demagnetization counter
   uint16_t mDemagnValue = 0;      // Demagnetization value
 
   uint16_t mCurrentReference = 0; // Currrent reference for SixStep algorithm
@@ -128,16 +160,11 @@ private:
   uint32_t mFirstSingleStep = 0;
   uint16_t mTargetSpeed = 0;
   uint32_t mArrLF = 0;
-  uint16_t index_ARR_step = 1;
+  uint16_t mNumRampSteps = 0;
   uint32_t mNumZeroCrossing = 0;
 
-  int16_t mPotArray[32];
-  uint16_t mPotArrayValues = 0;
-  uint16_t mPotArrayIndex = 0;
-
-  int16_t mSpeedArray[32];
-  uint16_t mSpeedArrayValues = 0;
-  uint16_t mSpeedArrayIndex = 0;
+  cFilter mPot;
+  cFilter mSpeed;
 
   uint16_t mOpenLoopBemfEvent = 0;
   bool mOpenLoopBemfFail = false;
