@@ -54,10 +54,12 @@
     </folder>
     <folder Name="inc">
       <file file_name="spn7/sixStepParam.h" />
-      <file file_name="spn7/cLcd.h" />
-      <file file_name="spn7/font.h" />
       <file file_name="spn7/cSixStep.h" />
-      <file file_name="spn7/cTraceVec.h" />
+      <file file_name="common/cLcd.h" />
+      <file file_name="common/cPointRect.h" />
+      <file file_name="common/cTraceVec.h" />
+      <file file_name="common/font.h" />
+      <file file_name="common/utils.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">
@@ -198,12 +200,12 @@
     </folder>
     <file file_name="spn7/main.cpp" />
     <file file_name="system/stm32f3xx_nucleo.c" />
-    <file file_name="spn7/utils.cpp" />
-    <file file_name="spn7/font18.c" />
-    <file file_name="spn7/font36.c" />
-    <file file_name="spn7/cLcd.cpp" />
     <configuration Name="Release" gcc_optimization_level="Level 3" />
     <file file_name="spn7/cSixStep.cpp" />
+    <file file_name="common/font18.c" />
+    <file file_name="common/font36.c" />
+    <file file_name="common/cLcd.cpp" />
+    <file file_name="common/utils.cpp" />
   </project>
   <configuration
     Name="Debug"
@@ -403,6 +405,11 @@
       <file file_name="Inc/power_stage_parameters.h" />
       <file file_name="Inc/stm32_hal.h" />
       <file file_name="Inc/stm32f3xx_hal_conf.h" />
+      <file file_name="../common/cLcd.h" />
+      <file file_name="../common/cPointRect.h" />
+      <file file_name="../common/cTraceVec.h" />
+      <file file_name="../common/font.h" />
+      <file file_name="../common/utils.h" />
     </folder>
     <folder Name="mcsdkv5.3">
       <folder Name="inc">
@@ -530,5 +537,9 @@
     <file file_name="Src/motorcontrol.c" />
     <file file_name="Src/stm32f3xx_hal_msp.c" />
     <file file_name="Src/stm32f3xx_it.c" />
+    <file file_name="../common/font18.c" />
+    <file file_name="../common/font36.c" />
+    <file file_name="../common/cLcd.cpp" />
+    <file file_name="../common/utils.cpp" />
   </project>
 </solution>

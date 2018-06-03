@@ -1,6 +1,6 @@
 #pragma once
 #include "sixStepParam.h"
-#include "cTraceVec.h"
+#include "../common/cTraceVec.h"
 //{{{
 #ifdef __cplusplus
  extern "C" {

@@ -84,7 +84,7 @@
 #include "stm32f3xx_nucleo.h"
 
 #include "cSixStep.h"
-#include "cLcd.h"
+#include "../common/cLcd.h"
 //}}}
 
 // public

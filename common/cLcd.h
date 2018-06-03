@@ -2,7 +2,7 @@
 #pragma once
 #include "cPointRect.h"
 #include "utils.h"
-#include "stm32f3xx_hal.h"
+#include "..\STM32F3xx_HAL_Driver\inc\stm32f3xx_hal.h"
 
 struct font_t;
 class cLcd {
