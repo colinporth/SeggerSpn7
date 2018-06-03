@@ -203,6 +203,7 @@
     <file file_name="spn7/font36.c" />
     <file file_name="spn7/cLcd.cpp" />
     <configuration Name="Release" gcc_optimization_level="Level 3" />
+    <file file_name="spn7/cSixStep.cpp" />
   </project>
   <configuration
     Name="Debug"
