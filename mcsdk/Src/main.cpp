@@ -8,7 +8,7 @@ DAC_HandleTypeDef hdac1;
 TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart2;
 
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+extern "C" { void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim); }
 
 //{{{
 void _Error_Handler(char *file, int line)
@@ -40,9 +40,7 @@ void SystemClock_Config()
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Initializes the CPU, AHB and APB busses clocks
     */
@@ -54,17 +52,13 @@ void SystemClock_Config()
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_TIM1;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Enables the Clock Security System
     */
@@ -82,6 +76,7 @@ void SystemClock_Config()
   HAL_NVIC_SetPriority(SysTick_IRQn, 4, 0);
 }
 //}}}
+
 //{{{
 static void MX_NVIC_Init()
 {
@@ -121,17 +116,13 @@ static void MX_ADC1_Init()
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure the ADC multi-mode
     */
   multimode.Mode = ADC_MODE_INDEPENDENT;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Injected Channel
     */
@@ -148,18 +139,14 @@ static void MX_ADC1_Init()
   sConfigInjected.InjectedOffset = 0;
   sConfigInjected.InjectedOffsetNumber = ADC_OFFSET_NONE;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Injected Channel
     */
   sConfigInjected.InjectedChannel = ADC_CHANNEL_7;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_2;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Regular Channel
     */
@@ -170,18 +157,14 @@ static void MX_ADC1_Init()
   sConfig.OffsetNumber = ADC_OFFSET_NONE;
   sConfig.Offset = 0;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Regular Channel
     */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
 }
 //}}}
@@ -206,9 +189,7 @@ static void MX_ADC2_Init()
   hadc2.Init.LowPowerAutoWait = DISABLE;
   hadc2.Init.Overrun = ADC_OVR_DATA_PRESERVED;
   if (HAL_ADC_Init(&hadc2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Injected Channel
     */
@@ -225,18 +206,14 @@ static void MX_ADC2_Init()
   sConfigInjected.InjectedOffset = 0;
   sConfigInjected.InjectedOffsetNumber = ADC_OFFSET_NONE;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc2, &sConfigInjected) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**Configure Injected Channel
     */
   sConfigInjected.InjectedChannel = ADC_CHANNEL_6;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_2;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc2, &sConfigInjected) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
 }
 //}}}
@@ -251,20 +228,15 @@ static void MX_DAC1_Init()
     */
   hdac1.Instance = DAC1;
   if (HAL_DAC_Init(&hdac1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
     /**DAC channel OUT1 config
     */
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
+    printf ("error %s %s\n",  __FILE__, __LINE__);
   }
-
-}
 //}}}
 //{{{
 static void MX_TIM1_Init()
@@ -283,29 +255,21 @@ static void MX_TIM1_Init()
   htim1.Init.RepetitionCounter = 1;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   sSlaveConfig.SlaveMode = TIM_SLAVEMODE_TRIGGER;
   sSlaveConfig.InputTrigger = TIM_TS_ITR1;
   if (HAL_TIM_SlaveConfigSynchronization(&htim1, &sSlaveConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   sMasterConfig.MasterOutputTrigger = TIM_TRGO_OC4REF;
   sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
   sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
   if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 600;
@@ -315,26 +279,18 @@ static void MX_TIM1_Init()
   sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
   sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   sConfigOC.OCMode = TIM_OCMODE_PWM2;
   sConfigOC.Pulse = 1092;
   if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_ENABLE;
   sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_ENABLE;
@@ -348,9 +304,7 @@ static void MX_TIM1_Init()
   sBreakDeadTimeConfig.Break2Filter = 3;
   sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
   if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 
   HAL_TIM_MspPostInit(&htim1);
 
@@ -371,10 +325,7 @@ static void MX_USART2_UART_Init()
   huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_UART_Init(&huart2) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-
+    printf ("error %s %s\n",  __FILE__, __LINE__);
 }
 //}}}
 //{{{

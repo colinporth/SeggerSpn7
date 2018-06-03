@@ -204,8 +204,8 @@
     <file file_name="spn7/cSixStep.cpp" />
     <file file_name="common/font18.c" />
     <file file_name="common/font36.c" />
-    <file file_name="common/cLcd.cpp" />
     <file file_name="common/utils.cpp" />
+    <file file_name="common/cLcd.cpp" />
   </project>
   <configuration
     Name="Debug"
@@ -528,7 +528,6 @@
     <file file_name="Src/system_stm32f3xx.c" />
     <file file_name="Src/ui_task.c" />
     <file file_name="Src/user_interface.c" />
-    <file file_name="Src/main.c" />
     <file file_name="Src/mc_api.c" />
     <file file_name="Src/mc_config.c" />
     <file file_name="Src/mc_parameters.c" />
@@ -539,7 +538,7 @@
     <file file_name="Src/stm32f3xx_it.c" />
     <file file_name="../common/font18.c" />
     <file file_name="../common/font36.c" />
-    <file file_name="../common/cLcd.cpp" />
     <file file_name="../common/utils.cpp" />
+    <file file_name="Src/main.cpp" />
   </project>
 </solution>
