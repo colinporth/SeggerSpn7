@@ -4,7 +4,7 @@
 #define TARGET_SPEED                      1000   // Target speed in closed loop control
 
 #define STARTUP_CURRENT_REFERENCE         1500   // startUP CurrentReference 2000 = 2.2A
-#define TIME_FOR_ALIGN                     500   // align ms
+#define ALIGN_MS                           500   
 #define MAX_STARTUP_STEPS                20000   // Number of elements for motor start-UP (max value 65535)
 #define MAX_STARTUP_ZERO_CROSSING           12   // Number of zero crossing event during the startup for closed loop control begin
 #define INITIAL_DEMAGN_DELAY                10   // Initial value for delay time during startup for Bemf detection

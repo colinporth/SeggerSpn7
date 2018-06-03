@@ -53,11 +53,11 @@
       <file file_name="system/system_stm32f3xx.c" />
     </folder>
     <folder Name="inc">
-      <file file_name="spn7/sixStepLib.h" />
       <file file_name="spn7/sixStepParam.h" />
       <file file_name="spn7/cLcd.h" />
       <file file_name="spn7/font.h" />
-      <file file_name="spn7/cTrace.h" />
+      <file file_name="spn7/cSixStep.h" />
+      <file file_name="spn7/cTraceVec.h" />
     </folder>
     <folder Name="drivers">
       <folder Name="inc">

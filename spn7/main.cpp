@@ -83,7 +83,7 @@
 //{{{  includes
 #include "stm32f3xx_nucleo.h"
 
-#include "sixStepLib.h"
+#include "cSixStep.h"
 #include "cTrace.h"
 #include "cLcd.h"
 //}}}
@@ -384,7 +384,7 @@ void cSixStep::sysTick() {
 
   if (mStatus == ALIGN) {
     mAlignTicks++;
-    if (mAlignTicks >= TIME_FOR_ALIGN + 1) {
+    if (mAlignTicks > ALIGN_MS) {
       //{{{  align time elapsed
       hTim6.Init.Prescaler = prescaler_value;
       hTim6.Instance->PSC = hTim6.Init.Prescaler;
