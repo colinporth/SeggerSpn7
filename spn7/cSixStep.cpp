@@ -150,8 +150,6 @@ void cSixStep::reset() {
 
   nucleoSetChanCCR (0,0,0);
 
-  mDemagnCount = 0;
-
   mSpeedRef = 0;
   mCurrentReference = 0;
   mBemfDownCount = 0;
@@ -169,11 +167,12 @@ void cSixStep::reset() {
   mOpenLoopBemfFail = false;
   mSpeedMeasuredFail = false;
 
-  mRampStepCount = 0;
-  mZeroCrossingCount = 0;
-
   mPrevStep = -1;
   mStep = 5;
+
+  mDemagnCount = 0;
+  mRampStepCount = 0;
+  mZeroCrossingCount = 0;
 
   mPot.clear();
   mSpeed.clear();
