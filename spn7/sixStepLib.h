@@ -9,7 +9,7 @@
 class cSixStep {
 public:
   enum eSixStepStatus { STARTUP_BEMF_FAIL, OVERCURRENT_FAIL, SPEED_FEEDBACK_FAIL, STARTUP_FAIL,
-                        STOPPED, START, ALIGN, STARTUP, SPEED_OK, BEMF_OK, RUN };
+                        INIT, STOPPED, START, ALIGN, STARTUP, SPEED_OK, BEMF_OK, RUN };
   //{{{
   class cPiParam {
   public:
@@ -28,26 +28,58 @@ public:
   //{{{
   class cFilter {
   public:
+    //{{{
+    void clear() {
+      mFilteredValue = 0;
+      mArrayValues = 0;
+      mArrayIndex = 0;
+      }
+    //}}}
+    //{{{
+    int16_t getFilteredValue() {
+      return mFilteredValue;
+      }
+
+    //}}}
+    //{{{
+    int16_t getMinValue() {
+
+      int16_t minValue = 0x7FFF;
+      for (int i = 0; i < mArrayValues; i++)
+        if (mArray[i] < minValue)
+          minValue = mArray[i];
+
+      return minValue;
+      }
+    //}}}
+    //{{{
+    int16_t getMaxValue() {
+
+      int16_t maxValue = 0;
+      for (int i = 0; i < mArrayValues; i++)
+        if (mArray[i] > maxValue)
+          maxValue = mArray[i];
+
+      return maxValue;
+      }
+    //}}}
+    //{{{
     void addValue (int16_t value) {
+
       mArray[mArrayIndex] = value;
       if (mArrayValues < 32)
         mArrayValues++;
       mArrayIndex = (mArrayIndex+1) % 32;
-      }
 
-    int16_t getFilteredValue() {
       int32_t sum = 0;
       for (int i = 0; i < mArrayValues; i++)
         sum += mArray[i];
-      return sum / mArrayValues;
+      mFilteredValue = sum / mArrayValues;
       }
+    //}}}
 
-    void clear() {
-      mArrayValues = 0;
-      mArrayIndex = 0;
-      }
-
-
+  private:
+    int16_t mFilteredValue = 0;
     int16_t mArray[32];
     uint16_t mArrayValues = 0;
     uint16_t mArrayIndex = 0;
@@ -60,7 +92,7 @@ public:
   void startMotor();
   void stopMotor (eSixStepStatus status);
 
-  int32_t getSpeedRPM();
+  int32_t getSpeed();
   int16_t getSpeedFiltered() { return mSpeed.getFilteredValue(); }
 
   void setSpeed();
@@ -70,7 +102,7 @@ public:
   void sysTick();
 
   // state
-  eSixStepStatus mStatus = STOPPED;
+  eSixStepStatus mStatus = INIT;
 
   uint16_t mAdcValue[4];  // chan 0-3 lastReadValue
   int16_t mSpeedRef = 0;  // reference speed
@@ -88,6 +120,7 @@ private:
   void TIM1_Init();
   void TIM6_Init();
   void TIM16_Init();
+
   void mcNucleoDisableChan();
   void mcNucleoEnableInputChan12();
   void mcNucleoEnableInputChan13();
@@ -104,12 +137,13 @@ private:
   void mcNucleoInit();
 
   uint64_t fastSqrt (uint64_t input);
+  uint16_t getDemagnValue (uint16_t piReference, int16_t speed);
+
   void rampMotor();
   void arrBemf (bool up);
+
   void setPiParam (cPiParam* piParam);
   int16_t piController (cPiParam* PI_PARAM, int16_t speed_fdb);
-  uint16_t getDemagnValue (uint16_t piReference, int16_t speed);
-  void taskSpeed();
   //}}}
   //{{{  vars
   cPiParam piParam;
@@ -120,7 +154,7 @@ private:
   const uint16_t mStartupCurrent = STARTUP_CURRENT_REFERENCE; // Currrent reference
   const uint16_t mBemfUpThreshold = BEMF_THRSLD_UP;           // Voltage threshold for BEMF detection in up direction
   const uint16_t mBemfDownThreshold = BEMF_THRSLD_DOWN;       // Voltage threshold for BEMF detection in down direction
-  const uint16_t mMaxNumRampSteps = NUMBER_OF_STEPS;
+  const uint16_t mMaxNumRampSteps = MAX_STARTUP_STEPS;
 
   const uint16_t KP = KP_GAIN;    // KP parameter for PI regulator
   const uint16_t KI = KI_GAIN;    // KI parameter for PI regulator
@@ -160,8 +194,8 @@ private:
   uint32_t mFirstSingleStep = 0;
   uint16_t mTargetSpeed = 0;
   uint32_t mArrLF = 0;
-  uint16_t mNumRampSteps = 0;
-  uint32_t mNumZeroCrossing = 0;
+  uint16_t mRampStepCount = 0;
+  uint32_t mZeroCrossingCount = 0;
 
   cFilter mPot;
   cFilter mSpeed;

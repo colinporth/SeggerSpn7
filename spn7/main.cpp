@@ -88,11 +88,12 @@
 #include "cLcd.h"
 //}}}
 //{{{  const
-const char* kStatusStr[11] = {
+const char* kStatusStr[12] = {
   "startupBemf FAIL",
   "overcurrent FAIL",
   "speed feedback FAIL",
   "startup FAIL",
+  "init",
   "stopped",
   "start",
   "align",
@@ -104,6 +105,7 @@ const char* kStatusStr[11] = {
 
 cSixStep gSixStep;
 uint32_t gLastButtonPress = 0;
+
 cLcd gLcd;
 cTraceVec gTraceVec;
 
@@ -208,14 +210,14 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             break;
             }
           //}}}
+          //{{{
           default: {
-            //{{{
             uint16_t value = HAL_ADC_GetValue (hadc);
             break;
             }
-            //}}}
+          //}}}
           }
-      // set adc2Sample curr:temp
+      // adc2Sample curr or temp
       mcNucleoAdcChan (&hAdc2, mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
       }
     else {
@@ -224,10 +226,10 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
       switch (mStep) {
         case 0:
         case 3:
-          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // set adc2Sample bemf3
+          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // adc2Sample bemf3
         case 2:
         case 5:
-          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // set adc2Sample bemf1
+          mcNucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // adc2Sample bemf1
         }
       }
     }
@@ -271,19 +273,19 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
             break;
             }
           //}}}
+          //{{{
           default: {
-            //{{{
             uint16_t value = HAL_ADC_GetValue (hadc);
             break;
             }
-            //}}}
+          //}}}
           }
-      // set adc3Sample pot
+      // adc3Sample pot
       mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
       }
     else {
       mAdcValue[2] = HAL_ADC_GetValue (hadc);
-      // set adc3Sample bemf2
+      // adc3Sample bemf2
       mcNucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
       }
     }
@@ -295,11 +297,11 @@ void cSixStep::tim6Tick() {
   mArrLF = __HAL_TIM_GetAutoreload (&hTim6);
 
   if (mStatus >= STARTUP) {
-    mSpeed.addValue (getSpeedRPM());
+    mSpeed.addValue (getSpeed());
 
     // next step
     if (mStep != mPrevStep)
-      mNumZeroCrossing = 0;
+      mZeroCrossingCount = 0;
     mStep = (piParam.Reference >= 0) ? (mStep + 1) % 6 :  (mStep + 5) % 6;
     mDemagnCount = 1;
     }
@@ -351,10 +353,10 @@ void cSixStep::tim6Tick() {
 
   if (mStatus == STARTUP) {
     rampMotor();
-    if (mNumRampSteps < mMaxNumRampSteps) {
+    if (mRampStepCount < mMaxNumRampSteps) {
       hTim6.Init.Period = mArrValue;
       hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
-      mNumRampSteps++;
+      mRampStepCount++;
       }
     }
   else if (mStatus >= SPEED_OK) {
@@ -494,8 +496,8 @@ void cSixStep::reset() {
   mOpenLoopBemfFail = false;
   mSpeedMeasuredFail = false;
 
-  mNumRampSteps = 0;
-  mNumZeroCrossing = 0;
+  mRampStepCount = 0;
+  mZeroCrossingCount = 0;
 
   mPrevStep = -1;
   mStep = 5;
@@ -514,7 +516,7 @@ void cSixStep::reset() {
 //}}}
 
 //{{{
-int32_t cSixStep::getSpeedRPM() {
+int32_t cSixStep::getSpeed() {
 
   int32_t speedHz = mSysClkFrequency / (hTim6.Instance->PSC * __HAL_TIM_GetAutoreload (&hTim6) * 6);
 
@@ -567,6 +569,7 @@ void cSixStep::stopMotor (eSixStepStatus status) {
   }
 //}}}
 
+// private
 //{{{  ihm07m1
 //{{{
 void cSixStep::GPIO_Init() {
@@ -1072,7 +1075,7 @@ void cSixStep::rampMotor() {
     }
 
   uint32_t timeVector = 0;
-  if (mStartupStepCount < NUMBER_OF_STEPS) {
+  if (mStartupStepCount < MAX_STARTUP_STEPS) {
     timeVector = ((uint64_t)1000000 * (uint64_t)fastSqrt(((uint64_t)(mStartupStepCount+1) * (uint64_t)constant_k))) / 632455;
     int32_t delta = timeVector - mTimeVectorPrev;
     if (mStartupStepCount == 0) {
@@ -1112,15 +1115,15 @@ void cSixStep::arrBemf (bool up) {
         mOpenLoopBemfFail = true;
 
       if (up) {
-        mNumZeroCrossing++;
+        mZeroCrossingCount++;
         mOpenLoopBemfEvent = 0;
         }
       else
         mOpenLoopBemfEvent++;
 
-      if (mNumZeroCrossing >= NUMBER_ZCR) {
+      if (mZeroCrossingCount >= MAX_STARTUP_ZERO_CROSSING) {
         mStatus = BEMF_OK;
-        mNumZeroCrossing = 0;
+        mZeroCrossingCount = 0;
         }
       }
 
