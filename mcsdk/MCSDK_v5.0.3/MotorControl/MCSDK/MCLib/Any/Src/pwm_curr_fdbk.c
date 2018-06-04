@@ -37,13 +37,7 @@
   */
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief Returns the phase current of the motor as read by the ADC (in s16A unit)
@@ -65,13 +59,7 @@ void PWMC_GetPhaseCurrents (PWMC_Handle_t *pHandle,Curr_Components* pStator_Curr
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  Converts input voltages @f$ V_{\alpha} @f$ and @f$ V_{\beta} @f$ into PWM duty cycles
@@ -397,21 +385,17 @@ void PWMC_RLDetectionModeDisable (PWMC_Handle_t *pHandle)
   * @brief  Sets the PWM duty cycle to apply in the RL Detection mode.
   * @param  pHandle: handle on the target instance of the PWMC component
   * @param  hDuty Duty cycle to apply
-  *
   * @todo TODO: Describe the unit of the hDuty variable.
-  *
   * @retval If the Duty Cycle could be applied on time for the next PWM period,
   *         #MC_NO_ERROR is returned. Otherwise, #MC_FOC_DURATION is returned.
   */
-uint16_t PWMC_RLDetectionModeSetDuty (PWMC_Handle_t *pHandle, uint16_t hDuty)
-{
+uint16_t PWMC_RLDetectionModeSetDuty (PWMC_Handle_t *pHandle, uint16_t hDuty) {
+
   uint16_t hRetVal = MC_FOC_DURATION;
   if (pHandle->pFctRLDetectionModeSetDuty)
-  {
     hRetVal = pHandle->pFctRLDetectionModeSetDuty(pHandle, hDuty);
-  }
   return hRetVal;
-}
+  }
 //}}}
 //{{{
 /**
@@ -420,11 +404,9 @@ uint16_t PWMC_RLDetectionModeSetDuty (PWMC_Handle_t *pHandle, uint16_t hDuty)
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterGetPhaseCurrentsCallBack (PWMC_GetPhaseCurr_Cb_t pCallBack,
-                                            PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterGetPhaseCurrentsCallBack (PWMC_GetPhaseCurr_Cb_t pCallBack, PWMC_Handle_t* pHandle) {
   pHandle->pFctGetPhaseCurrents = pCallBack;
-}
+ }
 //}}}
 
 //{{{
@@ -433,13 +415,10 @@ void PWMC_RegisterGetPhaseCurrentsCallBack (PWMC_GetPhaseCurr_Cb_t pCallBack,
  *        generation off.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSwitchOffPwmCallBack (PWMC_Generic_Cb_t pCallBack,
-                                        PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterSwitchOffPwmCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctSwitchOffPwm = pCallBack;
-}
+  }
 //}}}
 //{{{
 /**
@@ -449,11 +428,9 @@ void PWMC_RegisterSwitchOffPwmCallBack (PWMC_Generic_Cb_t pCallBack,
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterSwitchonPwmCallBack (PWMC_Generic_Cb_t pCallBack,
-                                      PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterSwitchonPwmCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctSwitchOnPwm = pCallBack;
-}
+  }
 //}}}
 //{{{
 /**
@@ -463,11 +440,9 @@ void PWMC_RegisterSwitchonPwmCallBack (PWMC_Generic_Cb_t pCallBack,
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterReadingCalibrationCallBack (PWMC_Generic_Cb_t pCallBack,
-                                              PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterReadingCalibrationCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctCurrReadingCalib = pCallBack;
-}
+  }
 //}}}
 //{{{
 /**
@@ -476,11 +451,9 @@ void PWMC_RegisterReadingCalibrationCallBack (PWMC_Generic_Cb_t pCallBack,
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterTurnOnLowSidesCallBack (PWMC_Generic_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterTurnOnLowSidesCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctTurnOnLowSides = pCallBack;
-}
+  }
 //}}}
 
 //{{{
@@ -499,42 +472,33 @@ void PWMC_RegisterSetSamplingTimeCallBack (PWMC_SetSampTime_Cb_t pCallBack,
 //}}}
 //{{{
 /**
- * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
- *        sector 1.
+ * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for sector 1.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSampPointSect1CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterSampPointSect1CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle) {
   pHandle->pFctSetADCSampPointSect1 = pCallBack;
-}
+  }
 //}}}
 //{{{
 /**
- * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
- *        sector 2.
+ * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for sector 2.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterSampPointSect2CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
+void PWMC_RegisterSampPointSect2CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle )
 {
   pHandle->pFctSetADCSampPointSect2 = pCallBack;
 }
 //}}}
 //{{{
 /**
- * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
- *        sector 3.
+ * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for sector 3.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSampPointSect3CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
+void PWMC_RegisterSampPointSect3CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle )
 {
   pHandle->pFctSetADCSampPointSect3 = pCallBack;
 }
@@ -545,38 +509,30 @@ void PWMC_RegisterSampPointSect3CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
  *        sector 4.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSampPointSect4CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
+void PWMC_RegisterSampPointSect4CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle )
 {
   pHandle->pFctSetADCSampPointSect4 = pCallBack;
 }
 //}}}
 //{{{
 /**
- * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
- *        sector 5.
+ * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for sector 5.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSampPointSect5CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
+void PWMC_RegisterSampPointSect5CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle )
 {
   pHandle->pFctSetADCSampPointSect5 = pCallBack;
 }
 //}}}
 //{{{
 /**
- * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for
- *        sector 6.
+ * @brief Sets the Callback that the PWMC component shall invoke to ADC sampling point for sector 6.
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterSampPointSect6CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
-                                          PWMC_Handle_t* pHandle )
+void PWMC_RegisterSampPointSect6CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack, PWMC_Handle_t* pHandle )
 {
   pHandle->pFctSetADCSampPointSect6 = pCallBack;
 }
@@ -586,11 +542,8 @@ void PWMC_RegisterSampPointSect6CallBack (PWMC_SetSampPointSectX_Cb_t pCallBack,
  * @brief Sets the Callback that the PWMC component shall invoke to execute a regular ADC conversion
  * @param pCallBack pointer on the callback
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterRegularConvExecCallBack (PWMC_RegConvExec_Cb_t pCallBack,
-                                           PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterRegularConvExecCallBack (PWMC_RegConvExec_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctRegularConvExec = pCallBack;
 }
 //}}}
@@ -602,35 +555,27 @@ void PWMC_RegisterRegularConvExecCallBack (PWMC_RegConvExec_Cb_t pCallBack,
  * @param pHandle pointer on the handle structure of the PWMC instance
  *
  */
-void PWMC_RegisterIsOverCurrentOccurredCallBack (PWMC_OverCurr_Cb_t pCallBack,
-                                                 PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterIsOverCurrentOccurredCallBack (PWMC_OverCurr_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctIsOverCurrentOccurred = pCallBack;
-}
+  }
 //}}}
 //{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to set the reference
  *        voltage for the over current protection
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterOCPSetRefVoltageCallBack (PWMC_SetOcpRefVolt_Cb_t pCallBack,
-                                            PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterOCPSetRefVoltageCallBack (PWMC_SetOcpRefVolt_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctOCPSetReferenceVoltage = pCallBack;
-}
+  }
 //}}}
 
 //{{{
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to enable the R/L detection mode
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterRLDetectionModeEnableCallBack (PWMC_Generic_Cb_t pCallBack,
-                                                 PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterRLDetectionModeEnableCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctRLDetectionModeEnable = pCallBack;
 }
 //}}}
@@ -638,11 +583,8 @@ void PWMC_RegisterRLDetectionModeEnableCallBack (PWMC_Generic_Cb_t pCallBack,
 /**
  * @brief Sets the Callback which PWMC shall invoke to disable the R/L detection mode
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterRLDetectionModeDisableCallBack (PWMC_Generic_Cb_t pCallBack,
-                                                  PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterRLDetectionModeDisableCallBack (PWMC_Generic_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctRLDetectionModeDisable = pCallBack;
 }
 //}}}
@@ -651,11 +593,8 @@ void PWMC_RegisterRLDetectionModeDisableCallBack (PWMC_Generic_Cb_t pCallBack,
  * @brief Sets the Callback that the PWMC component shall invoke to set the duty cycle
  *        for the R/L detection mode
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  */
-void PWMC_RegisterRLDetectionModeSetDutyCallBack (PWMC_RLDetectSetDuty_Cb_t pCallBack,
-                                                  PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterRLDetectionModeSetDutyCallBack (PWMC_RLDetectSetDuty_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctRLDetectionModeSetDuty = pCallBack;
 }
 //}}}
@@ -664,12 +603,9 @@ void PWMC_RegisterRLDetectionModeSetDutyCallBack (PWMC_RLDetectSetDuty_Cb_t pCal
 /**
  * @brief Sets the Callback that the PWMC component shall invoke to call PWMC instance IRQ handler
  * @param pHandle pointer on the handle structure of the PWMC instance
- *
  * @note this function is deprecated.
  */
-void PWMC_RegisterIrqHandlerCallBack (PWMC_IrqHandler_Cb_t pCallBack,
-                                      PWMC_Handle_t* pHandle )
-{
+void PWMC_RegisterIrqHandlerCallBack (PWMC_IrqHandler_Cb_t pCallBack, PWMC_Handle_t* pHandle ) {
   pHandle->pFctIrqHandler = pCallBack;
 }
 //}}}
