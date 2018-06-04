@@ -16,21 +16,347 @@
 #define OPAMP_CSR_DEFAULT_MASK  ((uint32_t)0xFFFFFF93u)
 
 static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl);
-static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
-static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
-static void R3_4_F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref);
-static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx,
-                                             uint8_t ADC_Channel,
-                                             uint8_t Rank,
-                                             uint8_t ADC_SampleTime,
-                                             uint8_t SequencerLength,
-                                             uint16_t ADC_ExternalTriggerInjectedPolarity,
-                                             uint16_t ADC_ExternalTriggerInjected);
 static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
-static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl);
-static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl);
-static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl);
 static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl);
+
+//{{{
+/**
+ * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
+ *         calibration. It sum up injected conversion data into wPhaseAOffset and
+ *         wPhaseBOffset to compute the offset introduced in the current feedback
+ *         network. It is requied to proper configure ADC inputs before to enable
+ *         the offset computation.
+ * @param  pHandle: handler of the current instance of the PWM component
+ * @retval It always returns {0,0} in Curr_Components format
+ */
+static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+
+  /* Clear the flag to indicate the start of FOC algorithm*/
+  LL_TIM_ClearFlag_UPDATE(pHandle->pParams_str->TIMx);
+
+  if (pHandle->bIndex < NB_CONVERSIONS)
+  {
+    pHandle-> wPhaseAOffset += pHandle->pParams_str->ADCx_1->JDR1;
+    pHandle-> wPhaseBOffset += pHandle->pParams_str->ADCx_2->JDR1;
+    pHandle->bIndex++;
+  }
+}
+
+/**
+ * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
+ *         calibration. It sum up injected conversion data into wPhaseCOffset
+ *         to compute the offset introduced in the current feedback
+ *         network. It is requied to proper configure ADC input before to enable
+ *         the offset computation.
+ * @param  pHandle: handler of the current instance of the PWM component
+ * @retval It always returns {0,0} in Curr_Components format
+ */
+static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+
+  /* Clear the flag to indicate the start of FOC algorithm*/
+  LL_TIM_ClearFlag_UPDATE(pHandle->pParams_str->TIMx);
+
+  if (pHandle->bIndex < NB_CONVERSIONS)
+  {
+    pHandle-> wPhaseCOffset += pHandle->pParams_str->ADCx_2->JDR1;
+    pHandle->bIndex++;
+  }
+}
+//}}}
+//{{{
+/**
+ * @brief  It is used to configure the analog output used for protection
+ *         thresholds.
+ * @param  DAC_Channel: the selected DAC channel.
+ *          This parameter can be:
+ *            @arg LL_DAC_CHANNEL_1: DAC Channel1 selected
+ *            @arg LL_DAC_CHANNEL_2: DAC Channel2 selected
+ * @param  hDACVref Value of DAC reference expressed as 16bit unsigned integer.
+ *         Ex. 0 = 0V 65536 = VDD_DAC.
+ * @retval none
+ */
+static void R3_4_F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref)
+{
+
+  if (DAC_Channel == LL_DAC_CHANNEL_2)
+  {
+    LL_DAC_ConvertData12LeftAligned (DAC1, LL_DAC_CHANNEL_2, hDACVref );
+  }
+  else
+  {
+    LL_DAC_ConvertData12LeftAligned (DAC1, LL_DAC_CHANNEL_1, hDACVref );
+  }
+
+  /* Enable DAC Channel */
+  LL_DAC_TrigSWConversion (DAC1, DAC_Channel);
+  LL_DAC_Enable (DAC1, DAC_Channel );
+}
+//}}}
+//{{{
+static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t ADC_Channel, uint8_t Rank, uint8_t ADC_SampleTime, uint8_t SequencerLength, uint16_t ADC_ExternalTriggerInjectedPolarity, uint16_t ADC_ExternalTriggerInjected)
+{
+  uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpregA = 0u;
+  uint32_t wAux,wAux2;
+
+  /*  ADC_InjectedSequencerLengthConfig(ADCx,1); */
+  tmpregA = ADCx->JSQR;
+  /* Clear the old injected sequnence lenght JL bits */
+  tmpregA &= ~(uint32_t)ADC_JSQR_JL;
+  /* Set the injected sequnence lenght JL bits */
+  tmpregA |= ((uint32_t)(SequencerLength) - 1u); /* first value is sequencer lenght */
+
+  /* Disable the selected ADC conversion on external event */
+  tmpregA &= ~ADC_JSQR_JEXTEN;
+  tmpregA |= ADC_ExternalTriggerInjectedPolarity;
+
+  /* Disable the selected ADC conversion on external event */
+  tmpregA &= ~ADC_JSQR_JEXTSEL;
+  tmpregA |= ADC_ExternalTriggerInjected;
+
+  /* Channel sampling configuration */
+  /* if ADC_CHANNEL_10 ... ADC_CHANNEL_18 is selected */
+  if (ADC_Channel > MC_ADC_CHANNEL_9)
+  {
+    /* Get the old register value */
+    tmpreg1 = ADCx->SMPR2;
+    /* Calculate the mask to clear */
+    wAux = ADC_SMPR2_SMP10;
+    wAux2 = 3u * ((uint32_t)(ADC_Channel) - 10u);
+    tmpreg2 = wAux << wAux2;
+    /* Clear the old channel sample time */
+    tmpreg1 &= ~tmpreg2;
+    /* Calculate the mask to set */
+    wAux = (uint32_t)(ADC_SampleTime);
+    tmpreg2 = wAux << wAux2;
+    /* Set the new channel sample time */
+    tmpreg1 |= tmpreg2;
+    /* Store the new register value */
+    ADCx->SMPR2 = tmpreg1;
+  }
+  else if (ADC_Channel != 0u)
+  {
+    /* Get the old register value */
+    tmpreg1 = ADCx->SMPR1;
+    /* Calculate the mask to clear */
+    wAux = ADC_SMPR1_SMP0;
+    wAux2 = 3u * (uint32_t)(ADC_Channel);
+    tmpreg2 =  wAux << wAux2;
+    /* Clear the old channel sample time */
+    tmpreg1 &= ~tmpreg2;
+    /* Calculate the mask to set */
+    wAux = (uint32_t)ADC_SampleTime;
+    wAux2 = 3u * (uint32_t)(ADC_Channel);
+    tmpreg2 =  wAux << wAux2;
+    /* Set the new channel sample time */
+    tmpreg1 |= tmpreg2;
+    /* Store the new register value */
+    ADCx->SMPR1 = tmpreg1;
+  }
+  else
+  {
+  }
+
+  /* Rank configuration */
+  /* Get the old register value */
+  tmpreg1 = tmpregA;
+  /* Calculate the mask to clear */
+  wAux = ADC_JSQR_JSQ1;
+  wAux2 = 6u * ((uint32_t)(Rank) - 1u);
+  tmpreg2 = wAux << wAux2;
+  /* Clear the old SQx bits for the selected rank */
+  tmpreg1 &= ~tmpreg2;
+  /* Calculate the mask to set */
+  wAux = ADC_Channel;
+  wAux2 = 6u * (uint32_t)(Rank) + 2u;
+  tmpreg2 = wAux << wAux2;
+  /* Set the SQx bits for the selected rank */
+  tmpreg1 |= tmpreg2;
+  /* Store the new register value */
+
+  return (tmpreg1);
+}
+//}}}
+
+//{{{
+/**
+ * @brief  It turns on low sides switches. This function is intended to be
+ *         used for charging boot capacitors of driving section. It has to be
+ *         called each motor start-up when using high voltage drivers.
+ *         This function is specific for RL detection phase.
+ * @param  pHandle Pointer on the target component instance
+ * @retval none
+ */
+static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
+
+  pHandle->_Super.bTurnOnLowSidesAction = true;
+  /*Turn on the phase A low side switch */
+  LL_TIM_OC_SetCompareCH1 (TIMx, 0u);
+
+  /* Clear Update Flag */
+  LL_TIM_ClearFlag_UPDATE(TIMx);
+
+  /* Wait until next update */
+  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
+  {}
+
+  /* Main PWM Output Enable */
+  LL_TIM_EnableAllOutputs(TIMx);
+
+  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
+  {
+    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
+    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
+    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+  }
+  return;
+}
+//}}}
+//{{{
+/**
+ * @brief  It enables PWM generation on the proper Timer peripheral
+ *         This function is specific for RL detection phase.
+ * @param  pHandle Pointer on the target component instance
+ * @retval none
+ */
+static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
+  pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
+
+  pHandle->_Super.bTurnOnLowSidesAction = false;
+  /* wait for a new PWM period */
+  LL_TIM_ClearFlag_UPDATE(TIMx);
+  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
+  {}
+  /* Clear Update Flag */
+  LL_TIM_ClearFlag_UPDATE(TIMx);
+
+  TIMx->CCR1 = 1u;
+  TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - 5u;
+  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
+
+  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
+  {}
+
+  /* Main PWM Output Enable */
+  TIMx->BDTR |= LL_TIM_OSSI_ENABLE ;
+  LL_TIM_EnableAllOutputs (TIMx);
+
+  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
+  {
+    if ((TIMx->CCER & TIMxCCER_MASK_CH123) != 0u)
+    {
+      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
+      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
+      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+    }
+    else
+    {
+      /* It is executed during calibration phase the EN signal shall stay off */
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+    }
+  }
+
+  pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phA;
+  pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phB;
+
+  /* Switch Context */
+  if (pDOPAMPParams_str)
+  {
+    pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
+    pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
+  }
+  pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
+  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
+  return;
+}
+//}}}
+//{{{
+/**
+ * @brief  It disables PWM generation on the proper Timer peripheral acting on
+ *         MOE bit
+ *         This function is specific for RL detection phase.
+ * @param  pHandle Pointer on the target component instance
+ * @retval none
+ */
+static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
+  ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
+  ADC_TypeDef* ADCx_2 = pHandle->pParams_str->ADCx_2;
+
+  pHandle->_Super.bTurnOnLowSidesAction = false;
+  /* Main PWM Output Disable */
+  if (pHandle->BrakeActionLock == true)
+  {
+  }
+  else
+  {
+    TIMx->BDTR &= ~((uint32_t)(LL_TIM_OSSI_ENABLE ));
+
+    if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
+    {
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
+      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+    }
+  }
+  LL_TIM_DisableAllOutputs (TIMx);
+
+  LL_ADC_DisableIT_JEOS(ADCx_1);
+
+  /* Flushing JSQR queue of context by setting JADSTP = 1 (JQM)=1 */
+  ADCx_1->CR |= ADC_CR_JADSTP;
+  ADCx_2->CR |= ADC_CR_JADSTP;
+
+  ADCx_1->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_1,
+                                                     0u,
+                                                     1u,
+                                                     0u,
+                                                     1u,
+                                                     LL_ADC_INJ_TRIG_EXT_RISING,
+                                                     pHandle->ADC_ExternalTriggerInjected);
+  ADCx_2->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_2,
+                                                     0u,
+                                                     1u,
+                                                     0u,
+                                                     1u,
+                                                     LL_ADC_INJ_TRIG_EXT_RISING,
+                                                     pHandle->ADC_ExternalTriggerInjected);
+  ADCx_1->CR |= ADC_CR_JADSTART;
+  ADCx_2->CR |= ADC_CR_JADSTART;
+
+  LL_TIM_OC_DisablePreload(TIMx, LL_TIM_CHANNEL_CH4);
+  /* Set CC4 as PWM mode 2 (default) */
+  TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
+  TIMx->CCMR2 |= CCMR2_CH4_PWM2;
+  TIMx->CCR4 = 0xFFFFu;
+  TIMx->CCR4 = 0x0u;
+  LL_TIM_OC_EnablePreload(TIMx, LL_TIM_CHANNEL_CH4);
+
+  while (LL_ADC_IsActiveFlag_JEOS(ADCx_1) == 0)
+  {}
+  while (LL_ADC_IsActiveFlag_JEOS(ADCx_2) == 0)
+  {}
+
+  /* ADCx_1 Injected conversions end interrupt enabling */
+  LL_ADC_ClearFlag_JEOS(ADCx_1);
+  LL_ADC_ClearFlag_JEOS(ADCx_2);
+  LL_ADC_EnableIT_JEOS(ADCx_1);
+  return;
+}
+//}}}
 
 //{{{
 /**
@@ -461,13 +787,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor
@@ -620,54 +940,6 @@ void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Cur
 }
 //}}}
 
-//{{{
-/**
- * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
- *         calibration. It sum up injected conversion data into wPhaseAOffset and
- *         wPhaseBOffset to compute the offset introduced in the current feedback
- *         network. It is requied to proper configure ADC inputs before to enable
- *         the offset computation.
- * @param  pHandle: handler of the current instance of the PWM component
- * @retval It always returns {0,0} in Curr_Components format
- */
-static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-
-  /* Clear the flag to indicate the start of FOC algorithm*/
-  LL_TIM_ClearFlag_UPDATE(pHandle->pParams_str->TIMx);
-
-  if (pHandle->bIndex < NB_CONVERSIONS)
-  {
-    pHandle-> wPhaseAOffset += pHandle->pParams_str->ADCx_1->JDR1;
-    pHandle-> wPhaseBOffset += pHandle->pParams_str->ADCx_2->JDR1;
-    pHandle->bIndex++;
-  }
-}
-
-/**
- * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
- *         calibration. It sum up injected conversion data into wPhaseCOffset
- *         to compute the offset introduced in the current feedback
- *         network. It is requied to proper configure ADC input before to enable
- *         the offset computation.
- * @param  pHandle: handler of the current instance of the PWM component
- * @retval It always returns {0,0} in Curr_Components format
- */
-static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-
-  /* Clear the flag to indicate the start of FOC algorithm*/
-  LL_TIM_ClearFlag_UPDATE(pHandle->pParams_str->TIMx);
-
-  if (pHandle->bIndex < NB_CONVERSIONS)
-  {
-    pHandle-> wPhaseCOffset += pHandle->pParams_str->ADCx_2->JDR1;
-    pHandle->bIndex++;
-  }
-}
-//}}}
 
 //{{{
 /**
@@ -858,13 +1130,7 @@ void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Stores into the component's handle the voltage present on Ia and
@@ -917,13 +1183,7 @@ static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling during calibration.
@@ -948,13 +1208,7 @@ static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 1.
@@ -1052,13 +1306,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 2.
@@ -1154,13 +1402,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect2(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 3.
@@ -1257,13 +1499,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect3(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 4.
@@ -1359,13 +1595,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect4(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 5.
@@ -1461,13 +1691,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect5(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 6.
@@ -1563,13 +1787,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Update event interrupt
@@ -1583,13 +1801,7 @@ void *R3_4_F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Break2 event interrupt
@@ -1615,13 +1827,7 @@ void *R3_4_F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Break1 event interrupt
@@ -1741,120 +1947,6 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
   }
 
   return retVal;
-}
-//}}}
-
-//{{{
-/**
- * @brief  It is used to configure the analog output used for protection
- *         thresholds.
- * @param  DAC_Channel: the selected DAC channel.
- *          This parameter can be:
- *            @arg LL_DAC_CHANNEL_1: DAC Channel1 selected
- *            @arg LL_DAC_CHANNEL_2: DAC Channel2 selected
- * @param  hDACVref Value of DAC reference expressed as 16bit unsigned integer.
- *         Ex. 0 = 0V 65536 = VDD_DAC.
- * @retval none
- */
-static void R3_4_F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref)
-{
-
-  if (DAC_Channel == LL_DAC_CHANNEL_2)
-  {
-    LL_DAC_ConvertData12LeftAligned (DAC1, LL_DAC_CHANNEL_2, hDACVref );
-  }
-  else
-  {
-    LL_DAC_ConvertData12LeftAligned (DAC1, LL_DAC_CHANNEL_1, hDACVref );
-  }
-
-  /* Enable DAC Channel */
-  LL_DAC_TrigSWConversion (DAC1, DAC_Channel);
-  LL_DAC_Enable (DAC1, DAC_Channel );
-}
-//}}}
-//{{{
-static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t ADC_Channel, uint8_t Rank, uint8_t ADC_SampleTime, uint8_t SequencerLength, uint16_t ADC_ExternalTriggerInjectedPolarity, uint16_t ADC_ExternalTriggerInjected)
-{
-  uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpregA = 0u;
-  uint32_t wAux,wAux2;
-
-  /*  ADC_InjectedSequencerLengthConfig(ADCx,1); */
-  tmpregA = ADCx->JSQR;
-  /* Clear the old injected sequnence lenght JL bits */
-  tmpregA &= ~(uint32_t)ADC_JSQR_JL;
-  /* Set the injected sequnence lenght JL bits */
-  tmpregA |= ((uint32_t)(SequencerLength) - 1u); /* first value is sequencer lenght */
-
-  /* Disable the selected ADC conversion on external event */
-  tmpregA &= ~ADC_JSQR_JEXTEN;
-  tmpregA |= ADC_ExternalTriggerInjectedPolarity;
-
-  /* Disable the selected ADC conversion on external event */
-  tmpregA &= ~ADC_JSQR_JEXTSEL;
-  tmpregA |= ADC_ExternalTriggerInjected;
-
-  /* Channel sampling configuration */
-  /* if ADC_CHANNEL_10 ... ADC_CHANNEL_18 is selected */
-  if (ADC_Channel > MC_ADC_CHANNEL_9)
-  {
-    /* Get the old register value */
-    tmpreg1 = ADCx->SMPR2;
-    /* Calculate the mask to clear */
-    wAux = ADC_SMPR2_SMP10;
-    wAux2 = 3u * ((uint32_t)(ADC_Channel) - 10u);
-    tmpreg2 = wAux << wAux2;
-    /* Clear the old channel sample time */
-    tmpreg1 &= ~tmpreg2;
-    /* Calculate the mask to set */
-    wAux = (uint32_t)(ADC_SampleTime);
-    tmpreg2 = wAux << wAux2;
-    /* Set the new channel sample time */
-    tmpreg1 |= tmpreg2;
-    /* Store the new register value */
-    ADCx->SMPR2 = tmpreg1;
-  }
-  else if (ADC_Channel != 0u)
-  {
-    /* Get the old register value */
-    tmpreg1 = ADCx->SMPR1;
-    /* Calculate the mask to clear */
-    wAux = ADC_SMPR1_SMP0;
-    wAux2 = 3u * (uint32_t)(ADC_Channel);
-    tmpreg2 =  wAux << wAux2;
-    /* Clear the old channel sample time */
-    tmpreg1 &= ~tmpreg2;
-    /* Calculate the mask to set */
-    wAux = (uint32_t)ADC_SampleTime;
-    wAux2 = 3u * (uint32_t)(ADC_Channel);
-    tmpreg2 =  wAux << wAux2;
-    /* Set the new channel sample time */
-    tmpreg1 |= tmpreg2;
-    /* Store the new register value */
-    ADCx->SMPR1 = tmpreg1;
-  }
-  else
-  {
-  }
-
-  /* Rank configuration */
-  /* Get the old register value */
-  tmpreg1 = tmpregA;
-  /* Calculate the mask to clear */
-  wAux = ADC_JSQR_JSQ1;
-  wAux2 = 6u * ((uint32_t)(Rank) - 1u);
-  tmpreg2 = wAux << wAux2;
-  /* Clear the old SQx bits for the selected rank */
-  tmpreg1 &= ~tmpreg2;
-  /* Calculate the mask to set */
-  wAux = ADC_Channel;
-  wAux2 = 6u * (uint32_t)(Rank) + 2u;
-  tmpreg2 = wAux << wAux2;
-  /* Set the SQx bits for the selected rank */
-  tmpreg1 |= tmpreg2;
-  /* Store the new register value */
-
-  return (tmpreg1);
 }
 //}}}
 
@@ -2089,13 +2181,7 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor
@@ -2162,182 +2248,5 @@ static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pS
   pHandle->_Super.hIa = hCurrA;
   pHandle->_Super.hIb = hCurrB;
   pHandle->_Super.hIc = -hCurrA - hCurrB;
-}
-//}}}
-
-//{{{
-/**
- * @brief  It turns on low sides switches. This function is intended to be
- *         used for charging boot capacitors of driving section. It has to be
- *         called each motor start-up when using high voltage drivers.
- *         This function is specific for RL detection phase.
- * @param  pHandle Pointer on the target component instance
- * @retval none
- */
-static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
-
-  pHandle->_Super.bTurnOnLowSidesAction = true;
-  /*Turn on the phase A low side switch */
-  LL_TIM_OC_SetCompareCH1 (TIMx, 0u);
-
-  /* Clear Update Flag */
-  LL_TIM_ClearFlag_UPDATE(TIMx);
-
-  /* Wait until next update */
-  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
-  {}
-
-  /* Main PWM Output Enable */
-  LL_TIM_EnableAllOutputs(TIMx);
-
-  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-  {
-    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
-    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
-    LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-  }
-  return;
-}
-//}}}
-//{{{
-/**
- * @brief  It enables PWM generation on the proper Timer peripheral
- *         This function is specific for RL detection phase.
- * @param  pHandle Pointer on the target component instance
- * @retval none
- */
-static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
-  pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
-
-  pHandle->_Super.bTurnOnLowSidesAction = false;
-  /* wait for a new PWM period */
-  LL_TIM_ClearFlag_UPDATE(TIMx);
-  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
-  {}
-  /* Clear Update Flag */
-  LL_TIM_ClearFlag_UPDATE(TIMx);
-
-  TIMx->CCR1 = 1u;
-  TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - 5u;
-  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
-
-  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
-  {}
-
-  /* Main PWM Output Enable */
-  TIMx->BDTR |= LL_TIM_OSSI_ENABLE ;
-  LL_TIM_EnableAllOutputs (TIMx);
-
-  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-  {
-    if ((TIMx->CCER & TIMxCCER_MASK_CH123) != 0u)
-    {
-      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
-      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
-      LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-    }
-    else
-    {
-      /* It is executed during calibration phase the EN signal shall stay off */
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-    }
-  }
-
-  pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phA;
-  pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phB;
-
-  /* Switch Context */
-  if (pDOPAMPParams_str)
-  {
-    pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
-    pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
-  }
-  pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
-  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
-  return;
-}
-//}}}
-//{{{
-/**
- * @brief  It disables PWM generation on the proper Timer peripheral acting on
- *         MOE bit
- *         This function is specific for RL detection phase.
- * @param  pHandle Pointer on the target component instance
- * @retval none
- */
-static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
-  ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
-  ADC_TypeDef* ADCx_2 = pHandle->pParams_str->ADCx_2;
-
-  pHandle->_Super.bTurnOnLowSidesAction = false;
-  /* Main PWM Output Disable */
-  if (pHandle->BrakeActionLock == true)
-  {
-  }
-  else
-  {
-    TIMx->BDTR &= ~((uint32_t)(LL_TIM_OSSI_ENABLE ));
-
-    if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-    {
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
-      LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-    }
-  }
-  LL_TIM_DisableAllOutputs (TIMx);
-
-  LL_ADC_DisableIT_JEOS(ADCx_1);
-
-  /* Flushing JSQR queue of context by setting JADSTP = 1 (JQM)=1 */
-  ADCx_1->CR |= ADC_CR_JADSTP;
-  ADCx_2->CR |= ADC_CR_JADSTP;
-
-  ADCx_1->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_1,
-                                                     0u,
-                                                     1u,
-                                                     0u,
-                                                     1u,
-                                                     LL_ADC_INJ_TRIG_EXT_RISING,
-                                                     pHandle->ADC_ExternalTriggerInjected);
-  ADCx_2->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_2,
-                                                     0u,
-                                                     1u,
-                                                     0u,
-                                                     1u,
-                                                     LL_ADC_INJ_TRIG_EXT_RISING,
-                                                     pHandle->ADC_ExternalTriggerInjected);
-  ADCx_1->CR |= ADC_CR_JADSTART;
-  ADCx_2->CR |= ADC_CR_JADSTART;
-
-  LL_TIM_OC_DisablePreload(TIMx, LL_TIM_CHANNEL_CH4);
-  /* Set CC4 as PWM mode 2 (default) */
-  TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
-  TIMx->CCMR2 |= CCMR2_CH4_PWM2;
-  TIMx->CCR4 = 0xFFFFu;
-  TIMx->CCR4 = 0x0u;
-  LL_TIM_OC_EnablePreload(TIMx, LL_TIM_CHANNEL_CH4);
-
-  while (LL_ADC_IsActiveFlag_JEOS(ADCx_1) == 0)
-  {}
-  while (LL_ADC_IsActiveFlag_JEOS(ADCx_2) == 0)
-  {}
-
-  /* ADCx_1 Injected conversions end interrupt enabling */
-  LL_ADC_ClearFlag_JEOS(ADCx_1);
-  LL_ADC_ClearFlag_JEOS(ADCx_2);
-  LL_ADC_EnableIT_JEOS(ADCx_1);
-  return;
 }
 //}}}
