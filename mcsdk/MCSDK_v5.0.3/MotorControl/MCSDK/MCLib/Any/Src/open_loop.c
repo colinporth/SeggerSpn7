@@ -7,11 +7,11 @@
   * @param  pVSS: Pointer on virtual speed sensor structure.
   *  @retval none
   */
-void OL_Init(OpenLoop_Handle_t *pHandle, VirtualSpeedSensor_Handle_t * pVSS)
-{
+void OL_Init (OpenLoop_Handle_t* pHandle, VirtualSpeedSensor_Handle_t* pVSS) {
+
   pHandle->hVoltage = pHandle->hDefaultVoltage;
   pHandle->pVSS = pVSS;
-}
+  }
 //}}}
 
 //{{{
@@ -20,15 +20,14 @@ void OL_Init(OpenLoop_Handle_t *pHandle, VirtualSpeedSensor_Handle_t * pVSS)
   * @param  pHandle: Pointer on Handle structure of OpenLoop feature.
   *  @retval Voltage components Vqd conditioned values.
   */
-Volt_Components OL_VqdConditioning(OpenLoop_Handle_t *pHandle)
-{
-  Volt_Components Vqd;
+Volt_Components OL_VqdConditioning (OpenLoop_Handle_t* pHandle) {
 
+  Volt_Components Vqd;
   Vqd.qV_Component1 = pHandle->hVoltage;
   Vqd.qV_Component2 = 0;
 
- return(Vqd);
-}
+  return(Vqd);
+  }
 //}}}
 //{{{
 /**
@@ -37,10 +36,9 @@ Volt_Components OL_VqdConditioning(OpenLoop_Handle_t *pHandle)
   * @param  hNewVoltage: New voltage value to apply.
   * @retval None
   */
-void OL_UpdateVoltage(OpenLoop_Handle_t *pHandle, int16_t hNewVoltage)
-{
+void OL_UpdateVoltage (OpenLoop_Handle_t* pHandle, int16_t hNewVoltage) {
   pHandle->hVoltage = hNewVoltage;
-}
+  }
 //}}}
 //{{{
 /**
@@ -48,17 +46,15 @@ void OL_UpdateVoltage(OpenLoop_Handle_t *pHandle, int16_t hNewVoltage)
   * @param  pHandle: Pointer on Handle structure of OpenLoop feature.
   * @retval None
   */
-void OL_Calc(OpenLoop_Handle_t *pHandle)
-{
+void OL_Calc (OpenLoop_Handle_t* pHandle) {
 
-  if (pHandle->VFMode == true)
-  {
+  if (pHandle->VFMode == true) {
     /* V/F mode true means enabled */
     int16_t hMecSpeed01Hz = pHandle->pVSS->_Super.hAvrMecSpeed01Hz;
     int16_t hOLVoltage = pHandle->hVFOffset + (pHandle->hVFSlope*hMecSpeed01Hz);
     pHandle->hVoltage = hOLVoltage;
+    }
   }
-}
 //}}}
 //{{{
 /**
@@ -67,8 +63,7 @@ void OL_Calc(OpenLoop_Handle_t *pHandle)
   * @param  VFEnabling: Flag to enable the V/F mode.
   * @retval None
   */
-void OL_VF(OpenLoop_Handle_t *pHandle, bool VFEnabling)
-{
+void OL_VF (OpenLoop_Handle_t* pHandle, bool VFEnabling) {
   pHandle->VFMode = VFEnabling;
-}
+  }
 //}}}

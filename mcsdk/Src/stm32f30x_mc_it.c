@@ -26,20 +26,10 @@ __attribute__((section ("ccmram")))
 //{{{
 void ADC1_2_IRQHandler()
 {
-  /* USER CODE BEGIN ADC1_2_IRQn 0 */
-
-  /* USER CODE END ADC1_2_IRQn 0 */
-
   // Clear Flags Single or M1
   LL_ADC_ClearFlag_JEOS( ADC1 );
   // Highfrequency task Single or M1
   UI_DACUpdate(TSK_HighFrequencyTask());
- /* USER CODE BEGIN HighFreq M1 */
-
- /* USER CODE END HighFreq M1 */
-  /* USER CODE BEGIN ADC1_2_IRQn 1 */
-
-  /* USER CODE END ADC1_2_IRQn 1 */
 }
 //}}}
 
@@ -58,12 +48,6 @@ __attribute__((section ("ccmram")))
   */
 void ADC3_IRQHandler()
 {
- /* USER CODE BEGIN ADC3_IRQn 0 */
-
- /* USER CODE END  ADC3_IRQn 0 */
- /* USER CODE BEGIN ADC3_IRQn 1 */
-
- /* USER CODE END  ADC3_IRQn 1 */
 }
 //}}}
 
@@ -82,13 +66,6 @@ __attribute__((section ("ccmram")))
   */
 void ADC4_IRQHandler()
 {
- /* USER CODE BEGIN ADC4_IRQn 0 */
-
- /* USER CODE END  ADC4_IRQn 0 */
-
- /* USER CODE BEGIN ADC4_IRQn 1 */
-
- /* USER CODE END  ADC4_IRQn 1 */
 }
 //}}}
 
@@ -100,40 +77,26 @@ void ADC4_IRQHandler()
   */
 void TIMx_UP_M1_IRQHandler()
 {
- /* USER CODE BEGIN TIMx_UP_M1_IRQn 0 */
-
- /* USER CODE END  TIMx_UP_M1_IRQn 0 */
-
     LL_TIM_ClearFlag_UPDATE(PWM_TIMER_SELECTION);
     R3_4_F30X_TIMx_UP_IRQHandler(pwmcHandle[M1]);
- /* USER CODE BEGIN TIMx_UP_M1_IRQn 1 */
-
- /* USER CODE END  TIMx_UP_M1_IRQn 1 */
 }
 //}}}
 //{{{
-void TIMx_BRK_M1_IRQHandler()
-{
-  /* USER CODE BEGIN TIMx_BRK_M1_IRQn 0 */
+void TIMx_BRK_M1_IRQHandler() {
 
-  /* USER CODE END TIMx_BRK_M1_IRQn 0 */
-  if (LL_TIM_IsActiveFlag_BRK(PWM_TIMER_SELECTION))
-  {
-    LL_TIM_ClearFlag_BRK(PWM_TIMER_SELECTION);
-    R3_4_F30X_BRK_IRQHandler(pwmcHandle[M1]);
-  }
-  if (LL_TIM_IsActiveFlag_BRK2(PWM_TIMER_SELECTION))
-  {
-    LL_TIM_ClearFlag_BRK2(PWM_TIMER_SELECTION);
-    R3_4_F30X_BRK2_IRQHandler(pwmcHandle[M1]);
-  }
+  if (LL_TIM_IsActiveFlag_BRK (PWM_TIMER_SELECTION)) {
+    LL_TIM_ClearFlag_BRK (PWM_TIMER_SELECTION);
+    R3_4_F30X_BRK_IRQHandler (pwmcHandle[M1]);
+    }
+
+  if (LL_TIM_IsActiveFlag_BRK2 (PWM_TIMER_SELECTION)) {
+    LL_TIM_ClearFlag_BRK2 (PWM_TIMER_SELECTION);
+    R3_4_F30X_BRK2_IRQHandler (pwmcHandle[M1]);
+    }
+
   /* Systick is not executed due low priority so is necessary to call MC_Scheduler here.*/
   MC_Scheduler();
-
-  /* USER CODE BEGIN TIMx_BRK_M1_IRQn 1 */
-
-  /* USER CODE END TIMx_BRK_M1_IRQn 1 */
-}
+  }
 //}}}
 
 //{{{
@@ -144,59 +107,37 @@ void TIMx_BRK_M1_IRQHandler()
   * @param  None
   * @retval None
   */
-void USART_IRQHandler()
-{
- /* USER CODE BEGIN USART_IRQn 0 */
+void USART_IRQHandler() {
 
-  /* USER CODE END USART_IRQn 0 */
-  if (LL_USART_IsActiveFlag_RXNE(USART)) /* Valid data have been received */
-  {
+  if (LL_USART_IsActiveFlag_RXNE(USART)) {
+    /* Valid data have been received */
     uint16_t retVal;
     retVal = *(uint16_t*)UFCP_RX_IRQ_Handler(&pUSART,LL_USART_ReceiveData8(USART));
     if (retVal == 1)
-    {
       UI_SerialCommunicationTimeOutStart();
-    }
     if (retVal == 2)
-    {
       UI_SerialCommunicationTimeOutStop();
     }
-  /* USER CODE BEGIN USART_RXNE */
-
-  /* USER CODE END USART_RXNE  */
-  }
 
   else if (LL_USART_IsActiveFlag_TXE(USART))
-  {
     UFCP_TX_IRQ_Handler(&pUSART);
-    /* USER CODE BEGIN USART_TXE */
-
-    /* USER CODE END USART_TXE   */
-  }
-  else if (LL_USART_IsActiveFlag_ORE(USART)) /* Overrun error occurs */
-  {
-    /* Send Overrun message */
+  else if (LL_USART_IsActiveFlag_ORE(USART)) {
+    /* Overrun error occurs Send Overrun message */
     UFCP_OVR_IRQ_Handler(&pUSART);
     LL_USART_ClearFlag_ORE(USART); /* Clear overrun flag */
     UI_SerialCommunicationTimeOutStop();
-    /* USER CODE BEGIN USART_ORE */
-
-    /* USER CODE END USART_ORE   */
+    }
   }
-  /* USER CODE BEGIN USART_IRQn 1 */
-
-  /* USER CODE END USART_IRQn 1 */
-}
 //}}}
 
 //{{{
 void HardFault_Handler() {
- /* USER CODE END HardFault_IRQn 0 */
+
   TSK_HardwareFaultTask();
 
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1) {
-    if (LL_USART_IsActiveFlag_ORE(USART)) { 
+    if (LL_USART_IsActiveFlag_ORE(USART)) {
       /* Overrun error occurs Send Overrun message */
       UFCP_OVR_IRQ_Handler(&pUSART);
       LL_USART_ClearFlag_ORE(USART); /* Clear overrun flag */
@@ -206,7 +147,7 @@ void HardFault_Handler() {
     else if (LL_USART_IsActiveFlag_TXE(USART))
       UFCP_TX_IRQ_Handler (&pUSART);
 
-    else if (LL_USART_IsActiveFlag_RXNE(USART)) { 
+    else if (LL_USART_IsActiveFlag_RXNE(USART)) {
       /* Valid data have been received */
       uint16_t retVal;
       retVal = *(uint16_t*)(UFCP_RX_IRQ_Handler(&pUSART,LL_USART_ReceiveData8(USART)));

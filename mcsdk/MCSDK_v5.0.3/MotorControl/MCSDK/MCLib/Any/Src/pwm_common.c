@@ -36,7 +36,6 @@
 //}}}
 
 
-//{{{
 /**
  * @brief  It perform the start of all the timers required by the control.
  *          It utilizes TIM2 as temporary timer to achieve synchronization between
@@ -47,24 +46,20 @@
  * @param  none
  * @retval none
  */
-void startTimers(void)
-{
-  uint32_t isTIM2ClockOn;
-  uint32_t trigOut;
+void startTimers() {
 
-  isTIM2ClockOn = LL_APB1_GRP1_IsEnabledClock (LL_APB1_GRP1_PERIPH_TIM2);
-  if (isTIM2ClockOn == 0)
-  {  /* Temporary Enable TIM2 clock if not already on */
+  uint32_t isTIM2ClockOn = LL_APB1_GRP1_IsEnabledClock (LL_APB1_GRP1_PERIPH_TIM2);
+  if (isTIM2ClockOn == 0) {  
+    /* Temporary Enable TIM2 clock if not already on */
     LL_APB1_GRP1_EnableClock (LL_APB1_GRP1_PERIPH_TIM2);
     LL_TIM_GenerateEvent_UPDATE (TIM2);
     LL_APB1_GRP1_DisableClock (LL_APB1_GRP1_PERIPH_TIM2);
-  }
-  else
-  {
-    trigOut = LL_TIM_ReadReg(TIM2, CR2) & TIM_CR2_MMS;
+    }
+
+  else {
+    uint32_t trigOut = LL_TIM_ReadReg (TIM2, CR2) & TIM_CR2_MMS;
     LL_TIM_SetTriggerOutput(TIM2, LL_TIM_TRGO_UPDATE);
     LL_TIM_GenerateEvent_UPDATE (TIM2);
-    LL_TIM_SetTriggerOutput(TIM2, trigOut);
+    LL_TIM_SetTriggerOutput (TIM2, trigOut);
+    }
   }
-}
-//}}}

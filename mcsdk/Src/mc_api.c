@@ -3,44 +3,7 @@
 #include "mc_extended_api.h"
 #include "parameters_conversion.h"
 
-extern MCI_Handle_t * pMCI[MC_NUM];
-
-//{{{
-
-/* startMotor
-  * If the state machine of Motor 1 is in #IDLE state, the command is immediately
-  * executed. Otherwise the command is discarded. The Application can check the
-  * return value to know whether the command was executed or discarded.
-  * One of the following commands must be executed before calling MC_StartMotor1():
-  * - MC_ProgramSpeedRampMotor1()
-  * - MC_ProgramTorqueRampMotor1()
-  * - MC_SetCurrentReferenceMotor1()
-  * Failing to do so results in an unpredictable behaviour.
-  * @note The MC_StartMotor1() command only triggers the start-up procedure:
-  * It moves Motor 1's state machine from the #IDLE to the #IDLE_START state and then
-  * returns. It is not blocking the application until the motor is indeed running.
-  * To know if it is running, the application can query Motor 1's state machine and
-  * check if it has reached the #RUN state. See MCI_GetSTMStateMotor1() for more details.
-  */
-bool MC_StartMotor1() {
-  return MCI_StartMotor (pMCI[M1]);
-  }
-//}}}
-//{{{
-/*  stopMotor
-  * If the state machine is in #RUN or #START states the command is immediately
-  * executed. Otherwise, the command is discarded. The Application can check the
-  * return value to know whether the command was executed or discarded.
-  * @note The MCI_StopMotor1() command only triggers the stop motor procedure
-  * moving Motor 1's state machine to #ANY_STOP and then returns. It is not
-  * blocking the application until the motor is indeed stopped. To know if it has
-  * stopped, the application can query Motor 1's state machine ans check if the
-  * #IDLE state has been reached back.
-  */
-void MC_StopMotor1() {
-  MCI_StopMotor( pMCI[M1] );
-  }
-//}}}
+extern MCI_Handle_t* pMCI[MC_NUM];
 
 //{{{
 /** Programs a speed ramp for Motor 1 for later or immediate execution.
@@ -74,7 +37,7 @@ void MC_StopMotor1() {
   *         value.
   */
 void MC_ProgramSpeedRampMotor1 (int16_t hFinalSpeed, uint16_t hDurationms) {
-  MCI_ExecSpeedRamp( pMCI[M1], hFinalSpeed, hDurationms );
+  MCI_ExecSpeedRamp (pMCI[M1], hFinalSpeed, hDurationms);
   }
 //}}}
 //{{{
@@ -138,6 +101,42 @@ void MC_SetCurrentReferenceMotor1 (Curr_Components Iqdref) {
 //}}}
 
 //{{{
+/* startMotor
+  * If the state machine of Motor 1 is in #IDLE state, the command is immediately
+  * executed. Otherwise the command is discarded. The Application can check the
+  * return value to know whether the command was executed or discarded.
+  * One of the following commands must be executed before calling MC_StartMotor1():
+  * - MC_ProgramSpeedRampMotor1()
+  * - MC_ProgramTorqueRampMotor1()
+  * - MC_SetCurrentReferenceMotor1()
+  * Failing to do so results in an unpredictable behaviour.
+  * @note The MC_StartMotor1() command only triggers the start-up procedure:
+  * It moves Motor 1's state machine from the #IDLE to the #IDLE_START state and then
+  * returns. It is not blocking the application until the motor is indeed running.
+  * To know if it is running, the application can query Motor 1's state machine and
+  * check if it has reached the #RUN state. See MCI_GetSTMStateMotor1() for more details.
+  */
+bool MC_StartMotor1() {
+  return MCI_StartMotor (pMCI[M1]);
+  }
+//}}}
+//{{{
+/*  stopMotor
+  * If the state machine is in #RUN or #START states the command is immediately
+  * executed. Otherwise, the command is discarded. The Application can check the
+  * return value to know whether the command was executed or discarded.
+  * @note The MCI_StopMotor1() command only triggers the stop motor procedure
+  * moving Motor 1's state machine to #ANY_STOP and then returns. It is not
+  * blocking the application until the motor is indeed stopped. To know if it has
+  * stopped, the application can query Motor 1's state machine ans check if the
+  * #IDLE state has been reached back.
+  */
+void MC_StopMotor1() {
+  MCI_StopMotor( pMCI[M1] );
+  }
+//}}}
+
+//{{{
 /**
   * @brief  Returns the status of the last buffered command for Motor 1.
   * The status can be one of the following values:
@@ -149,12 +148,11 @@ void MC_SetCurrentReferenceMotor1 (Curr_Components Iqdref) {
   * - #MCI_COMMAND_EXECUTED_UNSUCCESFULLY: the buffered command has been executed unsuccessfully.
   *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
   */
-MCI_CommandState_t MC_GetCommandStateMotor1( void)
-{
-  return MCI_IsCommandAcknowledged( pMCI[M1] );
-}
-//}}}
+MCI_CommandState_t MC_GetCommandStateMotor1() {
 
+  return MCI_IsCommandAcknowledged (pMCI[M1]);
+  }
+//}}}
 //{{{
 /**
  * @brief Stops the execution of the on-going speed ramp for Motor 1, if any.
@@ -163,7 +161,7 @@ MCI_CommandState_t MC_GetCommandStateMotor1( void)
  * speed of Motor 1 is maintained to its current value and true is returned. If no speed
  * ramp is on-going, nothing is done and false is returned.
  */
-bool MC_StopSpeedRampMotor1(void)
+bool MC_StopSpeedRampMotor1()
 {
   return MCI_StopSpeedRamp( pMCI[M1] );
 }
@@ -172,7 +170,7 @@ bool MC_StopSpeedRampMotor1(void)
 /**
  * @brief Returns true if the last ramp submited for Motor 1 has completed, false otherwise
  */
-bool MC_HasRampCompletedMotor1(void)
+bool MC_HasRampCompletedMotor1()
 {
   return MCI_RampCompleted( pMCI[M1] );
 }
@@ -184,7 +182,7 @@ bool MC_HasRampCompletedMotor1(void)
 /**
  *  @brief Returns the current mechanical rotor speed reference set for Motor 1, expressed in dHz (tenth of Hertz)
  */
-int16_t MC_GetMecSpeedReferenceMotor1(void)
+int16_t MC_GetMecSpeedReferenceMotor1()
 {
   return MCI_GetMecSpeedRef01Hz( pMCI[M1] );
 }
@@ -193,7 +191,7 @@ int16_t MC_GetMecSpeedReferenceMotor1(void)
 /**
  * @brief Returns the last computed average mechanical rotor speed for Motor 1, expressed in dHz (tenth of Hertz)
  */
-int16_t MC_GetMecSpeedAverageMotor1(void)
+int16_t MC_GetMecSpeedAverageMotor1()
 {
   return MCI_GetAvrgMecSpeed01Hz( pMCI[M1] );
 }
@@ -202,22 +200,20 @@ int16_t MC_GetMecSpeedAverageMotor1(void)
 /**
  * @brief Returns the final speed of the last ramp programmed for Motor 1 if this ramp was a speed ramp, 0 otherwise.
  */
-int16_t MC_GetLastRampFinalSpeedMotor1(void)
+int16_t MC_GetLastRampFinalSpeedMotor1()
 {
   return MCI_GetLastRampFinalSpeed( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief Returns the Control Mode used for Motor 1 (either Speed or Torque)
  */
-STC_Modality_t MC_GetControlModeMotor1(void)
+STC_Modality_t MC_GetControlModeMotor1()
 {
   return MCI_GetControlMode( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief Returns the rotation direction imposed by the last command on Motor 1
@@ -230,22 +226,20 @@ STC_Modality_t MC_GetControlModeMotor1(void)
  *
  * @note if no such command has ever been submitted, 1 is returned as well.
  */
-int16_t MC_GetImposedDirectionMotor1(void)
+int16_t MC_GetImposedDirectionMotor1()
 {
   return MCI_GetImposedMotorDirection( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief Returns true if the speed sensor used for Motor 1 is reliable, false otherwise
  */
-bool MC_GetSpeedSensorReliabilityMotor1(void)
+bool MC_GetSpeedSensorReliabilityMotor1()
 {
   return MCI_GetSpdSensorReliability( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief returns the amplitude of the phase current injected in Motor 1
@@ -257,7 +251,7 @@ bool MC_GetSpeedSensorReliabilityMotor1(void)
  * @f]
  *
  */
-int16_t MC_GetPhaseCurrentAmplitudeMotor1(void)
+int16_t MC_GetPhaseCurrentAmplitudeMotor1()
 {
   return MCI_GetPhaseCurrentAmplitude( pMCI[M1] );
 }
@@ -273,17 +267,16 @@ int16_t MC_GetPhaseCurrentAmplitudeMotor1(void)
  * @f]
  *
  */
-int16_t MC_GetPhaseVoltageAmplitudeMotor1(void)
+int16_t MC_GetPhaseVoltageAmplitudeMotor1()
 {
   return MCI_GetPhaseVoltageAmplitude( pMCI[M1] );
 }
 //}}}
-
 //{{{
 /**
  * @brief returns Ia and Ib current values for Motor 1 in Curr_Components format
  */
-Curr_Components MC_GetIabMotor1(void)
+Curr_Components MC_GetIabMotor1()
 {
   return MCI_GetIab( pMCI[M1] );
 }
@@ -292,7 +285,7 @@ Curr_Components MC_GetIabMotor1(void)
 /**
  * @brief returns Ialpha and Ibeta current values for Motor 1 in Curr_Components format
  */
-Curr_Components MC_GetIalphabetaMotor1(void)
+Curr_Components MC_GetIalphabetaMotor1()
 {
   return MCI_GetIalphabeta( pMCI[M1] );
 }
@@ -302,7 +295,7 @@ Curr_Components MC_GetIalphabetaMotor1(void)
 /**
  * @brief returns Iq and Id current values for Motor 1 in Curr_Components format
  */
-Curr_Components MC_GetIqdMotor1(void)
+Curr_Components MC_GetIqdMotor1()
 {
   return MCI_GetIqd( pMCI[M1] );
 }
@@ -311,7 +304,7 @@ Curr_Components MC_GetIqdMotor1(void)
 /**
  * @brief returns Iq and Id reference current values for Motor 1 in Curr_Components format
  */
-Curr_Components MC_GetIqdrefMotor1(void)
+Curr_Components MC_GetIqdrefMotor1()
 {
   return MCI_GetIqdref( pMCI[M1] );
 }
@@ -320,7 +313,7 @@ Curr_Components MC_GetIqdrefMotor1(void)
 /**
  * @brief returns Vq and Vd voltage values for Motor 1 in Volt_Components format
  */
-Volt_Components MC_GetVqdMotor1(void)
+Volt_Components MC_GetVqdMotor1()
 {
   return MCI_GetVqd( pMCI[M1] );
 }
@@ -329,7 +322,7 @@ Volt_Components MC_GetVqdMotor1(void)
 /**
  * @brief returns Valpha and Vbeta voltage values for Motor 1 in Volt_Components format
  */
-Volt_Components MC_GetValphabetaMotor1(void)
+Volt_Components MC_GetValphabetaMotor1()
 {
   return MCI_GetValphabeta( pMCI[M1] );
 }
@@ -338,7 +331,7 @@ Volt_Components MC_GetValphabetaMotor1(void)
 /**
  * @brief returns the electrical angle of the rotor of Motor 1, in DDP format
  */
-int16_t MC_GetElAngledppMotor1(void)
+int16_t MC_GetElAngledppMotor1()
 {
   return MCI_GetElAngledpp( pMCI[M1] );
 }
@@ -347,7 +340,7 @@ int16_t MC_GetElAngledppMotor1(void)
 /**
  * @brief returns the electrical torque reference for Motor 1
  */
-int16_t MC_GetTerefMotor1(void)
+int16_t MC_GetTerefMotor1()
 {
   return MCI_GetTeref( pMCI[M1] );
 }
@@ -363,7 +356,7 @@ int16_t MC_GetTerefMotor1(void)
  *
  * Calling this function has no effect when either flux weakening region is entered or MTPA is enabled.
  */
-void MC_SetIdrefMotor1( int16_t hNewIdref )
+void MC_SetIdrefMotor1 (int16_t hNewIdref)
 {
   MCI_SetIdref( pMCI[M1], hNewIdref );
 }
@@ -377,7 +370,7 @@ void MC_SetIdrefMotor1( int16_t hNewIdref )
  *
  * @see   SpeednTorqCtrl for more details.
  */
-void MC_Clear_IqdrefMotor1(void)
+void MC_Clear_IqdrefMotor1()
 {
   MCI_Clear_Iqdref( pMCI[M1] );
 }
@@ -392,7 +385,7 @@ void MC_Clear_IqdrefMotor1(void)
  * the function is called, nothing is done and false is returned. Otherwise, true is
  * returned.
  */
-bool MC_AcknowledgeFaultMotor1( void )
+bool MC_AcknowledgeFaultMotor1()
 {
   return MCI_FaultAcknowledged( pMCI[M1] );
 }
@@ -407,7 +400,7 @@ bool MC_AcknowledgeFaultMotor1( void )
  * See \link Fault_generation_error_codes Motor Control Faults\endlink for a list of
  * of all possible faults codes.
  */
-uint16_t MC_GetOccurredFaultsMotor1(void)
+uint16_t MC_GetOccurredFaultsMotor1()
 {
   return MCI_GetOccurredFaults( pMCI[M1] );
 }
@@ -415,27 +408,20 @@ uint16_t MC_GetOccurredFaultsMotor1(void)
 //{{{
 /**
  * @brief returns a bitfield showing all current faults on Motor 1
- *
  * This function returns a 16 bit fields containing the Motor Control faults
  * that are currently active.
- *
  * See \link Fault_generation_error_codes Motor Control Faults\endlink for a list of
  * of all possible faults codes.
  */
-uint16_t MC_GetCurrentFaultsMotor1(void)
+uint16_t MC_GetCurrentFaultsMotor1()
 {
   return MCI_GetCurrentFaults( pMCI[M1] );
 }
 //}}}
-
 //{{{
-/**
- * @brief returns the current state of Motor 1 state machine
- */
-State_t  MCI_GetSTMStateMotor1(void)
-{
-  return MCI_GetSTMState( pMCI[M1] );
-}
+State_t MCI_GetSTMStateMotor1() {
+  return MCI_GetSTMState (pMCI[M1]);
+  }
 //}}}
 
 //{{{
@@ -450,10 +436,9 @@ State_t  MCI_GetSTMStateMotor1(void)
 * @param  bSamplTime Sampling time selection, ADC_SampleTime_nCycles defined in
 *         stm32fxxx_adc.h see ADC_sampling_times.
 */
-void MC_ProgramRegularConversion(uint8_t bChannel, uint8_t bSampleTime)
-{
+void MC_ProgramRegularConversion (uint8_t bChannel, uint8_t bSampleTime) {
   MC_RequestRegularConv( bChannel, bSampleTime );
-}
+  }
 //}}}
 //{{{
 /**
@@ -462,10 +447,9 @@ void MC_ProgramRegularConversion(uint8_t bChannel, uint8_t bSampleTime)
 *         This function returns a valid result if the state returned by
 *         MC_RegularConvState is UDRC_STATE_EOC.
 */
-uint16_t MC_GetRegularConversionValue(void)
-{
+uint16_t MC_GetRegularConversionValue() {
   return MC_GetRegularConv();
-}
+  }
 //}}}
 //{{{
 /**
@@ -479,8 +463,7 @@ uint16_t MC_GetRegularConversionValue(void)
 *         UDRC_STATE_EOC regular conversion has been completed but not readed
 *         from the user.
 */
-UDRC_State_t MC_GetRegularConversionState(void)
-{
+UDRC_State_t MC_GetRegularConversionState() {
   return MC_RegularConvState();
-}
+  }
 //}}}

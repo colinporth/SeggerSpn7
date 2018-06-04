@@ -457,6 +457,7 @@ uint8_t TSK_HighFrequencyTask() {
     //STM_FaultProcessing (&STM[M1], MC_FOC_DURATION, 0);
     printf ("TSK_HighFrequencyTask - MC_FOC_DURATION ignored\n");
     }
+
   else {
     bool IsAccelerationStageReached = RUC_FirstAccelerationStageReached (&RevUpControlM1);
     STO_Inputs.Ialfa_beta = FOCVars[M1].Ialphabeta;
@@ -465,13 +466,13 @@ uint8_t TSK_HighFrequencyTask() {
     STO_PLL_CalcAvrgElSpeedDpp (&STO_PLL_M1);
 
    if (IsAccelerationStageReached == false)
-      STO_ResetPLL (&STO_PLL_M1);
+     STO_ResetPLL (&STO_PLL_M1);
 
     uint16_t hState = STM_GetState (&STM[M1]);
     if((hState == START) || (hState == START_RUN)) {
       /*  only for sensor-less*/
-      int16_t hObsAngle = SPD_GetElAngle(&STO_PLL_M1._Super);
-      VSS_CalcElAngle(&VirtualSpeedSensorM1,&hObsAngle);
+      int16_t hObsAngle = SPD_GetElAngle (&STO_PLL_M1._Super);
+      VSS_CalcElAngle (&VirtualSpeedSensorM1, &hObsAngle);
       }
     }
 
@@ -504,7 +505,7 @@ void MC_Scheduler() {
 
   if (bMCBootCompleted == 1) {
 
-    if(hMFTaskCounterM1 > 0u)
+    if (hMFTaskCounterM1 > 0u)
       hMFTaskCounterM1--;
     else {
       TSK_MediumFrequencyTask();
@@ -519,75 +520,62 @@ void MC_Scheduler() {
   }
 //}}}
 //{{{
-void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF_MOTORS] )
-{
-  /* USER CODE BEGIN MCboot 0 */
+void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF_MOTORS]) {
 
-  /* USER CODE END MCboot 0 */
   bMCBootCompleted = 0;
   pCLM[M1] = &CircleLimitationM1;
 
-  /**********************************************************/
-  /*    PWM and current sensing component initialization    */
-  /**********************************************************/
+  // PWM and current sensing component initialization
   pwmcHandle[M1] = &PWMC_R3_4_F3_Handle_M1._Super;
-  R3_4_F30X_Init(&PWMC_R3_4_F3_Handle_M1);
+  R3_4_F30X_Init (&PWMC_R3_4_F3_Handle_M1);
 
-  /* USER CODE BEGIN MCboot 1 */
-
-  /* USER CODE END MCboot 1 */
-
-  /**************************************/
-  /*    Start timers synchronously      */
-  /**************************************/
+  // Start timers synchronously
   startTimers();
 
-  /**************************************/
-  /*    State machine initialization    */
-  /**************************************/
+  // State machine initialization
   STM_Init(&STM[M1]);
 
-  /******************************************************/
-  /*   PID component initialization: speed regulation   */
-  /******************************************************/
-  PID_HandleInit(&PIDSpeedHandle_M1);
+  // PID component initialization: speed regulation
+  PID_HandleInit (&PIDSpeedHandle_M1);
   pPIDSpeed[M1] = &PIDSpeedHandle_M1;
   pSTC[M1] = &SpeednTorqCtrlM1;
   STO_PLL_Init (&STO_PLL_M1);
 
-  STC_Init(pSTC[M1],pPIDSpeed[M1], &STO_PLL_M1._Super);
+  STC_Init (pSTC[M1],pPIDSpeed[M1], &STO_PLL_M1._Super);
   VSS_Init (&VirtualSpeedSensorM1);
-  RUC_Init(&RevUpControlM1,pSTC[M1],&VirtualSpeedSensorM1, &STO_M1, pwmcHandle[M1]);        /* only if sensorless*/
+  // only if sensorless
+  RUC_Init (&RevUpControlM1,pSTC[M1],&VirtualSpeedSensorM1, &STO_M1, pwmcHandle[M1]); 
 
-  /********************************************************/
-  /*   PID component initialization: current regulation   */
-  /********************************************************/
+  // PID component initialization: current regulation
   PID_HandleInit(&PIDIqHandle_M1);
   PID_HandleInit(&PIDIdHandle_M1);
   pPIDIq[M1] = &PIDIqHandle_M1;
   pPIDId[M1] = &PIDIdHandle_M1;
   pBusSensorM1 = &RealBusVoltageSensorParamsM1;
-  RVBS_Init(pBusSensorM1, pwmcHandle[M1]);
+  RVBS_Init (pBusSensorM1, pwmcHandle[M1]);
 
-  //Power Measurement M1
+  // Power Measurement M1
   pMPM[M1] = &PQD_MotorPowMeasM1;
   pMPM[M1]->pVBS = &(pBusSensorM1->_Super);
   pMPM[M1]->pFOCVars = &FOCVars[M1];
 
-  NTC_Init(&TempSensorParamsM1,pwmcHandle[M1]);
+  NTC_Init (&TempSensorParamsM1,pwmcHandle[M1]);
   pTemperatureSensor[M1] = &TempSensorParamsM1;
 
   pREMNG[M1] = &RampExtMngrHFParamsM1;
-  REMNG_Init(pREMNG[M1]);
+  REMNG_Init (pREMNG[M1]);
+
   FOC_Clear(M1);
   FOCVars[M1].bDriveInput = EXTERNAL;
   FOCVars[M1].Iqdref = STC_GetDefaultIqdref(pSTC[M1]);
   FOCVars[M1].UserIdref = STC_GetDefaultIqdref(pSTC[M1]).qI_Component2;
+
   oMCInterface[M1] = & Mci[M1];
-  MCI_Init(oMCInterface[M1], &STM[M1], pSTC[M1], &FOCVars[M1]);
-  MCI_ExecSpeedRamp(oMCInterface[M1],
-  STC_GetMecSpeedRef01HzDefault(pSTC[M1]),0); /*First command to STC*/
+  MCI_Init (oMCInterface[M1], &STM[M1], pSTC[M1], &FOCVars[M1]);
+  MCI_ExecSpeedRamp (oMCInterface[M1],
+  STC_GetMecSpeedRef01HzDefault (pSTC[M1]),0); /*First command to STC*/
   pMCIList[M1] = oMCInterface[M1];
+
   MCT[M1].pPIDSpeed = pPIDSpeed[M1];
   MCT[M1].pPIDIq = pPIDIq[M1];
   MCT[M1].pPIDId = pPIDId[M1];
@@ -611,10 +599,7 @@ void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF
   pMCTList[M1] = &MCT[M1];
 
   bMCBootCompleted = 1;
-  /* USER CODE BEGIN MCboot 2 */
-
-  /* USER CODE END MCboot 2 */
-}
+  }
 //}}}
 
 //{{{
