@@ -9,9 +9,11 @@
   * @retval none.
   */
 void MPM_Clear (MotorPowMeas_Handle_t* pHandle) {
+
   uint16_t i;
   for (i = 0u; i < MPM_BUFFER_LENGHT; i++)
     pHandle->hMeasBuffer[i] = 0;
+
   pHandle->hNextMeasBufferIndex = 0u;
   pHandle->hLastMeasBufferIndex = 0u;
   }
@@ -28,9 +30,6 @@ void MPM_Clear (MotorPowMeas_Handle_t* pHandle) {
   */
 int16_t MPM_CalcElMotorPower (MotorPowMeas_Handle_t* pHandle,int16_t CurrentMotorPower) {
 
-  uint16_t i;
-  int32_t wAux = 0;
-
   /* Store the measured values in the buffer.*/
   pHandle->hMeasBuffer[pHandle->hNextMeasBufferIndex] = CurrentMotorPower;
   pHandle->hLastMeasBufferIndex = pHandle->hNextMeasBufferIndex;
@@ -39,6 +38,8 @@ int16_t MPM_CalcElMotorPower (MotorPowMeas_Handle_t* pHandle,int16_t CurrentMoto
     pHandle->hNextMeasBufferIndex = 0u;
 
   /* Compute the average measured motor power */
+  int32_t wAux = 0;
+  uint16_t i;
   for (i = 0u; i < MPM_BUFFER_LENGHT; i++)
     wAux += (int32_t)(pHandle->hMeasBuffer[i]);
   wAux /= (int32_t)MPM_BUFFER_LENGHT;

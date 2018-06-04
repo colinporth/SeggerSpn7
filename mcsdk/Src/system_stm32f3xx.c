@@ -18,7 +18,7 @@ const uint8_t AHBPrescTable[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 
 const uint8_t APBPrescTable[8]  = {0, 0, 0, 0, 1, 2, 3, 4};
 
 //{{{
-void SystemInit(void)
+void SystemInit()
 {
   /* FPU settings ------------------------------------------------------------*/
   #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
@@ -94,7 +94,7 @@ void SystemInit(void)
   * @param  None
   * @retval None
   */
-void SystemCoreClockUpdate (void)
+void SystemCoreClockUpdate ()
 {
   uint32_t tmp = 0, pllmull = 0, pllsource = 0, predivfactor = 0;
 

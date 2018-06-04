@@ -300,9 +300,7 @@ R3_4_F30XOPAMPParams_t R3_4_F30XOPAMPParamsM1 =
 };
 //}}}
 //{{{
-/**
-  * @brief  Current sensor parameters Motor 1 - three shunt - F30x - Independent Resources
-  */
+// Current sensor parameters Motor 1 - three shunt - F30x - Independent Resources
 R3_4_F30XParams_t R3_4_F30XParamsM1 =
 {
 /* Dual MC parameters --------------------------------------------------------*/

@@ -81,7 +81,6 @@
 "Output/mcsdk Release/Obj/state_machine.o"
 "Output/mcsdk Release/Obj/virtual_bus_voltage_sensor.o"
 "Output/mcsdk Release/Obj/virtual_speed_sensor.o"
-"Output/mcsdk Release/Obj/ics_f30x_pwm_curr_fdbk.o"
 "Output/mcsdk Release/Obj/r3_4_f30x_pwm_curr_fdbk.o"
 "Output/mcsdk Release/Obj/dac_common_ui.o"
 "Output/mcsdk Release/Obj/dac_rctimer_ui.o"

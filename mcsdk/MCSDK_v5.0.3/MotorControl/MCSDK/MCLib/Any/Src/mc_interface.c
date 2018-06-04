@@ -81,7 +81,6 @@ void MCI_ExecTorqueRamp (MCI_Handle_t* pHandle,  int16_t hFinalTorque, uint16_t 
   pHandle->LastModalitySetByUser = STC_TORQUE_MODE;
 }
 //}}}
-
 //{{{
 /**
   * @brief  This is a buffered command to set directly the motor current

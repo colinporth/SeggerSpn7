@@ -46,13 +46,7 @@
 
 const int16_t hSin_Cos_Table[256] = SIN_COS_TABLE;
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator currents Ia and qIb (which are
@@ -63,7 +57,7 @@ __attribute__((section ("ccmram")))
   * @param  Curr_Input: stator current Ia and Ib in Curr_Components format
   * @retval Stator current Ialpha and Ibeta in Curr_Components format
   */
-Curr_Components MCM_Clarke(Curr_Components Curr_Input)
+Curr_Components MCM_Clarke (Curr_Components Curr_Input)
 {
   Curr_Components Curr_Output;
 
@@ -116,13 +110,7 @@ Curr_Components MCM_Clarke(Curr_Components Curr_Input)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator currents Ialpha and Ibeta, which
@@ -134,7 +122,7 @@ __attribute__((section ("ccmram")))
   * @param  Theta: rotating frame angular position in q1.15 format
   * @retval Stator current Iq and Id in Curr_Components format
   */
-Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
+Curr_Components MCM_Park (Curr_Components Curr_Input, int16_t Theta)
 {
   Curr_Components Curr_Output;
   int32_t qId_tmp_1, qId_tmp_2, qIq_tmp_1, qIq_tmp_2;
@@ -222,13 +210,7 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator voltage qVq and qVd, that belong to
@@ -240,7 +222,7 @@ __attribute__((section ("ccmram")))
   * @param  Theta: rotating frame angular position in q1.15 format
   * @retval Stator voltage Valpha and Vbeta in Volt_Components format
   */
-Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta)
+Volt_Components MCM_Rev_Park (Volt_Components Volt_Input, int16_t Theta)
 {
   int32_t qValpha_tmp1,qValpha_tmp2,qVbeta_tmp1,qVbeta_tmp2;
   Trig_Components Local_Vector_Components;
@@ -277,13 +259,7 @@ Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function returns cosine and sine functions of the angle fed in
@@ -292,7 +268,7 @@ __attribute__((section ("ccmram")))
   * @retval Sin(angle) and Cos(angle) in Trig_Components format
   */
 
-Trig_Components MCM_Trig_Functions(int16_t hAngle)
+Trig_Components MCM_Trig_Functions (int16_t hAngle)
 {
   int32_t shindex;
   uint16_t uhindex;
@@ -333,13 +309,7 @@ Trig_Components MCM_Trig_Functions(int16_t hAngle)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  It calculates the square root of a non-negative int32_t. It returns 0
@@ -347,7 +317,7 @@ __attribute__((section ("ccmram")))
   * @param  Input int32_t number
   * @retval int32_t Square root of Input (0 if Input<0)
   */
-int32_t MCM_Sqrt(int32_t wInput)
+int32_t MCM_Sqrt (int32_t wInput)
 {
   uint8_t biter = 0u;
   int32_t wtemproot;
@@ -396,7 +366,7 @@ int32_t MCM_Sqrt(int32_t wInput)
   * @param  float Floting point number to be coded.
   * @retval uint32_t Coded 32bit integer.
   */
-uint32_t MCM_floatToIntBit(float x)
+uint32_t MCM_floatToIntBit (float x)
 {
   uint32_t *pInt;
   pInt = (uint32_t*)(&x);

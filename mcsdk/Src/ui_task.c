@@ -20,8 +20,7 @@ static volatile uint16_t  bCOMATRTimeCounter = SERIALCOM_ATR_TIME_TICKS;
 #define VECT_TABLE_BASE 0x08030000
 
 /* Setup the exported functions see UIExportedFunctions.h enum. */
-void* const exportedFunctions[EF_UI_NUMBERS] =
-{
+void* const exportedFunctions[EF_UI_NUMBERS] = {
   (void*)(&UI_GetReg),
   (void*)(&UI_ExecSpeedRamp),
   (void*)(&UI_SetReg),
@@ -31,7 +30,7 @@ void* const exportedFunctions[EF_UI_NUMBERS] =
   (void*)(&UI_GetRevupData),
   (void*)(&UI_SetDAC),
   (void*)(&UI_SetCurrentReferences)
-};
+  };
 
 //{{{
 void UI_TaskInit( uint8_t cfg, uint32_t* pUICfg, uint8_t bMCNum, MCI_Handle_t* pMCIList[],
@@ -58,7 +57,7 @@ void UI_TaskInit( uint8_t cfg, uint32_t* pUICfg, uint8_t bMCNum, MCI_Handle_t* p
 }
 //}}}
 //{{{
-void UI_Scheduler(void)
+void UI_Scheduler()
 {
   if(bUITaskCounter > 0u)
   {
@@ -101,20 +100,20 @@ void MC_SetUserDAC(DAC_UserChannel_t bUserChNumber, int16_t hValue)
 //}}}
 
 //{{{
-MCP_Handle_t * GetMCP(void)
+MCP_Handle_t * GetMCP()
 {
   return pMCP;
 }
 //}}}
 //{{{
-UI_Handle_t * GetDAC(void)
+UI_Handle_t * GetDAC()
 {
   return &pDAC->_Super;
 }
 //}}}
 
 //{{{
-bool UI_IdleTimeHasElapsed(void)
+bool UI_IdleTimeHasElapsed()
 {
   bool retVal = false;
   if (bUITaskCounter == 0u)
@@ -132,7 +131,7 @@ void UI_SetIdleTime(uint16_t SysTickCount)
 //}}}
 
 //{{{
-bool UI_SerialCommunicationTimeOutHasElapsed(void)
+bool UI_SerialCommunicationTimeOutHasElapsed()
 {
   bool retVal = false;
   if (bCOMTimeoutCounter == 1u)
@@ -144,7 +143,7 @@ bool UI_SerialCommunicationTimeOutHasElapsed(void)
 }
 //}}}
 //{{{
-bool UI_SerialCommunicationATRTimeHasElapsed(void)
+bool UI_SerialCommunicationATRTimeHasElapsed()
 {
   bool retVal = false;
   if (bCOMATRTimeCounter == 1u)
@@ -157,13 +156,13 @@ bool UI_SerialCommunicationATRTimeHasElapsed(void)
 //}}}
 
 //{{{
-void UI_SerialCommunicationTimeOutStop(void)
+void UI_SerialCommunicationTimeOutStop()
 {
   bCOMTimeoutCounter = 0u;
 }
 //}}}
 //{{{
-void UI_SerialCommunicationTimeOutStart(void)
+void UI_SerialCommunicationTimeOutStart()
 {
   bCOMTimeoutCounter = SERIALCOM_TIMEOUT_OCCURENCE_TICKS;
 }

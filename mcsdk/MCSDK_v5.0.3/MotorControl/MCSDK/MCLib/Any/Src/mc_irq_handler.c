@@ -57,11 +57,10 @@ static MCIRQ_HandlerConfigItem_t MCIRQ_Table[MCIRQ_MAX_HANDLERS];
 //{{{
 /**
  * @brief Registers function @p Handler as the handler for the interrupt identified by @p IrqId.
- *
  *  @p Handle is also registered and passed as first argument to the @p Handler function when it
  * is executed.
  */
-void MCIRQ_SetIrqHandler( uint8_t IrqId, MCIRQ_Handler_t Handler, void * Handle )
+void MCIRQ_SetIrqHandler (uint8_t IrqId, MCIRQ_Handler_t Handler, void * Handle )
 {
     if ( IrqId < MCIRQ_MAX_HANDLERS )
     {
@@ -73,19 +72,15 @@ void MCIRQ_SetIrqHandler( uint8_t IrqId, MCIRQ_Handler_t Handler, void * Handle 
 //}}}
 //{{{
 /** @brief Executes the handler registered with identifier @p IrqId and returns its return value.
- *
  *  @p Flag is passed as second argument to the handler function, the first being the pointer
  * that was registered with it.
  */
-void * MCIRQ_ExecIrqHandler( uint8_t IrqId, uint8_t Flag )
-{
-    void * ret_val = NULL;
+void* MCIRQ_ExecIrqHandler (uint8_t IrqId, uint8_t Flag ) {
+  void* ret_val = NULL;
 
-    if ( IrqId < MCIRQ_MAX_HANDLERS )
-    {
-        ret_val = MCIRQ_Table[ IrqId ].Handler( MCIRQ_Table[ IrqId ].Handle, Flag );
-    }
+  if ( IrqId < MCIRQ_MAX_HANDLERS )
+    ret_val = MCIRQ_Table[ IrqId ].Handler( MCIRQ_Table[ IrqId ].Handle, Flag );
 
-    return ret_val;
-}
+  return ret_val;
+  }
 //}}}

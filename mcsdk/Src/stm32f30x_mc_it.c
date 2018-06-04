@@ -15,14 +15,7 @@
 #include "stm32f3xx_it.h"
 #include "mc_config.h"
 
-
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 void ADC1_2_IRQHandler()
 {
@@ -33,13 +26,7 @@ void ADC1_2_IRQHandler()
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function handles ADC3 interrupt request.
@@ -51,13 +38,7 @@ void ADC3_IRQHandler()
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function handles ADC4 interrupt request.

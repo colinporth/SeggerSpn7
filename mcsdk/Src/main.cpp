@@ -9,7 +9,7 @@ DAC_HandleTypeDef hdac1;
 TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart2;
 
-extern "C" { void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim); }
+extern "C" { void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim); }
 
 //{{{
 void _Error_Handler(char *file, int line)
@@ -24,15 +24,13 @@ void _Error_Handler(char *file, int line)
 //}}}
 
 //{{{
-void SystemClock_Config()
-{
+void SystemClock_Config() {
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
+  // Initializes the CPU, AHB and APB busses clocks
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
@@ -40,11 +38,10 @@ void SystemClock_Config()
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
   RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
-  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  if (HAL_RCC_OscConfig (&RCC_OscInitStruct) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
+  // Initializes the CPU, AHB and APB busses clocks
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -52,56 +49,46 @@ void SystemClock_Config()
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig (&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_TIM1;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.Tim1ClockSelection = RCC_TIM1CLK_HCLK;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
+  if (HAL_RCCEx_PeriphCLKConfig (&PeriphClkInit) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Enables the Clock Security System
-    */
   HAL_RCC_EnableCSS();
 
-    /**Configure the Systick interrupt time
-    */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-
-    /**Configure the Systick
-    */
-  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-
-  /* SysTick_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(SysTick_IRQn, 4, 0);
-}
+  HAL_SYSTICK_Config (HAL_RCC_GetHCLKFreq()/1000);
+  HAL_SYSTICK_CLKSourceConfig (SYSTICK_CLKSOURCE_HCLK);
+  HAL_NVIC_SetPriority (SysTick_IRQn, 4, 0);
+  }
 //}}}
 
 //{{{
-static void MX_NVIC_Init()
-{
+static void MX_NVIC_Init() {
+
   /* TIM1_BRK_TIM15_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(TIM1_BRK_TIM15_IRQn, 4, 1);
-  HAL_NVIC_EnableIRQ(TIM1_BRK_TIM15_IRQn);
+  HAL_NVIC_SetPriority (TIM1_BRK_TIM15_IRQn, 4, 1);
+  HAL_NVIC_EnableIRQ (TIM1_BRK_TIM15_IRQn);
+
   /* ADC1_2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(ADC1_2_IRQn, 2, 0);
-  HAL_NVIC_EnableIRQ(ADC1_2_IRQn);
+  HAL_NVIC_SetPriority (ADC1_2_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ (ADC1_2_IRQn);
+
   /* USART2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(USART2_IRQn, 3, 1);
-  HAL_NVIC_EnableIRQ(USART2_IRQn);
-}
+  HAL_NVIC_SetPriority (USART2_IRQn, 3, 1);
+  HAL_NVIC_EnableIRQ (USART2_IRQn);
+  }
 //}}}
 //{{{
-static void MX_ADC1_Init()
-{
+static void MX_ADC1_Init() {
 
   ADC_MultiModeTypeDef multimode;
   ADC_InjectionConfTypeDef sConfigInjected;
   ADC_ChannelConfTypeDef sConfig;
 
-    /**Common config
-    */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -119,14 +106,10 @@ static void MX_ADC1_Init()
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure the ADC multi-mode
-    */
   multimode.Mode = ADC_MODE_INDEPENDENT;
   if (HAL_ADCEx_MultiModeConfigChannel(&hadc1, &multimode) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Injected Channel
-    */
   sConfigInjected.InjectedChannel = ADC_CHANNEL_1;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_1;
   sConfigInjected.InjectedSingleDiff = ADC_SINGLE_ENDED;
@@ -142,15 +125,11 @@ static void MX_ADC1_Init()
   if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Injected Channel
-    */
   sConfigInjected.InjectedChannel = ADC_CHANNEL_7;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_2;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc1, &sConfigInjected) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Regular Channel
-    */
   sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SingleDiff = ADC_SINGLE_ENDED;
@@ -160,23 +139,15 @@ static void MX_ADC1_Init()
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Regular Channel
-    */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
-
-}
+  }
 //}}}
 //{{{
-static void MX_ADC2_Init()
-{
+static void MX_ADC2_Init() {
 
-  ADC_InjectionConfTypeDef sConfigInjected;
-
-    /**Common config
-    */
   hadc2.Instance = ADC2;
   hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV1;
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
@@ -192,8 +163,7 @@ static void MX_ADC2_Init()
   if (HAL_ADC_Init(&hadc2) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Injected Channel
-    */
+  ADC_InjectionConfTypeDef sConfigInjected;
   sConfigInjected.InjectedChannel = ADC_CHANNEL_7;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_1;
   sConfigInjected.InjectedSingleDiff = ADC_SINGLE_ENDED;
@@ -209,30 +179,20 @@ static void MX_ADC2_Init()
   if (HAL_ADCEx_InjectedConfigChannel(&hadc2, &sConfigInjected) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**Configure Injected Channel
-    */
   sConfigInjected.InjectedChannel = ADC_CHANNEL_6;
   sConfigInjected.InjectedRank = ADC_INJECTED_RANK_2;
   if (HAL_ADCEx_InjectedConfigChannel(&hadc2, &sConfigInjected) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
-
-}
+  }
 //}}}
 //{{{
-/* DAC1 init function */
-static void MX_DAC1_Init()
-{
+static void MX_DAC1_Init() {
 
-  DAC_ChannelConfTypeDef sConfig;
-
-    /**DAC Initialization
-    */
   hdac1.Instance = DAC1;
   if (HAL_DAC_Init(&hdac1) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
 
-    /**DAC channel OUT1 config
-    */
+  DAC_ChannelConfTypeDef sConfig;
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
@@ -240,8 +200,7 @@ static void MX_DAC1_Init()
   }
 //}}}
 //{{{
-static void MX_TIM1_Init()
-{
+static void MX_TIM1_Init() {
 
   TIM_SlaveConfigTypeDef sSlaveConfig;
   TIM_MasterConfigTypeDef sMasterConfig;
@@ -312,8 +271,7 @@ static void MX_TIM1_Init()
 }
 //}}}
 //{{{
-static void MX_USART2_UART_Init()
-{
+static void MX_USART2_UART_Init() {
 
   huart2.Instance = USART2;
   huart2.Init.BaudRate = 115200;
@@ -327,11 +285,10 @@ static void MX_USART2_UART_Init()
   huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   if (HAL_UART_Init(&huart2) != HAL_OK)
     printf ("error %s %s\n",  __FILE__, __LINE__);
-}
+  }
 //}}}
 //{{{
-static void MX_GPIO_Init()
-{
+static void MX_GPIO_Init() {
 
   GPIO_InitTypeDef GPIO_InitStruct;
 
@@ -341,32 +298,31 @@ static void MX_GPIO_Init()
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin (LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, M1_PWM_EN_U_Pin|M1_PWM_EN_V_Pin|M1_PWM_EN_W_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin (GPIOC, M1_PWM_EN_U_Pin|M1_PWM_EN_V_Pin|M1_PWM_EN_W_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : Start_Stop_Pin */
   GPIO_InitStruct.Pin = Start_Stop_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(Start_Stop_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init (Start_Stop_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LD2_Pin */
   GPIO_InitStruct.Pin = LD2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init (LD2_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : M1_PWM_EN_U_Pin M1_PWM_EN_V_Pin M1_PWM_EN_W_Pin */
   GPIO_InitStruct.Pin = M1_PWM_EN_U_Pin|M1_PWM_EN_V_Pin|M1_PWM_EN_W_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
-
-}
+  HAL_GPIO_Init (GPIOC, &GPIO_InitStruct);
+  }
 //}}}
 
 //{{{

@@ -96,111 +96,112 @@ void MCP_ReceivedFrame (MCP_Handle_t *pHandle, uint8_t Code, uint8_t *buffer, ui
   switch (Code) {
     //{{{
     case MC_PROTOCOL_CODE_SET_REG: {
+
       MC_Protocol_REG_t bRegID = (MC_Protocol_REG_t)buffer[0];
       bErrorCode = ERROR_CODE_WRONG_SET;
 
       switch (bRegID) {
-      //{{{
-      case MC_PROTOCOL_REG_TARGET_MOTOR:
-        {
-          /* Deprecated */
-          int32_t wValue = (int32_t)(buffer[1]);
+        //{{{
+        case MC_PROTOCOL_REG_TARGET_MOTOR:
+          {
+            /* Deprecated */
+            int32_t wValue = (int32_t)(buffer[1]);
 
-          UI_SetReg(&pHandle->pDAC->_Super, bRegID, wValue);
-          bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
+            UI_SetReg(&pHandle->pDAC->_Super, bRegID, wValue);
+            bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
+          }
+          break;
+        //}}}
+        case MC_PROTOCOL_REG_CONTROL_MODE:
+        //{{{
+        case MC_PROTOCOL_REG_SC_PP:
+          {
+            /* 8bit variables */
+            bNoError = UI_SetReg(&pHandle->_Super, bRegID, (int32_t)(buffer[1]));
+          }
+          break;
+        //}}}
+        //{{{
+        case MC_PROTOCOL_REG_DAC_OUT1:
+          {
+            UI_SetDAC(&pHandle->pDAC->_Super, DAC_CH0, (MC_Protocol_REG_t)(buffer[1]));
+            bNoError = true; /* No check inside class return always true*/
+          }
+          break;
+        //}}}
+        //{{{
+        case MC_PROTOCOL_REG_DAC_OUT2:
+          {
+            UI_SetDAC(&pHandle->pDAC->_Super, DAC_CH1, (MC_Protocol_REG_t)(buffer[1]));
+            bNoError = true; /* No check inside class return always true*/
+          }
+          break;
+        //}}}
+        case MC_PROTOCOL_REG_TORQUE_REF:
+        case MC_PROTOCOL_REG_FLUX_REF:
+        case MC_PROTOCOL_REG_SPEED_KP:
+        case MC_PROTOCOL_REG_SPEED_KI:
+        case MC_PROTOCOL_REG_SPEED_KD:
+        case MC_PROTOCOL_REG_TORQUE_KP:
+        case MC_PROTOCOL_REG_TORQUE_KI:
+        case MC_PROTOCOL_REG_TORQUE_KD:
+        case MC_PROTOCOL_REG_FLUX_KP:
+        case MC_PROTOCOL_REG_FLUX_KI:
+        case MC_PROTOCOL_REG_FLUX_KD:
+        case MC_PROTOCOL_REG_PLL_KI:
+        case MC_PROTOCOL_REG_PLL_KP:
+        case MC_PROTOCOL_REG_FLUXWK_KP:
+        case MC_PROTOCOL_REG_FLUXWK_KI:
+        case MC_PROTOCOL_REG_FLUXWK_BUS:
+        case MC_PROTOCOL_REG_IQ_SPEEDMODE:
+        case MC_PROTOCOL_REG_PFC_DCBUS_REF:
+        case MC_PROTOCOL_REG_PFC_I_KP:
+        case MC_PROTOCOL_REG_PFC_I_KI:
+        case MC_PROTOCOL_REG_PFC_I_KD:
+        case MC_PROTOCOL_REG_PFC_V_KP:
+        case MC_PROTOCOL_REG_PFC_V_KI:
+        case MC_PROTOCOL_REG_PFC_V_KD:
+        case MC_PROTOCOL_REG_PFC_STARTUP_DURATION:
+        case MC_PROTOCOL_REG_HFI_INIT_ANG_SAT_DIFF:
+        case MC_PROTOCOL_REG_HFI_PI_TRACK_KP:
+        //{{{
+        case MC_PROTOCOL_REG_HFI_PI_TRACK_KI:
+          {
+            /* 16bit variables */
+            int32_t wValue = buffer[1] + (buffer[2] << 8);
+            bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
+          }
+          break;
+        //}}}
+        case MC_PROTOCOL_REG_OBSERVER_C1:
+        case MC_PROTOCOL_REG_OBSERVER_C2:
+        case MC_PROTOCOL_REG_FF_1Q:
+        case MC_PROTOCOL_REG_FF_1D:
+        case MC_PROTOCOL_REG_FF_2:
+        case MC_PROTOCOL_REG_RAMP_FINAL_SPEED:
+        case MC_PROTOCOL_REG_SC_CURRENT:
+        case MC_PROTOCOL_REG_SC_SPDBANDWIDTH:
+        case MC_PROTOCOL_REG_SC_LDLQRATIO:
+        case MC_PROTOCOL_REG_SC_NOMINAL_SPEED:
+        case MC_PROTOCOL_REG_SC_CURRBANDWIDTH:
+        case MC_PROTOCOL_REG_SC_STARTUP_SPEED:
+        //{{{
+        case MC_PROTOCOL_REG_SC_STARTUP_ACC:
+          {
+            /* 32bit variables */
+            int32_t wValue = buffer[1] + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
+            bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
+          }
+          break;
+        //}}}
+        //{{{
+        default:
+          bErrorCode = ERROR_CODE_SET_READ_ONLY;
+          break;
+        //}}}
         }
-        break;
-      //}}}
-      case MC_PROTOCOL_REG_CONTROL_MODE:
-      //{{{
-      case MC_PROTOCOL_REG_SC_PP:
-        {
-          /* 8bit variables */
-          bNoError = UI_SetReg(&pHandle->_Super, bRegID, (int32_t)(buffer[1]));
-        }
-        break;
-      //}}}
-      //{{{
-      case MC_PROTOCOL_REG_DAC_OUT1:
-        {
-          UI_SetDAC(&pHandle->pDAC->_Super, DAC_CH0, (MC_Protocol_REG_t)(buffer[1]));
-          bNoError = true; /* No check inside class return always true*/
-        }
-        break;
-      //}}}
-      //{{{
-      case MC_PROTOCOL_REG_DAC_OUT2:
-        {
-          UI_SetDAC(&pHandle->pDAC->_Super, DAC_CH1, (MC_Protocol_REG_t)(buffer[1]));
-          bNoError = true; /* No check inside class return always true*/
-        }
-        break;
-      //}}}
-      case MC_PROTOCOL_REG_TORQUE_REF:
-      case MC_PROTOCOL_REG_FLUX_REF:
-      case MC_PROTOCOL_REG_SPEED_KP:
-      case MC_PROTOCOL_REG_SPEED_KI:
-      case MC_PROTOCOL_REG_SPEED_KD:
-      case MC_PROTOCOL_REG_TORQUE_KP:
-      case MC_PROTOCOL_REG_TORQUE_KI:
-      case MC_PROTOCOL_REG_TORQUE_KD:
-      case MC_PROTOCOL_REG_FLUX_KP:
-      case MC_PROTOCOL_REG_FLUX_KI:
-      case MC_PROTOCOL_REG_FLUX_KD:
-      case MC_PROTOCOL_REG_PLL_KI:
-      case MC_PROTOCOL_REG_PLL_KP:
-      case MC_PROTOCOL_REG_FLUXWK_KP:
-      case MC_PROTOCOL_REG_FLUXWK_KI:
-      case MC_PROTOCOL_REG_FLUXWK_BUS:
-      case MC_PROTOCOL_REG_IQ_SPEEDMODE:
-      case MC_PROTOCOL_REG_PFC_DCBUS_REF:
-      case MC_PROTOCOL_REG_PFC_I_KP:
-      case MC_PROTOCOL_REG_PFC_I_KI:
-      case MC_PROTOCOL_REG_PFC_I_KD:
-      case MC_PROTOCOL_REG_PFC_V_KP:
-      case MC_PROTOCOL_REG_PFC_V_KI:
-      case MC_PROTOCOL_REG_PFC_V_KD:
-      case MC_PROTOCOL_REG_PFC_STARTUP_DURATION:
-      case MC_PROTOCOL_REG_HFI_INIT_ANG_SAT_DIFF:
-      case MC_PROTOCOL_REG_HFI_PI_TRACK_KP:
-      //{{{
-      case MC_PROTOCOL_REG_HFI_PI_TRACK_KI:
-        {
-          /* 16bit variables */
-          int32_t wValue = buffer[1] + (buffer[2] << 8);
-          bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
-        }
-        break;
-      //}}}
-      case MC_PROTOCOL_REG_OBSERVER_C1:
-      case MC_PROTOCOL_REG_OBSERVER_C2:
-      case MC_PROTOCOL_REG_FF_1Q:
-      case MC_PROTOCOL_REG_FF_1D:
-      case MC_PROTOCOL_REG_FF_2:
-      case MC_PROTOCOL_REG_RAMP_FINAL_SPEED:
-      case MC_PROTOCOL_REG_SC_CURRENT:
-      case MC_PROTOCOL_REG_SC_SPDBANDWIDTH:
-      case MC_PROTOCOL_REG_SC_LDLQRATIO:
-      case MC_PROTOCOL_REG_SC_NOMINAL_SPEED:
-      case MC_PROTOCOL_REG_SC_CURRBANDWIDTH:
-      case MC_PROTOCOL_REG_SC_STARTUP_SPEED:
-      //{{{
-      case MC_PROTOCOL_REG_SC_STARTUP_ACC:
-        {
-          /* 32bit variables */
-          int32_t wValue = buffer[1] + (buffer[2] << 8) + (buffer[3] << 16) + (buffer[4] << 24);
-          bNoError = UI_SetReg(&pHandle->_Super, bRegID, wValue);
-        }
-        break;
-      //}}}
-      //{{{
-      default:
-        bErrorCode = ERROR_CODE_SET_READ_ONLY;
-        break;
-      //}}}
       }
-    }
-    break;
+      break;
     //}}}
     //{{{
     case MC_PROTOCOL_CODE_GET_REG: {
@@ -369,7 +370,7 @@ void MCP_ReceivedFrame (MCP_Handle_t *pHandle, uint8_t Code, uint8_t *buffer, ui
           break;
         }
       }
-    break;
+      break;
     //}}}
     //{{{
     case MC_PROTOCOL_CODE_EXECUTE_CMD: {
@@ -381,18 +382,17 @@ void MCP_ReceivedFrame (MCP_Handle_t *pHandle, uint8_t Code, uint8_t *buffer, ui
     //}}}
     //{{{
     case MC_PROTOCOL_CODE_GET_BOARD_INFO: {
-        /* GetBoardInfo */
-        unsigned char i;
-        uint8_t outBuff[32];
-        for (i = 0; i < 32; i++)
-          outBuff[i] = 0;
-        for (i = 0; (i<29) && (pHandle->s_fwVer[i]!=0); i++)
-          outBuff[3+i] = pHandle->s_fwVer[i];
-        outBuff[0] = pHandle->s_fwVer[i+5];
-        outBuff[1] = pHandle->s_fwVer[i+7];
-        outBuff[2] = pHandle->s_fwVer[i+9];
-        pHandle->fFcpSend (pHandle->pFCP, ACK_NOERROR, outBuff, 32 );
-        bNoError = true;
+      unsigned char i;
+      uint8_t outBuff[32];
+      for (i = 0; i < 32; i++)
+        outBuff[i] = 0;
+      for (i = 0; (i<29) && (pHandle->s_fwVer[i]!=0); i++)
+        outBuff[3+i] = pHandle->s_fwVer[i];
+      outBuff[0] = pHandle->s_fwVer[i+5];
+      outBuff[1] = pHandle->s_fwVer[i+7];
+      outBuff[2] = pHandle->s_fwVer[i+9];
+      pHandle->fFcpSend (pHandle->pFCP, ACK_NOERROR, outBuff, 32 );
+      bNoError = true;
       }
       break;
     //}}}

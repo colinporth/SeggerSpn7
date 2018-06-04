@@ -1,4 +1,4 @@
-// cSixSTep.cpp
+// cSixStep.cpp
 //{{{  ihm07m pins
 // CN7           1 PC10 ->Enable_CH1-L6230    Enable_CH2-L6230<- PC11 2
 //               3 PC12 ->Enable_CH3-L6230                       PD2  4
