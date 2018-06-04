@@ -506,9 +506,6 @@
       </folder>
       <folder Name="f3xx">
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/ics_f30x_pwm_curr_fdbk.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r1_f30x_pwm_curr_fdbk.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r3_1_f30x_pwm_curr_fdbk.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r3_2_f30x_pwm_curr_fdbk.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r3_4_f30x_pwm_curr_fdbk.c" />
       </folder>
       <folder Name="UILibrary">

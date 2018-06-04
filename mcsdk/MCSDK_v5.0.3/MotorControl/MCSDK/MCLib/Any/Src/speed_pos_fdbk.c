@@ -28,10 +28,9 @@
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor electrical angle (s16degrees)
   */
-int16_t SPD_GetElAngle(SpeednPosFdbk_Handle_t *pHandle)
-{
+int16_t SPD_GetElAngle (SpeednPosFdbk_Handle_t* pHandle) {
   return ( pHandle->hElAngle);
-}
+  }
 //}}}
 //{{{
 /**
@@ -44,10 +43,9 @@ int16_t SPD_GetElAngle(SpeednPosFdbk_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor mechanical angle (s16degrees)
   */
-int16_t SPD_GetMecAngle(SpeednPosFdbk_Handle_t *pHandle)
-{
+int16_t SPD_GetMecAngle (SpeednPosFdbk_Handle_t* pHandle) {
   return ( pHandle->hMecAngle);
-}
+  }
 //}}}
 //{{{
 /**
@@ -56,10 +54,9 @@ int16_t SPD_GetMecAngle(SpeednPosFdbk_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor average mechanical speed (01Hz)
   */
-int16_t SPD_GetAvrgMecSpeed01Hz(SpeednPosFdbk_Handle_t *pHandle)
-{
+int16_t SPD_GetAvrgMecSpeed01Hz (SpeednPosFdbk_Handle_t* pHandle) {
   return ( pHandle->hAvrMecSpeed01Hz);
-}
+  }
 //}}}
 //{{{
 /**
@@ -70,10 +67,9 @@ int16_t SPD_GetAvrgMecSpeed01Hz(SpeednPosFdbk_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor electrical speed (Dpp)
   */
-int16_t SPD_GetElSpeedDpp(SpeednPosFdbk_Handle_t *pHandle)
-{
-  return( pHandle->hElSpeedDpp);
-}
+int16_t SPD_GetElSpeedDpp (SpeednPosFdbk_Handle_t* pHandle) {
+  return pHandle->hElSpeedDpp;
+  }
 //}}}
 
 //{{{
@@ -87,16 +83,15 @@ int16_t SPD_GetElSpeedDpp(SpeednPosFdbk_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval bool sensor reliability state
   */
-bool SPD_Check(SpeednPosFdbk_Handle_t *pHandle)
-{
+bool SPD_Check (SpeednPosFdbk_Handle_t* pHandle) {
+
   bool SpeedSensorReliability = true;
   if (pHandle->bSpeedErrorNumber ==
       pHandle->bMaximumSpeedErrorsNumber)
-  {
     SpeedSensorReliability = false;
-  }
+
   return(SpeedSensorReliability);
-}
+  }
 //}}}
 
 #if defined (CCMRAM)
@@ -106,7 +101,6 @@ bool SPD_Check(SpeednPosFdbk_Handle_t *pHandle)
 __attribute__((section ("ccmram")))
 #endif
 #endif
-
 //{{{
 /**
   * @brief  This method must be called - at least - with the same periodicity
@@ -123,7 +117,7 @@ __attribute__((section ("ccmram")))
   *         mechanical speed (01Hz)
   * @retval none
   */
-bool SPD_IsMecSpeedReliable(SpeednPosFdbk_Handle_t *pHandle, int16_t *pMecSpeed01Hz)
+bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed01Hz)
 {
   bool SpeedSensorReliability = true;
   uint8_t bSpeedErrorNumber;
@@ -210,13 +204,13 @@ bool SPD_IsMecSpeedReliable(SpeednPosFdbk_Handle_t *pHandle, int16_t *pMecSpeed0
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t The average mechanical rotor speed expressed in "S16Speed".
   */
-int16_t SPD_GetS16Speed(SpeednPosFdbk_Handle_t *pHandle)
-{
+int16_t SPD_GetS16Speed (SpeednPosFdbk_Handle_t* pHandle) {
+
   int32_t wAux = (int32_t) pHandle->hAvrMecSpeed01Hz;
   wAux *= INT16_MAX;
   wAux /= (int16_t) pHandle->hMaxReliableMecSpeed01Hz;
   return (int16_t)wAux;
-}
+  }
 //}}}
 //{{{
 /**
@@ -226,21 +220,18 @@ int16_t SPD_GetS16Speed(SpeednPosFdbk_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval uint8_t The motor pole pairs number.
   */
-uint8_t SPD_GetElToMecRatio(SpeednPosFdbk_Handle_t *pHandle)
-{
+uint8_t SPD_GetElToMecRatio (SpeednPosFdbk_Handle_t* pHandle) {
   return (pHandle->bElToMecRatio);
-}
+  }
 //}}}
 //{{{
 /**
   * @brief  This method sets the coefficient used to transform electrical to
-  *         mechanical quantities and viceversa. It usually coincides with motor
-  *         pole pairs number.
+  *         mechanical quantities and viceversa. It usually coincides with motor pole pairs number.
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @param  bPP The motor pole pairs number to be set.
   */
-void SPD_SetElToMecRatio(SpeednPosFdbk_Handle_t *pHandle, uint8_t bPP)
-{
+void SPD_SetElToMecRatio (SpeednPosFdbk_Handle_t* pHandle, uint8_t bPP) {
   pHandle->bElToMecRatio = bPP;
-}
+  }
 //}}}

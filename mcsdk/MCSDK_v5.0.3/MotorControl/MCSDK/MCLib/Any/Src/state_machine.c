@@ -7,13 +7,12 @@
   * @param pHandle pointer on the component instance to initialize.
   * @retval none.
   */
-void STM_Init(STM_Handle_t *pHandle)
-{
+void STM_Init (STM_Handle_t* pHandle) {
 
   pHandle->bState = IDLE;
   pHandle->hFaultNow = MC_NO_FAULTS;
   pHandle->hFaultOccurred = MC_NO_FAULTS;
-}
+  }
 //}}}
 //{{{
 /**
@@ -32,172 +31,169 @@ void STM_Init(STM_Handle_t *pHandle)
   * @retval bool It returns true if the state has been really set equal to
   *         bState, false if the requested state can't be reached
   */
-bool STM_NextState(STM_Handle_t *pHandle, State_t bState)
-{
+bool STM_NextState (STM_Handle_t* pHandle, State_t bState) {
+
   bool bChangeState = false;
   State_t bCurrentState = pHandle->bState;
   State_t bNewState = bCurrentState;
 
-  switch(bCurrentState)
-  {
-  case ICLWAIT:
-    if (bState == IDLE)
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-  case IDLE:
-    if((bState == IDLE_START) || (bState == IDLE_ALIGNMENT)
-                              || (bState == ICLWAIT))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case IDLE_ALIGNMENT:
-    if((bState == ANY_STOP) || (bState == ALIGN_CHARGE_BOOT_CAP)
-                            || (bState == ALIGN_OFFSET_CALIB))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case ALIGN_CHARGE_BOOT_CAP:
-    if ((bState == ALIGN_OFFSET_CALIB) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
+  switch(bCurrentState) {
+    //{{{
+    case ICLWAIT:
+      if (bState == IDLE) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case IDLE:
+      if((bState == IDLE_START) || (bState == IDLE_ALIGNMENT)
+                                || (bState == ICLWAIT)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case IDLE_ALIGNMENT:
+      if((bState == ANY_STOP) || (bState == ALIGN_CHARGE_BOOT_CAP)
+                              || (bState == ALIGN_OFFSET_CALIB)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case ALIGN_CHARGE_BOOT_CAP:
+      if ((bState == ALIGN_OFFSET_CALIB) || (bState == ANY_STOP)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
     case ALIGN_OFFSET_CALIB:
-      if ((bState == ALIGN_CLEAR) || (bState == ANY_STOP))
-      {
+      if ((bState == ALIGN_CLEAR) || (bState == ANY_STOP)) {
         bNewState = bState;
         bChangeState = true;
       }
       break;
-
-  case ALIGN_CLEAR:
-    if ((bState == ALIGNMENT) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case ALIGNMENT:
-    if(bState == ANY_STOP)
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case IDLE_START:
-    if((bState == ANY_STOP) || (bState == CHARGE_BOOT_CAP) ||
-       (bState == START) ||
-       (bState == OFFSET_CALIB) || (bState == IDLE_ALIGNMENT))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case CHARGE_BOOT_CAP:
-    if ((bState == OFFSET_CALIB) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
+    //}}}
+    //{{{
+    case ALIGN_CLEAR:
+      if ((bState == ALIGNMENT) || (bState == ANY_STOP)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case ALIGNMENT:
+      if(bState == ANY_STOP) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case IDLE_START:
+      if((bState == ANY_STOP) || (bState == CHARGE_BOOT_CAP) ||
+         (bState == START) ||
+         (bState == OFFSET_CALIB) || (bState == IDLE_ALIGNMENT)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case CHARGE_BOOT_CAP:
+      if ((bState == OFFSET_CALIB) || (bState == ANY_STOP)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
     case OFFSET_CALIB:
-      if ((bState == CLEAR) || (bState == ANY_STOP))
-      {
+      if ((bState == CLEAR) || (bState == ANY_STOP)) {
         bNewState = bState;
         bChangeState = true;
       }
       break;
-
-  case CLEAR:
-    if ((bState == START) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
+    //}}}
+    //{{{
+    case CLEAR:
+      if ((bState == START) || (bState == ANY_STOP)) { 
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case START:
+      if((bState == START_RUN) || (bState == ANY_STOP)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case START_RUN:
+      if((bState == RUN) || (bState == ANY_STOP)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case RUN:
+      if(bState == ANY_STOP) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case ANY_STOP:
+      if(bState == STOP) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case STOP:
+      if(bState == STOP_IDLE) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    case STOP_IDLE:
+      if((bState == IDLE)||(bState == ICLWAIT)) {
+        bNewState = bState;
+        bChangeState = true;
+      }
+      break;
+    //}}}
+    //{{{
+    default:
+      break;
+    //}}}
     }
-    break;
-
-  case START:
-    if((bState == START_RUN) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case START_RUN:
-    if((bState == RUN) || (bState == ANY_STOP))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case RUN:
-    if(bState == ANY_STOP)
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case ANY_STOP:
-    if(bState == STOP)
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case STOP:
-    if(bState == STOP_IDLE)
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-
-  case STOP_IDLE:
-    if((bState == IDLE)||(bState == ICLWAIT))
-    {
-      bNewState = bState;
-      bChangeState = true;
-    }
-    break;
-  default:
-    break;
-  }
 
   if (bChangeState)
-  {
     pHandle->bState = bNewState;
-  }
-  else
-  {
-    if (!((bState == IDLE_START) || (bState == IDLE_ALIGNMENT)
-                   || (bState == ANY_STOP)))
-    {
+  else {
+    if (!((bState == IDLE_START) || (bState == IDLE_ALIGNMENT) || (bState == ANY_STOP)))
       /* If new state is not a user command START/STOP raise a software error */
       STM_FaultProcessing(pHandle, MC_SW_ERROR, 0u);
     }
-  }
 
   return(bChangeState);
-}
+  }
 //}}}
 //{{{
 /**
@@ -209,34 +205,29 @@ bool STM_NextState(STM_Handle_t *pHandle, State_t bState)
   * @param hResetErrors Bit field reporting faults to be cleared
   * @retval State_t New state machine state after fault processing
   */
-State_t STM_FaultProcessing(STM_Handle_t *pHandle, uint16_t hSetErrors, uint16_t
-                                                                  hResetErrors)
-{
-  State_t LocalState =  pHandle->bState;
+State_t STM_FaultProcessing (STM_Handle_t* pHandle, uint16_t hSetErrors, uint16_t hResetErrors) {
+
+  State_t LocalState = pHandle->bState;
 
   /* Set current errors */
   pHandle->hFaultNow = (pHandle->hFaultNow | hSetErrors) & (~hResetErrors);
   pHandle->hFaultOccurred |= hSetErrors;
 
-  if(LocalState == FAULT_NOW)
-  {
-    if (pHandle->hFaultNow == MC_NO_FAULTS)
-    {
+  if (LocalState == FAULT_NOW) {
+    if (pHandle->hFaultNow == MC_NO_FAULTS) {
       pHandle->bState = FAULT_OVER;
       LocalState = FAULT_OVER;
+      }
     }
-  }
-  else
-  {
-    if (pHandle->hFaultNow != MC_NO_FAULTS)
-    {
+  else {
+    if (pHandle->hFaultNow != MC_NO_FAULTS) {
       pHandle->bState = FAULT_NOW;
       LocalState = FAULT_NOW;
+      }
     }
-  }
 
   return (LocalState);
-}
+  }
 //}}}
 
 #if defined (CCMRAM)
@@ -252,10 +243,9 @@ __attribute__((section ("ccmram")))
   * @param  pHanlde pointer of type  STM_Handle_t
   * @retval State_t Current state machine state
   */
-State_t STM_GetState(STM_Handle_t *pHandle)
-{
+State_t STM_GetState (STM_Handle_t* pHandle) {
   return(pHandle->bState);
-}
+  }
 //}}}
 
 //{{{
@@ -269,19 +259,18 @@ State_t STM_GetState(STM_Handle_t *pHandle)
   * @retval bool true if the state machine has been moved to IDLE, false if the
   *        method call had no effects
   */
-bool STM_FaultAcknowledged(STM_Handle_t *pHandle)
-{
- bool bToBeReturned = false;
+bool STM_FaultAcknowledged (STM_Handle_t* pHandle) {
 
- if(pHandle->bState == FAULT_OVER)
- {
-  pHandle->bState = STOP_IDLE;
-  pHandle->hFaultOccurred = MC_NO_FAULTS;
-  bToBeReturned = true;
- }
+  bool bToBeReturned = false;
 
- return(bToBeReturned);
-}
+  if (pHandle->bState == FAULT_OVER) {
+    pHandle->bState = STOP_IDLE;
+    pHandle->hFaultOccurred = MC_NO_FAULTS;
+    bToBeReturned = true;
+    }
+
+  return(bToBeReturned);
+  }
 //}}}
 //{{{
 /**
@@ -295,13 +284,10 @@ bool STM_FaultAcknowledged(STM_Handle_t *pHandle)
   *         historically occurred since the state machine has been moved into
   *         FAULT_NOW state
   */
-uint32_t STM_GetFaultState(STM_Handle_t *pHandle)
-{
- uint32_t LocalFaultState;
+uint32_t STM_GetFaultState (STM_Handle_t* pHandle) {
 
- LocalFaultState = (uint32_t)(pHandle->hFaultOccurred);
- LocalFaultState |= (uint32_t)(pHandle->hFaultNow)<<16;
-
- return LocalFaultState;
-}
+  uint32_t LocalFaultState = (uint32_t)(pHandle->hFaultOccurred);
+  LocalFaultState |= (uint32_t)(pHandle->hFaultNow)<<16;
+  return LocalFaultState;
+ }
 //}}}

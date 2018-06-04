@@ -1,79 +1,11 @@
-/**
-  ******************************************************************************
-  * @file    r1_f30x_pwm_curr_fdbk.c
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file provides firmware functions that implement the following features
-  *          of the CCC component of the Motor Control SDK:
-  *           + initializes MCU peripheral for 1 shunt topology and F3 family
-  *           + performs PWM duty cycle computation and generation
-  *           + performs current sensing
-  *           +
-  *
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
-
-/* Includes ------------------------------------------------------------------*/
 #include "r1_f30x_pwm_curr_fdbk.h"
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @addtogroup pwm_curr_fdbk
-  * @{
-  */
-
 /**
- * @defgroup r1_f30x_pwm_curr_fdbk R1 F30x PWM & Current Feedback
- *
  * @brief STM32F3, 1-Shunt PWM & Current Feedback implementation
- *
  * This component is used in applications based on an STM32F3 MCU
  * and using a single shunt resistor current sensing topology.
- *
- * @todo: TODO: complete documentation.
- * @{
  */
 
-/* Constant values -----------------------------------------------------------*/
 #define TIMxCCER_MASK_CH123              (TIM_CCER_CC1E|TIM_CCER_CC2E|TIM_CCER_CC3E|\
                                           TIM_CCER_CC1NE|TIM_CCER_CC2NE|TIM_CCER_CC3NE)
 #define CC12_PRELOAD_ENABLE_MASK         (TIM_CCMR1_OC1PE|TIM_CCMR1_OC2PE)
@@ -113,11 +45,6 @@ static const uint8_t BOUNDR1_SAMP_CUR2[6] = {SAMP_IB,SAMP_IB,SAMP_IC,SAMP_IC,SAM
 static const uint8_t BOUNDR2_SAMP_CUR1[6] = {SAMP_IA,SAMP_IB,SAMP_IB,SAMP_IC,SAMP_IC,SAMP_IA};
 static const uint8_t BOUNDR2_SAMP_CUR2[6] = {SAMP_IC,SAMP_IA,SAMP_IA,SAMP_IB,SAMP_IB,SAMP_IC};
 
-/* Private typedef -----------------------------------------------------------*/
-
-
-
-/* Private function prototypes -----------------------------------------------*/
 static void R1F30X_HFCurrentsCalibration(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
 static void R1F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref);
 static void R1F30X_1ShuntMotorVarsInit(PWMC_Handle_t *pHdl);
@@ -128,6 +55,7 @@ static void R1F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl);
 static void R1F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl);
 static void R1F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl);
 
+//{{{
 /**
  * @brief  It initializes TIMx, ADC, GPIO, DMA1 and NVIC for current reading
  *         in ICS configuration using STM32F103x High Density
@@ -221,12 +149,12 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
       {
         R1F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_1, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
       }
-#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)	  
+#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)
       else if (LL_COMP_GetInputMinus(COMP_OCPx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
       {
         R1F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
       }
-#endif	  
+#endif
       else
       {}
     }
@@ -254,12 +182,12 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
       {
         R1F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_1, (uint16_t)(pHandle->pParams_str->hDAC_OVP_Threshold));
       }
-#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)	  
+#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)
       else if (LL_COMP_GetInputMinus(COMP_OVPx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
       {
         R1F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OVP_Threshold));
       }
-#endif	  
+#endif
       else
       {}
     }
@@ -279,18 +207,18 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
   }
 
   if(pHandle->pParams_str->TIMx == TIM1)
-  {   
+  {
     /* TIM1 Counter Clock stopped when the core is halted */
     LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM1_STOP);
   }
-#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)	  
+#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)
   else
   {
     /* TIM8 Counter Clock stopped when the core is halted */
     LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM8_STOP);
-  }  
+  }
 #endif
-  
+
   LL_ADC_EnableInternalRegulator(ADCx);
 
   LL_ADC_StartCalibration(ADCx,LL_ADC_SINGLE_ENDED);
@@ -323,12 +251,12 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
 
   /* reset regular conversion sequencer length set by cubeMX */
   LL_ADC_REG_SetSequencerLength(pHandle->pParams_str->regconvADCx, LL_ADC_REG_SEQ_SCAN_DISABLE);
-    
+
   /* Flushing JSQR queue of context by setting JADSTP = 1 (JQM)=1 */
   LL_ADC_INJ_StopConversion(ADCx);
 
   if(pHandle->pParams_str->TIMx == TIM1)
-  {   
+  {
     LL_ADC_INJ_ConfigQueueContext(ADCx,
                                   LL_ADC_INJ_TRIG_EXT_TIM1_TRGO2,
                                   LL_ADC_INJ_TRIG_EXT_RISING,
@@ -338,7 +266,7 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
                                   pHandle->pParams_str->bIChannel<<ADC_CFGR_AWD1CH_Pos,
                                   pHandle->pParams_str->bIChannel<<ADC_CFGR_AWD1CH_Pos);
   }
-#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8) 
+#if !defined(STM32F302x8) && !defined(STM32F318xx) && !defined(STM32F303x8) && !defined(STM32F328xx) && !defined(STM32F334x8) && !defined(STM32F301x8)
   else
   {
     LL_ADC_INJ_ConfigQueueContext(ADCx,
@@ -349,7 +277,7 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
                                   pHandle->pParams_str->bIChannel<<ADC_CFGR_AWD1CH_Pos,
                                   pHandle->pParams_str->bIChannel<<ADC_CFGR_AWD1CH_Pos,
                                   pHandle->pParams_str->bIChannel<<ADC_CFGR_AWD1CH_Pos);
-  }  
+  }
 #endif
 
 
@@ -367,7 +295,8 @@ void R1F30X_Init(PWMC_R1_F3_Handle_t *pHandle)
   pHandle->_Super.DTCompCnt = pHandle->_Super.hDTCompCnt;
 
 }
-
+//}}}
+//{{{
 /**
   * @brief  It initializes TIMx peripheral for PWM generation
   * @param TIMx: Timer to be initialized
@@ -396,13 +325,13 @@ static void R1F30X_TIMxInit(TIM_TypeDef* TIMx, PWMC_R1_F3_Handle_t *pHandle)
 
   /* Always enable BKIN for safety feature */
   LL_TIM_ClearFlag_BRK(TIMx);
-  
+
   if ((pHandle->pParams_str->bBKIN2Mode) != NONE)
   {
     LL_TIM_ClearFlag_BRK2(TIMx);
   }
   LL_TIM_EnableIT_BRK(TIMx);
-  
+
   /* Prepare timer for synchronization */
   LL_TIM_GenerateEvent_UPDATE(TIMx);
   if (pHandle->pParams_str->bFreqRatio == 2u)
@@ -427,7 +356,7 @@ static void R1F30X_TIMxInit(TIM_TypeDef* TIMx, PWMC_R1_F3_Handle_t *pHandle)
       if(pHandle->pParams_str->bRepetitionCounter == 1u)
       {
         LL_TIM_SetCounter(TIMx, (uint32_t)(pHandle->Half_PWMPeriod)-1u);
-      }  
+      }
       else if (pHandle->pParams_str->bRepetitionCounter == 3u)
       {
         /* Set TIMx repetition counter to 1 */
@@ -435,7 +364,7 @@ static void R1F30X_TIMxInit(TIM_TypeDef* TIMx, PWMC_R1_F3_Handle_t *pHandle)
         LL_TIM_GenerateEvent_UPDATE(TIMx);
         /* Repetition counter will be set to 3 at next Update */
         LL_TIM_SetRepetitionCounter(TIMx, 3);
-      } 
+      }
     }
   }
 
@@ -444,14 +373,15 @@ static void R1F30X_TIMxInit(TIM_TypeDef* TIMx, PWMC_R1_F3_Handle_t *pHandle)
   pHandle->wPreloadDisableCC3 = TIMx->CCMR2 & CC3_PRELOAD_DISABLE_MASK;
 
 }
-
+//}}}
+//{{{
 /**
   * @brief  First initialization of the handler
   * @param pHdl: handler of the current instance of the PWM component
   * @retval none
   */
 static void R1F30X_1ShuntMotorVarsInit(PWMC_Handle_t *pHdl)
-{  
+{
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
 
   /* Init motor vars */
@@ -465,11 +395,12 @@ static void R1F30X_1ShuntMotorVarsInit(PWMC_Handle_t *pHdl)
   pHandle->hDmaBuff[0] =  pHandle->Half_PWMPeriod + 1u;
   pHandle->hDmaBuff[1] =  pHandle->Half_PWMPeriod >> 1; /*dummy*/
 
-  /* Default value of sampling points */ 
+  /* Default value of sampling points */
   pHandle->hCntSmp1 = (pHandle->Half_PWMPeriod >> 1) + (pHandle->pParams_str->hTafter);
   pHandle->hCntSmp2 = pHandle->Half_PWMPeriod - 1u;
 }
-
+//}}}
+//{{{
 /**
   * @brief  Re-initialization of of the handler after each motor start
   * @param pHdl: handler of the current instance of the PWM component
@@ -495,7 +426,8 @@ static void R1F30X_1ShuntMotorVarsRestart(PWMC_Handle_t *pHdl)
 
   pHandle->BrakeActionLock = false;
 }
-
+//}}}
+//{{{
 /**
   * @brief It stores into pHandle the offset voltage read onchannels when no
   * current is flowing into the motor
@@ -505,7 +437,7 @@ static void R1F30X_1ShuntMotorVarsRestart(PWMC_Handle_t *pHdl)
 void R1F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 {
   uint16_t hCalibrationPeriodCounter;
-  uint16_t hMaxPeriodsNumber;  
+  uint16_t hMaxPeriodsNumber;
 
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -519,7 +451,7 @@ void R1F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
   TIMx->CCER &= (~TIMxCCER_MASK_CH123);
 
   /* Offset calibration  */
-  /* Change function to be executed in ADCx_ISR */ 
+  /* Change function to be executed in ADCx_ISR */
   pHandle->_Super.pFctGetPhaseCurrents = &R1F30X_HFCurrentsCalibration;
 
   R1F30X_SwitchOnPWM(&pHandle->_Super);
@@ -550,7 +482,7 @@ void R1F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 
   pHandle->wPhaseOffset >>=4;
 
-  /* Change back function to be executed in ADCx_ISR */ 
+  /* Change back function to be executed in ADCx_ISR */
   pHandle->_Super.pFctGetPhaseCurrents = &R1F30X_GetPhaseCurrents;
 
   /* It re-enable drive of TIMx CHy and CHyN by TIMx CHyRef*/
@@ -561,6 +493,7 @@ void R1F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 
   R1F30X_1ShuntMotorVarsRestart(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -569,6 +502,7 @@ void R1F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  It computes and return latest converted motor phase currents motor
   * @param pHdl: handler of the current instance of the PWM component
@@ -589,7 +523,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
   ADC_TypeDef* ADCx = pHandle->pParams_str->ADCx;
 
   TIMx->CCMR1 |= CC12_PRELOAD_ENABLE_MASK;
-  TIMx->CCMR2 |= CC3_PRELOAD_ENABLE_MASK;  
+  TIMx->CCMR2 |= CC3_PRELOAD_ENABLE_MASK;
 
   /* Reset the update flag to indicate the start of FOC algorithm*/
   LL_TIM_ClearFlag_UPDATE(TIMx);
@@ -613,7 +547,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
   else
   {
     wAux = -INT16_MAX;
-  }   
+  }
 
   switch (pHandle->sampCur1)
   {
@@ -675,7 +609,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
   else
   {
     wAux = -INT16_MAX;
-  }   
+  }
 
   switch (pHandle->sampCur2)
   {
@@ -729,7 +663,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
     else
     {
       wAux = -INT16_MAX;
-    }  
+    }
 
     hCurrA = (int16_t)wAux;
   }
@@ -751,7 +685,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
     else
     {
       wAux = -INT16_MAX;
-    }  
+    }
 
     hCurrB = (int16_t)wAux;
   }
@@ -773,7 +707,7 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
     else
     {
       wAux = -INT16_MAX;
-    }  
+    }
 
     hCurrC = (int16_t)wAux;
   }
@@ -789,7 +723,9 @@ void R1F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Curren
   pHandle->_Super.hIb = hCurrB;
   pHandle->_Super.hIc = -hCurrA - hCurrB;
 }
+//}}}
 
+//{{{
 /**
   * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
   *         calibration. It sum up injected conversion data into wPhaseCOffset
@@ -820,13 +756,14 @@ static void R1F30X_HFCurrentsCalibration(PWMC_Handle_t *pHdl,Curr_Components* pS
     LL_TIM_OC_SetCompareCH5(TIMx,0);
     LL_TIM_OC_SetCompareCH6(TIMx,0);
     /* Preload enable */
-    TIMx->CCMR3 |= TIMxCCR56_PRELOAD_ENABLE_MASK; 
+    TIMx->CCMR3 |= TIMxCCR56_PRELOAD_ENABLE_MASK;
 
     LL_TIM_OC_SetCompareCH5(TIMx,((uint32_t)(pHandle->Half_PWMPeriod) >> 1) + (uint32_t)(pHandle->pParams_str->hTafter));
     LL_TIM_OC_SetCompareCH6(TIMx,((uint32_t)(pHandle->Half_PWMPeriod) - 1u));
   }
 }
-
+//}}}
+//{{{
 /**
   * @brief  It turns on low sides switches. This function is intended to be
   *         used for charging boot capacitors of driving section. It has to be
@@ -835,7 +772,7 @@ static void R1F30X_HFCurrentsCalibration(PWMC_Handle_t *pHdl,Curr_Components* pS
   * @retval none
   */
 void R1F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
-{  
+{
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
 
@@ -861,10 +798,10 @@ void R1F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
   }
-  return; 
+  return;
 }
-
-
+//}}}
+//{{{
 /**
   * @brief  It enables PWM generation on the proper Timer peripheral acting on MOE
   *         bit
@@ -903,7 +840,7 @@ void R1F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
   /* Set all duty to 50% */
   /* Set ch5 ch6 for triggering */
   /* Clear Update Flag */
-  /* TIM ch4 DMA request enable */  
+  /* TIM ch4 DMA request enable */
 
   pHandle->hDmaBuff[1] = pHandle->Half_PWMPeriod >> 1;
   LL_TIM_OC_SetCompareCH1(TIMx,(uint32_t)(pHandle->Half_PWMPeriod >> 1));
@@ -912,7 +849,7 @@ void R1F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
 
   while (LL_TIM_IsActiveFlag_UPDATE(TIMx)==RESET)
   {}
-  /* Main PWM Output Enable */  
+  /* Main PWM Output Enable */
   LL_TIM_EnableAllOutputs(TIMx);
 
   LL_TIM_OC_SetCompareCH5(TIMx,(((uint32_t)(pHandle->Half_PWMPeriod >> 1)) + (uint32_t)pHandle->pParams_str->hTafter));
@@ -937,10 +874,11 @@ void R1F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
     }
   }
-  return; 
+  return;
 }
 
-
+//}}}
+//{{{
 /**
   * @brief  It disables PWM generation on the proper Timer peripheral acting on
   *         MOE bit
@@ -970,7 +908,7 @@ void R1F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
     LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
     LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
     LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-  }  
+  }
 
   /* Flushing JSQR queue of context by setting JADSTP = 1 (JQM)=1 */
   LL_ADC_INJ_StopConversion(ADCx);
@@ -1010,8 +948,9 @@ void R1F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
   /* Disable DMA channels*/
   pHandle->PreloadDMAy_Chx->CCR &= (uint16_t)(~DMA_CCR_EN);
 
-  return; 
+  return;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1020,7 +959,7 @@ void R1F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
-
+//{{{
 /**
   * @brief  It contains the TIMx Update event interrupt
   * @param pHdl: handler of the current instance of the PWM component
@@ -1031,6 +970,7 @@ void *R1F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1039,6 +979,7 @@ void *R1F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  It contains the TIMx Break2 event interrupt
   * @param pHdl: handler of the current instance of the PWM component
@@ -1061,6 +1002,7 @@ void *R1F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
 
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1069,6 +1011,7 @@ void *R1F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
   * @brief  It contains the TIMx Break1 event interrupt
   * @param pHdl: handler of the current instance of the PWM component
@@ -1084,7 +1027,9 @@ void *R1F30X_BRK_IRQHandler(PWMC_Handle_t *pHdl)
 
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
+//{{{
 /**
   * @brief  Execute a regular conversion using ADCx.
   *         The function is not re-entrant (can't executed twice at the same time)
@@ -1101,17 +1046,18 @@ uint16_t R1F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
                                LL_ADC_REG_RANK_1,
                                __LL_ADC_DECIMAL_NB_TO_CHANNEL(bChannel));
 
-  LL_ADC_REG_ReadConversionData12(ADCx); 
-  LL_ADC_REG_StartConversion(ADCx);      
+  LL_ADC_REG_ReadConversionData12(ADCx);
+  LL_ADC_REG_StartConversion(ADCx);
 
   /* Wait until end of regular conversion */
-  while(LL_ADC_IsActiveFlag_EOC(ADCx) == 0u)  
+  while(LL_ADC_IsActiveFlag_EOC(ADCx) == 0u)
   {}
 
-  pHandle->hRegConv = LL_ADC_REG_ReadConversionData12(ADCx); 
+  pHandle->hRegConv = LL_ADC_REG_ReadConversionData12(ADCx);
   return (pHandle->hRegConv);
 }
-
+//}}}
+//{{{
 /**
   * @brief  It sets the specified sampling time for the specified ADC channel
   *         on ADC1. It must be called once for each channel utilized by user
@@ -1120,7 +1066,7 @@ uint16_t R1F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
   * @retval none
   */
 void R1F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
-{ 
+{
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
   uint32_t tmpreg2 = 0u;
   uint8_t ADC_Channel = ADConv_struct.Channel;
@@ -1159,6 +1105,8 @@ void R1F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
     pHandle->pParams_str->regconvADCx->SMPR1 |= wAux << wAux2;
   }
 }
+//}}}
+//{{{
 /**
   * @brief  It is used to check if an overcurrent occurred since last call.
   * @param  pHdl: handler of the current instance of the PWM component
@@ -1183,9 +1131,11 @@ uint16_t R1F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
     pHandle->OverCurrentFlag = false;
   }
 
-  return retVal;  
+  return retVal;
 }
+//}}}
 
+//{{{
 /**
   * @brief  It is used to configure the analog output used for protection
   *         thresholds.
@@ -1206,6 +1156,7 @@ static void R1F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref
   LL_DAC_Enable(DAC1, DAC_Channel);
 
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1214,7 +1165,7 @@ static void R1F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref
 __attribute__((section ("ccmram")))
 #endif
 #endif
-
+//{{{
 /**
   * @brief  Implementation of the single shunt algorithm to setup the
   *         TIM1 register and DMA buffers values for the next PWM period.
@@ -1239,7 +1190,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
   bSector = (uint8_t)(pHandle->_Super.hSector);
 
   if ((pHandle->hFlags & DSTEN) != 0u)
-  { 
+  {
     switch (bSector)
     {
       case SECTOR_1:
@@ -1291,8 +1242,8 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
       {
         bStatorFluxPos = BOUNDARY_2;
       }
-    } 
-    else 
+    }
+    else
     {
       if ((uint16_t)hDeltaDuty_1>pHandle->pParams_str->hTMin)
       {
@@ -1438,7 +1389,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
         pHandle->bInverted_pwm_new = INVERT_A;
         pHandle->_Super.hCntPhA -=pHandle->pParams_str->hCHTMin;
         pHandle->hFlags |= STBD3;
-      } 
+      }
       else
       {
         pHandle->bInverted_pwm_new = INVERT_B;
@@ -1460,7 +1411,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
     }
 
     if (bStatorFluxPos == BOUNDARY_1) /* Two small, one big */
-    {      
+    {
       /* First point */
       pHandle->hCntSmp1 = hDutyV_1 - pHandle->pParams_str->hTbefore;
 
@@ -1477,7 +1428,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
       pHandle->hCntSmp2 = pHandle->Half_PWMPeriod - pHandle->pParams_str->hHTMin + pHandle->pParams_str->hTSample;
     }
 
-    if (bStatorFluxPos == BOUNDARY_3)  
+    if (bStatorFluxPos == BOUNDARY_3)
     {
       /* First point */
       pHandle->hCntSmp1 = hDutyV_0-pHandle->pParams_str->hTbefore; /* Dummy trigger */
@@ -1491,12 +1442,12 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
     bStatorFluxPos = REGULAR;
   }
 
-  /* Update Timer Ch4 for active vector*/  
+  /* Update Timer Ch4 for active vector*/
   /* Update Timer Ch 5,6 for ADC triggering and books the queue*/
   TIMx->CCMR3 &= TIMxCCR56_PRELOAD_DISABLE_MASK;
   TIMx->CCR5 = 0x0u;
   TIMx->CCR6 = 0xFFFFu;
-  TIMx->CCMR3 |= TIMxCCR56_PRELOAD_ENABLE_MASK; 
+  TIMx->CCMR3 |= TIMxCCR56_PRELOAD_ENABLE_MASK;
 
   TIMx->CCR5 = pHandle->hCntSmp1;
   TIMx->CCR6 = pHandle->hCntSmp2;
@@ -1556,7 +1507,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
 
       default:
         break;
-    } 
+    }
 
     /*TIM_SelectOutputTrigger2(TIMx, TIM_TRGO2Source_OC5RefRising_OC6RefFalling); */
     TIMx->CR2 |= ((uint32_t)0x100000u);
@@ -1591,7 +1542,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
   {
     hAux = MC_FOC_DURATION;
     pHandle->_Super.SWerror = 0u;
-  }  
+  }
 
   /* Set the current sampled */
   if (bStatorFluxPos == REGULAR) /* Regual zone */
@@ -1612,7 +1563,7 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
     pHandle->sampCur2 = BOUNDR2_SAMP_CUR2[bSector];
   }
 
-  if (bStatorFluxPos == BOUNDARY_3)  
+  if (bStatorFluxPos == BOUNDARY_3)
   {
     if (pHandle->bInverted_pwm_new == INVERT_A)
     {
@@ -1630,7 +1581,9 @@ uint16_t R1F30X_CalcDutyCycles(PWMC_Handle_t *pHdl)
 
   return (hAux);
 }
+//}}}
 
+//{{{
 /**
   * @brief  It is used to set the PWM mode for R/L detection.
   * @param  pHdl: handler of the current instance of the PWM component
@@ -1677,7 +1630,8 @@ void R1F30X_RLDetectionModeEnable(PWMC_Handle_t *pHdl)
 
   pHandle->_Super.RLDetectionMode = true;
 }
-
+//}}}
+//{{{
 /**
   * @brief  It is used to disable the PWM mode for R/L detection.
   * @param  pHdl: handler of the current instance of the PWM component
@@ -1749,6 +1703,7 @@ void R1F30X_RLDetectionModeDisable(PWMC_Handle_t *pHdl)
     pHandle->_Super.RLDetectionMode = false;
   }
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1757,7 +1712,7 @@ void R1F30X_RLDetectionModeDisable(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
-
+//{{{
 /**
   * @brief  It is used to set the PWM dutycycle for R/L detection
   * @param  pHdl: handler of the current instance of the PWM component
@@ -1798,6 +1753,7 @@ uint16_t R1F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
   }
   return hAux;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1806,7 +1762,7 @@ uint16_t R1F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
 __attribute__((section ("ccmram")))
 #endif
 #endif
-
+//{{{
 /**
   * @brief  It computes and return latest converted motor phase currents motor
   *         during RL detection phase
@@ -1851,7 +1807,9 @@ static void R1F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStat
   pStator_Currents->qI_Component1 = -hCurrA;
   pStator_Currents->qI_Component2 = hCurrB;
 }
+//}}}
 
+//{{{
 /**
   * @brief  It turns on low sides switches. This function is intended to be
   *         used for charging boot capacitors of driving section. It has to be
@@ -1861,7 +1819,7 @@ static void R1F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStat
   * @retval none
   */
 static void R1F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
-{  
+{
   PWMC_R1_F3_Handle_t *pHandle = (PWMC_R1_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
 
@@ -1886,7 +1844,8 @@ static void R1F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
   }
   return;
 }
-
+//}}}
+//{{{
 /**
   * @brief  It enables PWM generation on the proper Timer peripheral
   *         This function is specific for RL detection phase.
@@ -1930,8 +1889,8 @@ static void R1F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
   }
   return;
 }
-
-
+//}}}
+//{{{
 /**
   * @brief  It disables PWM generation on the proper Timer peripheral acting on
   *         MOE bit
@@ -1981,17 +1940,4 @@ static void R1F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
 
   return;
 }
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

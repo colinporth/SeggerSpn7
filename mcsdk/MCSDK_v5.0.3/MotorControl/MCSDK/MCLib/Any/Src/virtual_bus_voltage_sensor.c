@@ -6,7 +6,7 @@
   * @param  pHandle related Handle of VirtualBusVoltageSensor_Handle_t
   * @retval none
   */
-void VVBS_Init(VirtualBusVoltageSensor_Handle_t *pHandle)
+void VVBS_Init (VirtualBusVoltageSensor_Handle_t* pHandle)
 {
   pHandle->_Super.FaultState = MC_NO_ERROR;
   pHandle->_Super.LatestConv = pHandle->ExpectedVbus_d;
@@ -19,18 +19,19 @@ void VVBS_Init(VirtualBusVoltageSensor_Handle_t *pHandle)
   * @param  pHandle related Handle of VirtualBusVoltageSensor_Handle_t
   * @retval none
   */
-void VVBS_Clear(VirtualBusVoltageSensor_Handle_t *pHandle)
+void VVBS_Clear (VirtualBusVoltageSensor_Handle_t* pHandle)
 {
   return;
 }
 //}}}
+
 //{{{
 /**
   * @brief  It returns MC_NO_ERROR
   * @param  pHandle related Handle of VirtualBusVoltageSensor_Handle_t
 * @retval uint16_t Fault code error: MC_NO_ERROR
   */
-uint16_t VVBS_NoErrors(VirtualBusVoltageSensor_Handle_t *pHandle)
+uint16_t VVBS_NoErrors (VirtualBusVoltageSensor_Handle_t* pHandle)
 {
   return(MC_NO_ERROR);
 }

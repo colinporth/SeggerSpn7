@@ -16,7 +16,7 @@
   * @param  pFOCVars pointer to FOC vars to be used by MCI.
   * @retval none.
   */
-void MCI_Init( MCI_Handle_t * pHandle, STM_Handle_t *pSTM, SpeednTorqCtrl_Handle_t *pSTC, pFOCVars_t pFOCVars )
+void MCI_Init (MCI_Handle_t* pHandle, STM_Handle_t* pSTM, SpeednTorqCtrl_Handle_t* pSTC, pFOCVars_t pFOCVars)
 {
   pHandle->pSTM = pSTM;
   pHandle->pSTC = pSTC;
@@ -45,7 +45,7 @@ void MCI_Init( MCI_Handle_t * pHandle, STM_Handle_t *pSTM, SpeednTorqCtrl_Handle
   *         value.
   * @retval none.
   */
-void MCI_ExecSpeedRamp( MCI_Handle_t * pHandle,  int16_t hFinalSpeed, uint16_t hDurationms )
+void MCI_ExecSpeedRamp (MCI_Handle_t* pHandle,  int16_t hFinalSpeed, uint16_t hDurationms)
 {
   pHandle->lastCommand = MCI_EXECSPEEDRAMP;
   pHandle->hFinalSpeed = hFinalSpeed;
@@ -72,7 +72,7 @@ void MCI_ExecSpeedRamp( MCI_Handle_t * pHandle,  int16_t hFinalSpeed, uint16_t h
   *         value.
   * @retval none.
   */
-void MCI_ExecTorqueRamp( MCI_Handle_t * pHandle,  int16_t hFinalTorque, uint16_t hDurationms )
+void MCI_ExecTorqueRamp (MCI_Handle_t* pHandle,  int16_t hFinalTorque, uint16_t hDurationms)
 {
   pHandle->lastCommand = MCI_EXECTORQUERAMP;
   pHandle->hFinalTorque = hFinalTorque;
@@ -94,7 +94,7 @@ void MCI_ExecTorqueRamp( MCI_Handle_t * pHandle,  int16_t hFinalTorque, uint16_t
   *         format.
   * @retval none.
   */
-void MCI_SetCurrentReferences( MCI_Handle_t * pHandle, Curr_Components Iqdref )
+void MCI_SetCurrentReferences (MCI_Handle_t* pHandle, Curr_Components Iqdref)
 {
   pHandle->lastCommand = MCI_SETCURRENTREFERENCES;
   pHandle->Iqdref.qI_Component1 = Iqdref.qI_Component1;
@@ -126,7 +126,7 @@ void MCI_SetCurrentReferences( MCI_Handle_t * pHandle, Curr_Components Iqdref )
   * @retval bool It returns true if the command is successfully executed
   *         otherwise it return false.
   */
-bool MCI_StartMotor( MCI_Handle_t * pHandle )
+bool MCI_StartMotor (MCI_Handle_t* pHandle)
 {
   bool RetVal = STM_NextState( pHandle->pSTM, IDLE_START );
 
@@ -154,7 +154,7 @@ bool MCI_StartMotor( MCI_Handle_t * pHandle )
   * @retval bool It returns true if the command is successfully executed
   *         otherwise it return false.
   */
-bool MCI_StopMotor( MCI_Handle_t * pHandle )
+bool MCI_StopMotor (MCI_Handle_t* pHandle)
 {
   return STM_NextState( pHandle->pSTM, ANY_STOP );
 }
@@ -170,7 +170,7 @@ bool MCI_StopMotor( MCI_Handle_t * pHandle )
   * @retval bool It returns true if the command is successfully executed
   *         otherwise it return false.
   */
-bool MCI_FaultAcknowledged( MCI_Handle_t * pHandle )
+bool MCI_FaultAcknowledged (MCI_Handle_t* pHandle)
 {
   return STM_FaultAcknowledged( pHandle->pSTM );
 }
@@ -191,7 +191,7 @@ bool MCI_FaultAcknowledged( MCI_Handle_t * pHandle )
   * @retval bool It returns true if the command is successfully executed
   *         otherwise it return false.
   */
-bool MCI_EncoderAlign( MCI_Handle_t * pHandle )
+bool MCI_EncoderAlign (MCI_Handle_t* pHandle )
 {
   return STM_NextState( pHandle->pSTM,IDLE_ALIGNMENT );
 }
@@ -205,7 +205,7 @@ bool MCI_EncoderAlign( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval none.
   */
-void MCI_ExecBufferedCommands( MCI_Handle_t * pHandle )
+void MCI_ExecBufferedCommands (MCI_Handle_t* pHandle)
 {
   if ( pHandle != MC_NULL )
   {
@@ -267,7 +267,7 @@ void MCI_ExecBufferedCommands( MCI_Handle_t * pHandle )
   *         been executed unsuccessfully. In this case calling this function
   *         reset the command state to BC_BUFFER_EMPTY.
   */
-MCI_CommandState_t  MCI_IsCommandAcknowledged( MCI_Handle_t * pHandle )
+MCI_CommandState_t  MCI_IsCommandAcknowledged (MCI_Handle_t* pHandle)
 {
   MCI_CommandState_t retVal = pHandle->CommandState;
 
@@ -286,7 +286,7 @@ MCI_CommandState_t  MCI_IsCommandAcknowledged( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval State_t It returns the current state of the related pSTM object.
   */
-State_t  MCI_GetSTMState( MCI_Handle_t * pHandle )
+State_t  MCI_GetSTMState (MCI_Handle_t* pHandle)
 {
   return STM_GetState( pHandle->pSTM );
 }
@@ -304,7 +304,7 @@ State_t  MCI_GetSTMState( MCI_Handle_t * pHandle )
   *         FAULT_NOW state.
   * \n\link Fault_generation_error_codes Returned error codes are listed here \endlink
   */
-uint16_t MCI_GetOccurredFaults( MCI_Handle_t * pHandle )
+uint16_t MCI_GetOccurredFaults (MCI_Handle_t* pHandle)
 {
   return (uint16_t)(STM_GetFaultState( pHandle->pSTM ));
 }
@@ -319,7 +319,7 @@ uint16_t MCI_GetOccurredFaults( MCI_Handle_t * pHandle )
   *         present faults.
   * \n\link Fault_generation_error_codes Returned error codes are listed here \endlink
   */
-uint16_t MCI_GetCurrentFaults( MCI_Handle_t * pHandle )
+uint16_t MCI_GetCurrentFaults (MCI_Handle_t* pHandle)
 {
   return (uint16_t)(STM_GetFaultState( pHandle->pSTM ) >> 16);
 }
@@ -331,7 +331,7 @@ uint16_t MCI_GetCurrentFaults( MCI_Handle_t * pHandle )
   * @retval STC_Modality_t It returns the modality of STC. It can be one of
   *         these two values: STC_TORQUE_MODE or STC_SPEED_MODE.
   */
-STC_Modality_t MCI_GetControlMode( MCI_Handle_t * pHandle )
+STC_Modality_t MCI_GetControlMode (MCI_Handle_t* pHandle)
 {
   return pHandle->LastModalitySetByUser;
 }
@@ -344,7 +344,7 @@ STC_Modality_t MCI_GetControlMode( MCI_Handle_t * pHandle )
   * @retval int16_t It returns 1 or -1 according the sign of hFinalSpeed,
   *         hFinalTorque or Iqdref.qI_Component1 of the last command.
   */
-int16_t MCI_GetImposedMotorDirection( MCI_Handle_t * pHandle )
+int16_t MCI_GetImposedMotorDirection (MCI_Handle_t* pHandle)
 {
   int16_t retVal = 1;
 
@@ -382,7 +382,7 @@ int16_t MCI_GetImposedMotorDirection( MCI_Handle_t * pHandle )
   * @retval int16_t last ramp final speed sent by the user expressed in tehts
   *         of HZ.
   */
-int16_t MCI_GetLastRampFinalSpeed( MCI_Handle_t * pHandle )
+int16_t MCI_GetLastRampFinalSpeed (MCI_Handle_t* pHandle)
 {
   int16_t hRetVal = 0;
 
@@ -401,7 +401,7 @@ int16_t MCI_GetLastRampFinalSpeed( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval bool It returns true if the ramp is completed, false otherwise.
   */
-bool MCI_RampCompleted( MCI_Handle_t * pHandle )
+bool MCI_RampCompleted (MCI_Handle_t* pHandle)
 {
   bool retVal = false;
 
@@ -419,7 +419,7 @@ bool MCI_RampCompleted( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval bool It returns true if the command is executed, false otherwise.
   */
-bool MCI_StopSpeedRamp( MCI_Handle_t * pHandle )
+bool MCI_StopSpeedRamp (MCI_Handle_t* pHandle)
 {
   return STC_StopSpeedRamp( pHandle->pSTC );
 }
@@ -434,7 +434,7 @@ bool MCI_StopSpeedRamp( MCI_Handle_t * pHandle )
   *         frame transformation and (in speed control mode) for speed
   *         regulation is reliable, false otherwise
   */
-bool MCI_GetSpdSensorReliability( MCI_Handle_t * pHandle )
+bool MCI_GetSpdSensorReliability( MCI_Handle_t* pHandle)
 {
   SpeednPosFdbk_Handle_t * SpeedSensor = STC_GetSpeedSensor( pHandle->pSTC );
 
@@ -449,7 +449,7 @@ bool MCI_GetSpdSensorReliability( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval int16_t rotor average mechanical speed (01Hz)
   */
-int16_t MCI_GetAvrgMecSpeed01Hz( MCI_Handle_t * pHandle )
+int16_t MCI_GetAvrgMecSpeed01Hz (MCI_Handle_t* pHandle)
 {
   SpeednPosFdbk_Handle_t * SpeedSensor = STC_GetSpeedSensor( pHandle->pSTC );
 
@@ -464,7 +464,7 @@ int16_t MCI_GetAvrgMecSpeed01Hz( MCI_Handle_t * pHandle )
   * @retval int16_t current mechanical rotor speed reference expressed in tenths
   *         of HZ.
   */
-int16_t MCI_GetMecSpeedRef01Hz( MCI_Handle_t * pHandle )
+int16_t MCI_GetMecSpeedRef01Hz (MCI_Handle_t* pHandle)
 {
   return ( STC_GetMecSpeedRef01Hz( pHandle->pSTC ) );
 }
@@ -476,7 +476,7 @@ int16_t MCI_GetMecSpeedRef01Hz( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Iab
   */
-Curr_Components MCI_GetIab( MCI_Handle_t * pHandle )
+Curr_Components MCI_GetIab (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Iab );
 }
@@ -487,7 +487,7 @@ Curr_Components MCI_GetIab( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Ialphabeta
   */
-Curr_Components MCI_GetIalphabeta( MCI_Handle_t * pHandle )
+Curr_Components MCI_GetIalphabeta (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Ialphabeta );
 }
@@ -498,7 +498,7 @@ Curr_Components MCI_GetIalphabeta( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Iqd
   */
-Curr_Components MCI_GetIqd( MCI_Handle_t * pHandle )
+Curr_Components MCI_GetIqd (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Iqd );
 }
@@ -510,7 +510,7 @@ Curr_Components MCI_GetIqd( MCI_Handle_t * pHandle )
   * @retval Curr_Components Stator current IqdHF if HFI is selected as main
   *         sensor. Otherwise it returns { 0, 0}.
   */
-Curr_Components MCI_GetIqdHF( MCI_Handle_t * pHandle )
+Curr_Components MCI_GetIqdHF (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->IqdHF );
 }
@@ -522,7 +522,7 @@ Curr_Components MCI_GetIqdHF( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Iqdref
   */
-Curr_Components MCI_GetIqdref( MCI_Handle_t * pHandle )
+Curr_Components MCI_GetIqdref (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Iqdref );
 }
@@ -533,7 +533,7 @@ Curr_Components MCI_GetIqdref( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Vqd
   */
-Volt_Components MCI_GetVqd( MCI_Handle_t * pHandle )
+Volt_Components MCI_GetVqd (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Vqd );
 }
@@ -544,7 +544,7 @@ Volt_Components MCI_GetVqd( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval Curr_Components Stator current Valphabeta
   */
-Volt_Components MCI_GetValphabeta( MCI_Handle_t * pHandle )
+Volt_Components MCI_GetValphabeta (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->Valphabeta );
 }
@@ -557,7 +557,7 @@ Volt_Components MCI_GetValphabeta( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval int16_t Rotor electrical angle in dpp format
   */
-int16_t MCI_GetElAngledpp( MCI_Handle_t * pHandle )
+int16_t MCI_GetElAngledpp (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->hElAngle );
 }
@@ -569,7 +569,7 @@ int16_t MCI_GetElAngledpp( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval int16_t Teref
   */
-int16_t MCI_GetTeref( MCI_Handle_t * pHandle )
+int16_t MCI_GetTeref (MCI_Handle_t* pHandle)
 {
   return ( pHandle->pFOCVars->hTeref );
 }
@@ -582,7 +582,7 @@ int16_t MCI_GetTeref( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval int16_t Motor phase current (0-to-peak) in s16A
   */
-int16_t MCI_GetPhaseCurrentAmplitude( MCI_Handle_t * pHandle )
+int16_t MCI_GetPhaseCurrentAmplitude (MCI_Handle_t* pHandle)
 {
   Curr_Components Local_Curr;
   int32_t wAux1, wAux2;
@@ -610,7 +610,7 @@ int16_t MCI_GetPhaseCurrentAmplitude( MCI_Handle_t * pHandle )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval int16_t Motor phase voltage (0-to-peak) in s16V
   */
-int16_t MCI_GetPhaseVoltageAmplitude( MCI_Handle_t * pHandle )
+int16_t MCI_GetPhaseVoltageAmplitude (MCI_Handle_t* pHandle)
 {
   Volt_Components Local_Voltage;
   int32_t wAux1,wAux2;
@@ -630,6 +630,7 @@ int16_t MCI_GetPhaseVoltageAmplitude( MCI_Handle_t * pHandle )
   return ( (int16_t) wAux1 );
 }
 //}}}
+
 //{{{
 /**
   * @brief  When bDriveInput is set to INTERNAL, Idref should is normally managed
@@ -640,7 +641,7 @@ int16_t MCI_GetPhaseVoltageAmplitude( MCI_Handle_t * pHandle )
   * @param  int16_t New target Id value
   * @retval none
   */
-void MCI_SetIdref( MCI_Handle_t * pHandle, int16_t hNewIdref )
+void MCI_SetIdref (MCI_Handle_t* pHandle, int16_t hNewIdref)
 {
   pHandle->pFOCVars->Iqdref.qI_Component2 = hNewIdref;
   pHandle->pFOCVars->UserIdref = hNewIdref;
@@ -652,7 +653,7 @@ void MCI_SetIdref( MCI_Handle_t * pHandle, int16_t hNewIdref )
   * @param  pHandle Pointer on the component instance to work on.
   * @retval none
   */
-void MCI_Clear_Iqdref( MCI_Handle_t * pHandle )
+void MCI_Clear_Iqdref (MCI_Handle_t* pHandle)
 {
   pHandle->pFOCVars->Iqdref = STC_GetDefaultIqdref( pHandle->pSTC );
 }

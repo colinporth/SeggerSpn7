@@ -1,6 +1,5 @@
 #include "pwm_curr_fdbk.h"
 #include "mc_type.h"
-
 //{{{
 
 /** @defgroup pwm_curr_fdbk PWM & Current Feedback

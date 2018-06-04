@@ -22,12 +22,8 @@
   * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
   * @retval none
   */
-void VSS_Init(VirtualSpeedSensor_Handle_t *pHandle)
+void VSS_Init (VirtualSpeedSensor_Handle_t *pHandle)
 {
-#ifdef STM32F0XX
-  FD_Init( &(pHandle->fd) );
-#endif
-
   VSS_Clear(pHandle);
 }
 //}}}
@@ -38,7 +34,7 @@ void VSS_Init(VirtualSpeedSensor_Handle_t *pHandle)
 * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
 * @retval none
 */
-void VSS_Clear(VirtualSpeedSensor_Handle_t *pHandle)
+void VSS_Clear (VirtualSpeedSensor_Handle_t *pHandle)
 {
 
   pHandle->_Super.bSpeedErrorNumber = 0u;
@@ -60,14 +56,7 @@ void VSS_Clear(VirtualSpeedSensor_Handle_t *pHandle)
   pHandle->bTransitionLocked = false;
 
   pHandle->bCopyObserver = false;
-
-#ifdef STM32F0XX
-  /* (Fast division optimization for cortex-M0 micros)*/
-  /* Dummy division to speed up next executions */
-  FD_FastDiv(&(pHandle->fd), 1 , (int32_t)(pHandle->_Super.bElToMecRatio));
-  FD_FastDiv(&(pHandle->fd), 1 , (int32_t)(pHandle->hTransitionSteps));
-#endif
-}
+  }
 //}}}
 
 #if defined (CCMRAM)
@@ -84,8 +73,7 @@ __attribute__((section ("ccmram")))
 * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
 * @retval int16_t Measured electrical angle in s16degree format.
 */
-int16_t VSS_CalcElAngle(VirtualSpeedSensor_Handle_t *pHandle, void *pInputVars_str)
-{
+int16_t VSS_CalcElAngle (VirtualSpeedSensor_Handle_t *pHandle, void *pInputVars_str) {
 
   int16_t hRetAngle;
   int16_t hAngleDiff;
@@ -94,85 +82,50 @@ int16_t VSS_CalcElAngle(VirtualSpeedSensor_Handle_t *pHandle, void *pInputVars_s
   int16_t hSignCorr = 1;
 
   if (pHandle->bCopyObserver == true)
-  {
     hRetAngle = *(int16_t*)pInputVars_str;
-  }
-  else
-  {
+  else {
     pHandle->hElAngleAccu += pHandle->_Super.hElSpeedDpp;
+    pHandle->_Super.hMecAngle += pHandle->_Super.hElSpeedDpp / (int16_t)pHandle->_Super.bElToMecRatio;
 
-#ifdef STM32F0XX
-    pHandle->_Super.hMecAngle += (int16_t)(FD_FastDiv(&(pHandle->fd),
-      (int32_t)pHandle->_Super.hElSpeedDpp,
-      (int32_t)pHandle->_Super.bElToMecRatio));
-#else
-    pHandle->_Super.hMecAngle += pHandle->_Super.hElSpeedDpp /
-      (int16_t)pHandle->_Super.bElToMecRatio;
-#endif
-
-    if (pHandle->bTransitionStarted == true)
-    {
-      if (pHandle->hTransitionRemainingSteps == 0)
-      {
+    if (pHandle->bTransitionStarted == true) {
+      if (pHandle->hTransitionRemainingSteps == 0) {
         hRetAngle = *(int16_t*)pInputVars_str;
         pHandle->bTransitionEnded = true;
         pHandle->_Super.bSpeedErrorNumber = 0u;
       }
-      else
-      {
+      else {
         pHandle->hTransitionRemainingSteps--;
 
         if (pHandle->_Super.hElSpeedDpp >= 0)
-        {
           hAngleDiff = *(int16_t*)pInputVars_str - pHandle->hElAngleAccu;
-        }
-        else
-        {
+        else {
           hAngleDiff = pHandle->hElAngleAccu - *(int16_t*)pInputVars_str;
           hSignCorr = -1;
-        }
-
+          }
         wAux = (int32_t)hAngleDiff * pHandle->hTransitionRemainingSteps;
-
-#ifdef STM32F0XX
-        hAngleCorr = (int16_t)(FD_FastDiv(&(pHandle->fd),
-                               wAux,
-                               (int32_t)(pHandle->hTransitionSteps)));
-#else
         hAngleCorr = (int16_t)(wAux/pHandle->hTransitionSteps);
-#endif
-
         hAngleCorr *= hSignCorr;
 
-        if (hAngleDiff >= 0)
-        {
+        if (hAngleDiff >= 0) {
           pHandle->bTransitionLocked = true;
           hRetAngle = *(int16_t*)pInputVars_str - hAngleCorr;
-        }
-        else
-        {
-          if (pHandle->bTransitionLocked == false)
-          {
-            hRetAngle = pHandle->hElAngleAccu;
           }
+        else {
+          if (pHandle->bTransitionLocked == false)
+            hRetAngle = pHandle->hElAngleAccu;
           else
-          {
             hRetAngle = *(int16_t*)pInputVars_str + hAngleCorr;
           }
         }
       }
-    }
     else
-    {
       hRetAngle = pHandle->hElAngleAccu;
     }
-  }
 
   pHandle->_Super.hElAngle = hRetAngle;
   return hRetAngle;
-}
+  }
 //}}}
-
 
 //{{{
 /**
@@ -190,7 +143,7 @@ int16_t VSS_CalcElAngle(VirtualSpeedSensor_Handle_t *pHandle, void *pInputVars_s
   * @retval true = sensor information is reliable
   *         false = sensor information is not reliable
   */
-bool VSS_CalcAvrgMecSpeed01Hz(VirtualSpeedSensor_Handle_t *pHandle, int16_t *hMecSpeed01Hz)
+bool VSS_CalcAvrgMecSpeed01Hz (VirtualSpeedSensor_Handle_t *pHandle, int16_t *hMecSpeed01Hz)
 {
   bool SpeedSensorReliability = false;
 
@@ -249,7 +202,7 @@ bool VSS_CalcAvrgMecSpeed01Hz(VirtualSpeedSensor_Handle_t *pHandle, int16_t *hMe
   * @param  hMecAngle istantaneous measure of rotor mechanical angle
   * @retval none
   */
-void VSS_SetMecAngle(VirtualSpeedSensor_Handle_t *pHandle, int16_t hMecAngle)
+void VSS_SetMecAngle (VirtualSpeedSensor_Handle_t *pHandle, int16_t hMecAngle)
 {
 
   pHandle->hElAngleAccu = hMecAngle;
@@ -269,7 +222,7 @@ void VSS_SetMecAngle(VirtualSpeedSensor_Handle_t *pHandle, int16_t hMecAngle)
             instantaneous the final speed.
   * @retval none
   */
-void  VSS_SetMecAcceleration(VirtualSpeedSensor_Handle_t *pHandle, int16_t  hFinalMecSpeed01Hz,
+void VSS_SetMecAcceleration (VirtualSpeedSensor_Handle_t *pHandle, int16_t  hFinalMecSpeed01Hz,
                               uint16_t hDurationms)
 {
 
@@ -330,7 +283,7 @@ void  VSS_SetMecAcceleration(VirtualSpeedSensor_Handle_t *pHandle, int16_t  hFin
   * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
   * @retval bool true if the ramp is completed, otherwise false.
   */
-bool VSS_RampCompleted(VirtualSpeedSensor_Handle_t *pHandle)
+bool VSS_RampCompleted (VirtualSpeedSensor_Handle_t *pHandle)
 {
   bool retVal = false;
   if (pHandle->hRemainingStep == 0u)
@@ -347,7 +300,7 @@ bool VSS_RampCompleted(VirtualSpeedSensor_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
   * @retval none
   */
-int16_t  VSS_GetLastRampFinalSpeed(VirtualSpeedSensor_Handle_t *pHandle)
+int16_t VSS_GetLastRampFinalSpeed (VirtualSpeedSensor_Handle_t *pHandle)
 {
   return pHandle->hFinalMecSpeed01Hz;
 }
@@ -365,7 +318,7 @@ int16_t  VSS_GetLastRampFinalSpeed(VirtualSpeedSensor_Handle_t *pHandle)
             transition has been triggered but it's actually disabled
             (parameter hTransitionSteps = 0)
   */
-bool VSS_SetStartTransition(VirtualSpeedSensor_Handle_t *pHandle, bool bCommand)
+bool VSS_SetStartTransition (VirtualSpeedSensor_Handle_t *pHandle, bool bCommand)
 {
   bool bAux = true;
   if (bCommand == true)
@@ -388,7 +341,7 @@ bool VSS_SetStartTransition(VirtualSpeedSensor_Handle_t *pHandle, bool bCommand)
   * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
   * @retval bool true if Transition phase is ongoing, false otherwise.
   */
-bool VSS_IsTransitionOngoing(VirtualSpeedSensor_Handle_t *pHandle)
+bool VSS_IsTransitionOngoing (VirtualSpeedSensor_Handle_t *pHandle)
 {
   uint16_t hTS = 0u, hTE = 0u, hAux;
   bool retVal = false;
@@ -415,7 +368,7 @@ bool VSS_IsTransitionOngoing(VirtualSpeedSensor_Handle_t *pHandle)
   * @param  pHandle: handler of the current instance of the VirtualSpeedSensor component
   * @retval none
   */
-void VSS_SetCopyObserver(VirtualSpeedSensor_Handle_t *pHandle)
+void VSS_SetCopyObserver (VirtualSpeedSensor_Handle_t *pHandle)
 {
     pHandle->bCopyObserver = true;
 }
@@ -427,7 +380,7 @@ void VSS_SetCopyObserver(VirtualSpeedSensor_Handle_t *pHandle)
   * @param  hElAngle istantaneous measure of rotor electrical angle (s16degrees)
   * @retval none
   */
-void VSS_SetElAngle(VirtualSpeedSensor_Handle_t *pHandle, int16_t hElAngle)
+void VSS_SetElAngle (VirtualSpeedSensor_Handle_t *pHandle, int16_t hElAngle)
 {
   pHandle->hElAngleAccu = hElAngle;
   pHandle->_Super.hElAngle = hElAngle;

@@ -8,19 +8,14 @@ uint32_t getScalingFactor(int32_t Target);
   * @param  pHandle related Handle of struct RampMngr_Handle_t
   * @retval none.
   */
-void REMNG_Init(RampExtMngr_Handle_t *pHandle)
-{
+void REMNG_Init (RampExtMngr_Handle_t* pHandle) {
+
   pHandle->Ext = 0;
   pHandle->TargetFinal = 0;
   pHandle->RampRemainingStep = 0u;
   pHandle->IncDecAmount = 0;
   pHandle->ScalingFactor = 1u;
-
-#ifdef STM32F0XX
-  FD_Init( & (pHandle->fd) );
-#endif
-
-}
+  }
 //}}}
 
 //{{{
@@ -31,43 +26,29 @@ void REMNG_Init(RampExtMngr_Handle_t *pHandle)
   * @param  pHandle related Handle of struct RampMngr_Handle_t
   * @retval int32_t value of the state variable
   */
-int32_t REMNG_Calc(RampExtMngr_Handle_t *pHandle)
-{
-  int32_t ret_val;
-  int32_t current_ref;
+int32_t REMNG_Calc (RampExtMngr_Handle_t* pHandle) {
 
-  current_ref = pHandle->Ext;
+  int32_t ret_val;
+  int32_t current_ref = pHandle->Ext;
 
   /* Update the variable and terminates the ramp if needed. */
-  if (pHandle->RampRemainingStep > 1u)
-  {
+  if (pHandle->RampRemainingStep > 1u) {
     /* Increment/decrement the reference value. */
     current_ref += pHandle->IncDecAmount;
-
     /* Decrement the number of remaining steps */
     pHandle->RampRemainingStep --;
-  }
-  else if (pHandle->RampRemainingStep == 1u)
-  {
+    }
+  else if (pHandle->RampRemainingStep == 1u) {
     /* Set the backup value of TargetFinal. */
     current_ref = pHandle->TargetFinal * (int32_t)(pHandle->ScalingFactor);
     pHandle->RampRemainingStep = 0u;
-  }
-  else
-  {
-    /* Do nothing. */
-  }
+    }
 
   pHandle->Ext = current_ref;
 
-#ifdef STM32F0XX
-  ret_val = FD_FastDiv(& (pHandle->fd), pHandle->Ext, (int32_t)(pHandle->ScalingFactor));
-#else
   ret_val = pHandle->Ext / (int32_t)(pHandle->ScalingFactor);
-#endif
-
   return ret_val;
-}
+  }
 //}}}
 
 //{{{
@@ -81,56 +62,39 @@ int32_t REMNG_Calc(RampExtMngr_Handle_t *pHandle)
   *         change in the value.
   * @retval bool It returns true is command is valid, false otherwise
   */
-bool REMNG_ExecRamp(RampExtMngr_Handle_t *pHandle, int32_t TargetFinal, uint32_t Durationms)
-{
+bool REMNG_ExecRamp (RampExtMngr_Handle_t* pHandle, int32_t TargetFinal, uint32_t Durationms) {
+
   uint32_t aux;
   int32_t aux1;
   int32_t current_ref;
   bool retVal = true;
 
   /* Get current state */
-#ifdef STM32F0XX
-  current_ref = FD_FastDiv( &(pHandle->fd), pHandle->Ext, (int32_t)(pHandle->ScalingFactor) );
-#else
   current_ref = pHandle->Ext / (int32_t)(pHandle->ScalingFactor);
-#endif
-
-  if (Durationms == 0u)
-  {
+  if (Durationms == 0u) {
     pHandle->ScalingFactor = getScalingFactor(TargetFinal);
     pHandle->Ext = TargetFinal * (int32_t)(pHandle->ScalingFactor);
     pHandle->RampRemainingStep = 0u;
     pHandle->IncDecAmount = 0;
   }
-  else
-  {
+  else {
     uint32_t wScalingFactor = getScalingFactor(TargetFinal - current_ref);
     uint32_t wScalingFactor2 = getScalingFactor(current_ref);
     uint32_t wScalingFactor3 = getScalingFactor(TargetFinal);
     uint32_t wScalingFactorMin;
 
-    if (wScalingFactor <  wScalingFactor2)
-    {
+    if (wScalingFactor <  wScalingFactor2) {
       if (wScalingFactor < wScalingFactor3)
-      {
         wScalingFactorMin = wScalingFactor;
-      }
       else
-      {
          wScalingFactorMin = wScalingFactor3;
       }
-    }
-    else
-    {
+    else {
       if (wScalingFactor2 < wScalingFactor3)
-      {
         wScalingFactorMin = wScalingFactor2;
-      }
       else
-      {
          wScalingFactorMin = wScalingFactor3;
       }
-    }
 
     pHandle->ScalingFactor = wScalingFactorMin;
     pHandle->Ext = current_ref * (int32_t)(pHandle->ScalingFactor);
@@ -138,8 +102,7 @@ bool REMNG_ExecRamp(RampExtMngr_Handle_t *pHandle, int32_t TargetFinal, uint32_t
     /* Store the TargetFinal to be applied in the last step */
     pHandle->TargetFinal = TargetFinal;
 
-    /* Compute the (wRampRemainingStep) number of steps remaining to complete
-    the ramp. */
+    /* Compute the (wRampRemainingStep) number of steps remaining to complete the ramp. */
     aux = Durationms * (uint32_t)pHandle->FrequencyHz; /* Check for overflow and use prescaler */
     aux /= 1000u;
     pHandle->RampRemainingStep = aux;
@@ -150,10 +113,10 @@ bool REMNG_ExecRamp(RampExtMngr_Handle_t *pHandle, int32_t TargetFinal, uint32_t
     aux1 = (TargetFinal - current_ref) * (int32_t)(pHandle->ScalingFactor);
     aux1 /= (int32_t)(pHandle->RampRemainingStep);
     pHandle->IncDecAmount = aux1;
-  }
+    }
 
   return retVal;
-}
+  }
 //}}}
 //{{{
 /**
@@ -161,12 +124,12 @@ bool REMNG_ExecRamp(RampExtMngr_Handle_t *pHandle, int32_t TargetFinal, uint32_t
   * @param  pHandle related Handle of struct RampMngr_Handle_t
   * @retval int32_t value of the state variable
   */
-int32_t REMNG_GetValue(RampExtMngr_Handle_t *pHandle)
-{
+int32_t REMNG_GetValue (RampExtMngr_Handle_t* pHandle) {
+
   int32_t ret_val;
   ret_val = pHandle->Ext / (int32_t)(pHandle->ScalingFactor);
   return ret_val;
-}
+  }
 //}}}
 //{{{
 /**
@@ -174,15 +137,14 @@ int32_t REMNG_GetValue(RampExtMngr_Handle_t *pHandle)
   * @param  pHandle related Handle of struct RampMngr_Handle_t.
   * @retval bool It returns true if the ramp is completed, false otherwise.
   */
-bool REMNG_RampCompleted(RampExtMngr_Handle_t *pHandle)
-{
+bool REMNG_RampCompleted (RampExtMngr_Handle_t* pHandle) {
+
   bool retVal = false;
   if (pHandle->RampRemainingStep == 0u)
-  {
     retVal = true;
-  }
+
   return retVal;
-}
+  }
 //}}}
 //{{{
 /**
@@ -190,11 +152,11 @@ bool REMNG_RampCompleted(RampExtMngr_Handle_t *pHandle)
   * @param  pHandle related Handle of struct RampMngr_Handle_t.
   * @retval none
   */
-void REMNG_StopRamp(RampExtMngr_Handle_t *pHandle)
-{
+void REMNG_StopRamp (RampExtMngr_Handle_t* pHandle) {
+
   pHandle->RampRemainingStep = 0u;
   pHandle->IncDecAmount = 0;
-}
+  }
 //}}}
 
 //{{{
@@ -205,29 +167,25 @@ void REMNG_StopRamp(RampExtMngr_Handle_t *pHandle)
   * @param  Target Input data.
   * @retval uint32_t It returns the optimized scaling factor.
   */
-uint32_t getScalingFactor(int32_t Target)
-{
+uint32_t getScalingFactor (int32_t Target) {
+
   uint8_t i;
+
   uint32_t TargetAbs;
   int32_t aux;
-
-  if (Target < 0)
-  {
+  if (Target < 0) {
     aux = -Target;
     TargetAbs = (uint32_t)(aux);
-  }
+    }
   else
-  {
     TargetAbs = (uint32_t)(Target);
-  }
-  for (i = 1u; i < 32u; i++)
-  {
+
+  for (i = 1u; i < 32u; i++) {
     uint32_t limit = ((uint32_t)(1) << (31u-i));
     if (TargetAbs > limit)
-    {
       break;
     }
-  }
+
   return ((uint32_t)(1u) << (i-1u));
-}
+  }
 //}}}

@@ -1,86 +1,13 @@
-/**
- ******************************************************************************
- * @file    r3_4_f30x_pwm_curr_fdbk.c
- * @author  Motor Control SDK Team, ST Microelectronics
- * @brief   This file provides firmware functions that implement current sensor
- *          class to be stantiated when the three shunts current sensing
- *          topology is used. It is specifically designed for STM32F30X
- *          microcontrollers and implements the successive sampling of two motor
- *          current using different ADC.
- *           + MCU peripheral and handle initialization function
- *           + three shunt current sesnsing
- *           + space vector modulation function
- *           + ADC sampling function
- *
- ******************************************************************************
- * @attention
- *
- * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
- * All rights reserved.</center></h2>
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted, provided that the following conditions are met:
- *
- * 1. Redistribution of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of other
- *    contributors to this software may be used to endorse or promote products
- *    derived from this software without specific written permission.
- * 4. This software, including modifications and/or derivative works of this
- *    software, must execute solely and exclusively on microcontroller or
- *    microprocessor devices manufactured by or for STMicroelectronics.
- * 5. Redistribution and use of this software other than as permitted under
- *    this license is void and will automatically terminate your rights under
- *    this license.
- *
- * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
- * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
- * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
- * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
- * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
- * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
- * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ******************************************************************************
- */
-
-/* Includes ------------------------------------------------------------------*/
 #include "r3_4_f30x_pwm_curr_fdbk.h"
 #include "mc_type.h"
-
-/** @addtogroup MCSDK
-  * @{
-  */
-
-/** @addtogroup pwm_curr_fdbk
-  * @{
-  */
-
 /** @defgroup r3_4_f30x_pwm_curr_fdbk R3 4 ADCs F30x PWM & Current Feedback
- *
- * @brief STM32F3, Independant Resources, 3-Shunt PWM & Current Feedback implementation
- *
  * This component is used in applications based on an STM32F3 MCU, using a three
  * shunt resistors current sensing topology and 2 ADC peripherals to acquire the current
  * values.
- *
  * It can be used in applications that drive two motors in which case two instances of the
  * component are used each using using two ADCs which leads to a total of 4 ADCs being used.
- *
- * @todo: TODO: complete documentation.
- *
- * @{
  */
 
-/* Private defines -----------------------------------------------------------*/
 #define TIMxCCER_MASK_CH123        ((uint32_t)  0x00000555u)
 #define NB_CONVERSIONS 16u
 #define CCMR2_CH4_DISABLE 0x8FFFu
@@ -88,12 +15,6 @@
 #define CCMR2_CH4_PWM2    0x7000u
 #define OPAMP_CSR_DEFAULT_MASK  ((uint32_t)0xFFFFFF93u)
 
-/* Private typedef -----------------------------------------------------------*/
-
-/* Private function prototypes -----------------------------------------------*/
-
-/* These function overloads the TIM_BDTRConfig and TIM_BDTRStructInit
-   of the standard library */
 static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl);
 static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
 static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
@@ -111,6 +32,7 @@ static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl);
 static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl);
 static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl);
 
+//{{{
 /**
  * @brief  It initializes TIMx, ADC, GPIO, and NVIC for current reading
  *         in three shunt topology using STM32F30x
@@ -154,7 +76,7 @@ void R3_4_F30X_Init(PWMC_R3_4_F3_Handle_t *pHandle)
     {
       pHandle->ADC_ExternalTriggerInjected = LL_ADC_INJ_TRIG_EXT_TIM1_TRGO;
     }
-    else 
+    else
     {
       pHandle->ADC_ExternalTriggerInjected = LL_ADC_INJ_TRIG_EXT_TIM8_TRGO;
     }
@@ -254,7 +176,7 @@ void R3_4_F30X_Init(PWMC_R3_4_F3_Handle_t *pHandle)
     /* Over current protection phase B */
     if (COMP_OCPBx)
     {
-      /* Output */	  
+      /* Output */
       LL_COMP_Enable (COMP_OCPBx);
       LL_COMP_Lock(COMP_OCPBx);
     }
@@ -385,7 +307,8 @@ void R3_4_F30X_Init(PWMC_R3_4_F3_Handle_t *pHandle)
 
   }
 }
-
+//}}}
+//{{{
 /**
  * @brief  It stores into handler the voltage present on Ia and
  *         Ib current feedback analog channels when no current is flowin into the
@@ -411,7 +334,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
   TIMx->CCER &= (~TIMxCCER_MASK_CH123);
 
   /* Offset calibration for A & B phases */
-  /* Change function to be executed in ADCx_ISR */ 
+  /* Change function to be executed in ADCx_ISR */
   pHandle->_Super.pFctGetPhaseCurrents = &R3_4_F30X_HFCurrentsCalibrationAB;
   pHandle->_Super.pFctSetADCSampPointSect1 = &R3_4_F30X_SetADCSampPointCalibration;
   pHandle->_Super.pFctSetADCSampPointSect2 = &R3_4_F30X_SetADCSampPointCalibration;
@@ -465,7 +388,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
   /* Reset bIndex */
   pHandle->bIndex=0u;
 
-  /* Change function to be executed in ADCx_ISR */ 
+  /* Change function to be executed in ADCx_ISR */
   pHandle->_Super.pFctGetPhaseCurrents = &R3_4_F30X_HFCurrentsCalibrationC;
 
   if (pDOPAMPParams_str)
@@ -507,7 +430,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
   pHandle->wPhaseBOffset >>=4;
   pHandle->wPhaseCOffset >>=4;
 
-  /* Change back function to be executed in ADCx_ISR */ 
+  /* Change back function to be executed in ADCx_ISR */
   pHandle->_Super.pFctGetPhaseCurrents = &R3_4_F30X_GetPhaseCurrents;
   pHandle->_Super.pFctSetADCSampPointSect1 = &R3_4_F30X_SetADCSampPointSect1;
   pHandle->_Super.pFctSetADCSampPointSect2 = &R3_4_F30X_SetADCSampPointSect2;
@@ -516,9 +439,9 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
   pHandle->_Super.pFctSetADCSampPointSect5 = &R3_4_F30X_SetADCSampPointSect5;
   pHandle->_Super.pFctSetADCSampPointSect6 = &R3_4_F30X_SetADCSampPointSect6;
 
-  /* It over write TIMx CCRy wrongly written by FOC during calibration so as to 
+  /* It over write TIMx CCRy wrongly written by FOC during calibration so as to
      force 50% duty cycle on the three inverer legs */
-  /* Disable TIMx preload */  
+  /* Disable TIMx preload */
   TIMx->CCMR1 &= 0xF7F7u;
   TIMx->CCMR2 &= 0xF7F7u;
   //LL_TIM_WriteReg(TIMx,,);
@@ -536,6 +459,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 
   pHandle->BrakeActionLock = false;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -544,6 +468,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor
  * @param  pHandle: handler of the current instance of the PWM component
@@ -687,13 +612,15 @@ void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Cur
 
     default:
       break;
-  }   
+  }
 
   pHandle->_Super.hIa = pStator_Currents->qI_Component1;
   pHandle->_Super.hIb = pStator_Currents->qI_Component2;
   pHandle->_Super.hIc = -pStator_Currents->qI_Component1 - pStator_Currents->qI_Component2;
 }
+//}}}
 
+//{{{
 /**
  * @brief  Implementaion of PWMC_GetPhaseCurrents to be performed during
  *         calibration. It sum up injected conversion data into wPhaseAOffset and
@@ -704,7 +631,7 @@ void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Cur
  * @retval It always returns {0,0} in Curr_Components format
  */
 static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
-{  
+{
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
 
   /* Clear the flag to indicate the start of FOC algorithm*/
@@ -740,7 +667,9 @@ static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components
     pHandle->bIndex++;
   }
 }
+//}}}
 
+//{{{
 /**
  * @brief  It turns on low sides switches. This function is intended to be
  *         used for charging boot capacitors of driving section. It has to be
@@ -775,10 +704,10 @@ void R3_4_F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
   }
-  return; 
+  return;
 }
-
-
+//}}}
+//{{{
 /**
  * @brief  It enables PWM generation on the proper Timer peripheral acting on MOE
  *         bit
@@ -786,7 +715,7 @@ void R3_4_F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
  * @retval none
  */
 void R3_4_F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
-{  
+{
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
   ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
@@ -820,7 +749,7 @@ void R3_4_F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
   {}
 
   /* Main PWM Output Enable */
-  TIMx->BDTR |= LL_TIM_OSSI_ENABLE; 
+  TIMx->BDTR |= LL_TIM_OSSI_ENABLE;
   LL_TIM_EnableAllOutputs (TIMx);
 
   if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
@@ -851,10 +780,10 @@ void R3_4_F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
   {
     ADCx_2->JSQR = pHandle->wADC2_JSQR;
   }
-  return; 
+  return;
 }
-
-
+//}}}
+//{{{
 /**
  * @brief  It disables PWM generation on the proper Timer peripheral acting on
  *         MOE bit
@@ -897,7 +826,7 @@ void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
                                                                            0u,
                                                                            1u,
                                                                            LL_ADC_INJ_TRIG_EXT_RISING,
-													                                                 pHandle->ADC_ExternalTriggerInjected);
+                                                                           pHandle->ADC_ExternalTriggerInjected);
   pHandle->pParams_str->ADCx_2->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(pHandle->pParams_str->ADCx_2,
                                                                            0u,
                                                                            1u,
@@ -925,8 +854,9 @@ void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
   LL_ADC_ClearFlag_JEOS(pHandle->pParams_str->ADCx_2);
   LL_ADC_EnableIT_JEOS(pHandle->pParams_str->ADCx_1);
 
-  return; 
+  return;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -935,6 +865,7 @@ void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Stores into the component's handle the voltage present on Ia and
  *         Ib current feedback analog channels when no current is flowing into the
@@ -984,6 +915,7 @@ static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl)
   }
   return hAux;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -992,6 +924,7 @@ static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling during calibration.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1013,6 +946,7 @@ static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl)
 
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1021,6 +955,7 @@ static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 1.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1083,7 +1018,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
         hCntSmp = pHandle->_Super.hCntPhA + pHandle->pParams_str->hTafter;
 
         if (hCntSmp >= pHandle->Half_PWMPeriod)
-        { 
+        {
           /* Set CC4 as PWM mode 1 */
           TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
           TIMx->CCMR2 |= CCMR2_CH4_PWM1;
@@ -1115,6 +1050,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1123,6 +1059,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 2.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1211,10 +1148,11 @@ uint16_t R3_4_F30X_SetADCSampPointSect2(PWMC_Handle_t *pHdl)
     }
 
     /* Set TIMx_CH4 value */
-    TIMx->CCR4 = hCntSmp; 
+    TIMx->CCR4 = hCntSmp;
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1223,6 +1161,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect2(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 3.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1312,10 +1251,11 @@ uint16_t R3_4_F30X_SetADCSampPointSect3(PWMC_Handle_t *pHdl)
     }
 
     /* Set TIMx_CH4 value */
-    TIMx->CCR4 = hCntSmp; 
+    TIMx->CCR4 = hCntSmp;
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1324,6 +1264,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect3(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 4.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1412,10 +1353,11 @@ uint16_t R3_4_F30X_SetADCSampPointSect4(PWMC_Handle_t *pHdl)
     }
 
     /* Set TIMx_CH4 value */
-    TIMx->CCR4 = hCntSmp; 
+    TIMx->CCR4 = hCntSmp;
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1424,6 +1366,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect4(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 5.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1516,6 +1459,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect5(PWMC_Handle_t *pHdl)
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1524,6 +1468,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect5(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 6.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
@@ -1585,7 +1530,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
         hCntSmp = pHandle->_Super.hCntPhA + pHandle->pParams_str->hTafter;
 
         if (hCntSmp >= pHandle->Half_PWMPeriod)
-        {   
+        {
           /* Set CC4 as PWM mode 1 */
           TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
           TIMx->CCMR2 |= CCMR2_CH4_PWM1;
@@ -1616,6 +1561,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
   }
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1624,6 +1570,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  It contains the TIMx Update event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
@@ -1634,6 +1581,7 @@ void *R3_4_F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1642,6 +1590,7 @@ void *R3_4_F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  It contains the TIMx Break2 event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
@@ -1664,6 +1613,7 @@ void *R3_4_F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
 
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -1672,6 +1622,7 @@ void *R3_4_F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  It contains the TIMx Break1 event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
@@ -1687,7 +1638,9 @@ void *R3_4_F30X_BRK_IRQHandler(PWMC_Handle_t *pHdl)
 
   return &(pHandle->_Super.bMotor);
 }
+//}}}
 
+//{{{
 /**
  * @brief  Execute a regular conversion using ADCx.
  *         The function is not re-entrant (can't executed twice at the same time)
@@ -1714,7 +1667,8 @@ uint16_t R3_4_F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
   pHandle->hRegConv = LL_ADC_REG_ReadConversionData12(ADCx);
   return (pHandle->hRegConv);
 }
-
+//}}}
+//{{{
 /**
  * @brief  It sets the specified sampling time for the specified ADC channel
  *         on ADCx. It must be called once for each channel utilized by user
@@ -1722,7 +1676,7 @@ uint16_t R3_4_F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
  * @retval none
  */
 void R3_4_F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
-{ 
+{
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   uint32_t tmpreg2 = 0u;
   uint8_t ADC_Channel = ADConv_struct.Channel;
@@ -1761,7 +1715,8 @@ void R3_4_F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
     pHandle->pParams_str->regconvADCx->SMPR1 |= wAux << wAux2;
   }
 }
-
+//}}}
+//{{{
 /**
  * @brief  It is used to check if an overcurrent occurred since last call.
  * @param  pHandle: handler of the current instance of the PWM component
@@ -1787,7 +1742,9 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
 
   return retVal;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It is used to configure the analog output used for protection
  *         thresholds.
@@ -1800,7 +1757,7 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
  * @retval none
  */
 static void R3_4_F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACVref)
-{ 
+{
 
   if (DAC_Channel == LL_DAC_CHANNEL_2)
   {
@@ -1815,8 +1772,8 @@ static void R3_4_F30X_SetAOReferenceVoltage(uint32_t DAC_Channel, uint16_t hDACV
   LL_DAC_TrigSWConversion (DAC1, DAC_Channel);
   LL_DAC_Enable (DAC1, DAC_Channel );
 }
-
-
+//}}}
+//{{{
 static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t ADC_Channel, uint8_t Rank, uint8_t ADC_SampleTime, uint8_t SequencerLength, uint16_t ADC_ExternalTriggerInjectedPolarity, uint16_t ADC_ExternalTriggerInjected)
 {
   uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpregA = 0u;
@@ -1831,7 +1788,7 @@ static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t A
 
   /* Disable the selected ADC conversion on external event */
   tmpregA &= ~ADC_JSQR_JEXTEN;
-  tmpregA |= ADC_ExternalTriggerInjectedPolarity; 
+  tmpregA |= ADC_ExternalTriggerInjectedPolarity;
 
   /* Disable the selected ADC conversion on external event */
   tmpregA &= ~ADC_JSQR_JEXTSEL;
@@ -1899,7 +1856,9 @@ static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t A
 
   return (tmpreg1);
 }
+//}}}
 
+//{{{
 /**
  * @brief  It is used to set the PWM mode for R/L detection.
  * @param  pHandle: handler of the current instance of the PWM component
@@ -1965,7 +1924,8 @@ void R3_4_F30X_RLDetectionModeEnable(PWMC_Handle_t *pHdl)
 
   pHandle->_Super.RLDetectionMode = true;
 }
-
+//}}}
+//{{{
 /**
  * @brief  It is used to disable the PWM mode for R/L detection.
  * @param  pHandle: handler of the current instance of the PWM component
@@ -2055,7 +2015,8 @@ void R3_4_F30X_RLDetectionModeDisable(PWMC_Handle_t *pHdl)
     pHandle->_Super.RLDetectionMode = false;
   }
 }
-
+//}}}
+//{{{
 /**
  * @brief  It is used to set the PWM dutycycle for R/L detection.
  * @param  pHandle: handler of the current instance of the PWM component
@@ -2126,6 +2087,7 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
   }
   return hAux;
 }
+//}}}
 
 #if defined (CCMRAM)
 #if defined (__ICCARM__)
@@ -2134,6 +2096,7 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
 __attribute__((section ("ccmram")))
 #endif
 #endif
+//{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor
  *         during RL detection phase
@@ -2200,7 +2163,9 @@ static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pS
   pHandle->_Super.hIb = hCurrB;
   pHandle->_Super.hIc = -hCurrA - hCurrB;
 }
+//}}}
 
+//{{{
 /**
  * @brief  It turns on low sides switches. This function is intended to be
  *         used for charging boot capacitors of driving section. It has to be
@@ -2210,7 +2175,7 @@ static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pS
  * @retval none
  */
 static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
-{  
+{
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
 
@@ -2234,10 +2199,10 @@ static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
   }
-  return; 
+  return;
 }
-
-
+//}}}
+//{{{
 /**
  * @brief  It enables PWM generation on the proper Timer peripheral
  *         This function is specific for RL detection phase.
@@ -2266,7 +2231,7 @@ static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
   {}
 
   /* Main PWM Output Enable */
-  TIMx->BDTR |= LL_TIM_OSSI_ENABLE ; 
+  TIMx->BDTR |= LL_TIM_OSSI_ENABLE ;
   LL_TIM_EnableAllOutputs (TIMx);
 
   if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
@@ -2297,10 +2262,10 @@ static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
   }
   pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
   pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
-  return; 
+  return;
 }
-
-
+//}}}
+//{{{
 /**
  * @brief  It disables PWM generation on the proper Timer peripheral acting on
  *         MOE bit
@@ -2375,17 +2340,4 @@ static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
   LL_ADC_EnableIT_JEOS(ADCx_1);
   return;
 }
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/**
- * @}
- */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}
