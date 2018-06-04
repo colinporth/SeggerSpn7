@@ -1,7 +1,7 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
  <Bookmarks>
-  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
+  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
   <BookmarkItem objectName="" line="4" column="-1" path="C:/projects/SeggerSpn7/common/cLcd.h" number="2" extra="#include &quot;..\STM32F3xx_HAL_Driver\inc\stm32f3xx_hal.h&quot;" color="5"/>
   <BookmarkItem objectName="" line="26" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="std::string kVersion = &quot;WebCam 27/4/18&quot;;" color="5"/>
   <BookmarkItem objectName="" line="42" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="2" extra="&quot;&lt;/html>\r\n&quot;;" color="5"/>
@@ -825,12 +825,12 @@
   <BookmarkItem objectName="" line="1500" column="-1" path="C:/projects/seggerf4/main.cpp" number="246" extra="audBuf[i] = int16_t(0x2000 * sin (((i % 64) / 128.f) * kPi));" color="5"/>
   <BookmarkItem objectName="" line="1508" column="-1" path="C:/projects/seggerf4/main.cpp" number="247" extra="__HAL_RCC_CLEAR_RESET_FLAGS();" color="5"/>
   <BookmarkItem objectName="" line="1509" column="-1" path="C:/projects/seggerf4/main.cpp" number="248" extra="printf (&quot;main pin:%d power:%d cApp size:%d\n&quot;, pinReset, powerOnReset, sizeof (cApp));" color="5"/>
-  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
+  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
-  <BreakpointListItem trigger="" line="173" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="common/cLcd.cpp" useHWbreakpoint="false"/>
+  <BreakpointListItem trigger="" line="173" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="common/cLcd.cpp" useHWbreakpoint="false"/>
   <BreakpointListItem trigger="" line="356" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/main.cpp" useHWbreakpoint="false"/>
-  <BreakpointListItem trigger="" line="389" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="mcsdk/Src/main.cpp" useHWbreakpoint="false"/>
+  <BreakpointListItem trigger="" line="389" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="mcsdk/Src/main.cpp" useHWbreakpoint="false"/>
   <BreakpointListItem trigger="" line="56" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/X-NUCLEO-IHM07M1.c" useHWbreakpoint="false"/>
  </Breakpoints>
  <ExecutionProfileWindow/>
@@ -880,8 +880,11 @@
  <Project>
   <ProjectSessionItem path="spn7"/>
   <ProjectSessionItem path="spn7;mcsdk"/>
+  <ProjectSessionItem path="spn7;mcsdk;drivers"/>
+  <ProjectSessionItem path="spn7;mcsdk;drivers;inc"/>
   <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3"/>
   <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;any"/>
+  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;f3xx"/>
   <ProjectSessionItem path="spn7;spn7"/>
   <ProjectSessionItem path="spn7;spn7;inc"/>
   <ProjectSessionItem path="spn7;spn7;System Files"/>
@@ -945,7 +948,12 @@
   <Watches active="0" update="Never"/>
  </Watch4>
  <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="5" y="22" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/r_divider_bus_voltage_sensor.c" selected="1" top="1" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="25" y="11" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/r_divider_bus_voltage_sensor.c" selected="0" top="1" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="4" y="361" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r3_4_f30x_pwm_curr_fdbk.c" selected="0" top="347" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="133" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/Src/stm32f30x_mc_it.c" selected="0" top="117" codecName=""/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="6422" useTextEdit="1" useBinaryEdit="0" left="0" path="STM32F3xx_HAL_Driver/Inc/stm32f3xx_ll_adc.h" selected="0" top="6406" codecName=""/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="388" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/Src/main.cpp" selected="0" top="356" codecName=""/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="6" y="174" useTextEdit="1" useBinaryEdit="0" left="0" path="common/cLcd.cpp" selected="1" top="156" codecName=""/>
  </Files>
- <ARMCrossStudioWindow activeProject="mcsdk" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
+ <ARMCrossStudioWindow activeProject="mcsdk" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

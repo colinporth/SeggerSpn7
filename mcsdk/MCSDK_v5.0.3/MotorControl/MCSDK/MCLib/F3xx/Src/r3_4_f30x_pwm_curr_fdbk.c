@@ -15,9 +15,83 @@
 #define CCMR2_CH4_PWM2    0x7000u
 #define OPAMP_CSR_DEFAULT_MASK  ((uint32_t)0xFFFFFF93u)
 
-static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl);
-static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents);
-static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl);
+//__attribute__((section ("ccmram")))
+//{{{
+/**
+ * @brief  Stores into the component's handle the voltage present on Ia and
+ *         Ib current feedback analog channels when no current is flowing into the
+ *         motor
+ * @param  pHandle handler of the current instance of the PWM component
+ */
+static uint16_t R3_4_F30X_WriteTIMRegisters (PWMC_Handle_t* pHdl)
+{
+  uint16_t hAux,hCCR4Aux;
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
+  pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
+
+  LL_TIM_OC_SetCompareCH1 (TIMx,pHandle->_Super.hCntPhA);
+  LL_TIM_OC_SetCompareCH2 (TIMx,pHandle->_Super.hCntPhB);
+  LL_TIM_OC_SetCompareCH3 (TIMx,pHandle->_Super.hCntPhC);
+  hCCR4Aux = (uint16_t)LL_TIM_OC_GetCompareCH4(TIMx);
+  LL_TIM_OC_DisablePreload(TIMx, LL_TIM_CHANNEL_CH4);
+  LL_TIM_OC_SetCompareCH4 (TIMx,0xFFFFu);
+  LL_TIM_OC_EnablePreload(TIMx, LL_TIM_CHANNEL_CH4);
+  LL_TIM_OC_SetCompareCH4 (TIMx, hCCR4Aux);
+
+  /* Switch Context */
+  if (pDOPAMPParams_str)
+  {
+    pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
+    pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
+  }
+  pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
+  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
+
+  /* Limit for update event */
+  /* Check the status flag. If an update event has occurred before to set new
+  values of regs the FOC rate is too high */
+  if (LL_TIM_IsActiveFlag_UPDATE(TIMx))
+  {
+    hAux = MC_FOC_DURATION;
+  }
+  else
+  {
+    hAux = MC_NO_ERROR;
+  }
+  if (pHandle->_Super.SWerror == 1u)
+  {
+    hAux = MC_FOC_DURATION;
+    pHandle->_Super.SWerror = 0u;
+  }
+  return hAux;
+}
+//}}}
+
+//__attribute__((section ("ccmram")))
+//{{{
+/**
+ * @brief  Configure the ADC for the current sampling during calibration.
+ *         It means set the sampling point via TIMx_Ch4 value and polarity
+ *         ADC sequence length and channels.
+ *         And call the WriteTIMRegisters method.
+ * @param  pHandle: handler of the current instance of the PWM component
+ * @retval none
+ */
+static uint16_t R3_4_F30X_SetADCSampPointCalibration (PWMC_Handle_t* pHdl)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
+
+  /* Set CC4 as PWM mode 2 (default) */
+  TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
+  TIMx->CCMR2 |= CCMR2_CH4_PWM2;
+
+  TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - 1u;
+
+  return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
+}
+//}}}
 
 //{{{
 /**
@@ -29,7 +103,7 @@ static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl);
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval It always returns {0,0} in Curr_Components format
  */
-static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
+static void R3_4_F30X_HFCurrentsCalibrationAB (PWMC_Handle_t* pHdl,Curr_Components* pStator_Currents)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
 
@@ -53,7 +127,7 @@ static void R3_4_F30X_HFCurrentsCalibrationAB(PWMC_Handle_t *pHdl,Curr_Component
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval It always returns {0,0} in Curr_Components format
  */
-static void R3_4_F30X_HFCurrentsCalibrationC(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
+static void R3_4_F30X_HFCurrentsCalibrationC (PWMC_Handle_t* pHdl,Curr_Components* pStator_Currents)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
 
@@ -190,7 +264,7 @@ static uint32_t R3_4_F30X_ADC_InjectedChannelConfig(ADC_TypeDef* ADCx, uint8_t A
  * @param  pHandle Pointer on the target component instance
  * @retval none
  */
-static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
+static void R3_4_F30X_RLTurnOnLowSides (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -225,7 +299,7 @@ static void R3_4_F30X_RLTurnOnLowSides(PWMC_Handle_t *pHdl)
  * @param  pHandle Pointer on the target component instance
  * @retval none
  */
-static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
+static void R3_4_F30X_RLSwitchOnPWM (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -289,7 +363,7 @@ static void R3_4_F30X_RLSwitchOnPWM(PWMC_Handle_t *pHdl)
  * @param  pHandle Pointer on the target component instance
  * @retval none
  */
-static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
+static void R3_4_F30X_RLSwitchOffPWM (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -355,6 +429,76 @@ static void R3_4_F30X_RLSwitchOffPWM(PWMC_Handle_t *pHdl)
   LL_ADC_ClearFlag_JEOS(ADCx_2);
   LL_ADC_EnableIT_JEOS(ADCx_1);
   return;
+}
+//}}}
+
+//__attribute__((section ("ccmram")))
+//{{{
+/**
+ * @brief  It computes and return latest converted motor phase currents motor
+ *         during RL detection phase
+ * @param  pHandle Pointer on the target component instance
+ * @retval Ia and Ib current in Curr_Components format
+ */
+static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl,Curr_Components* pStator_Currents)
+{
+  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
+  ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
+  ADC_TypeDef* ADCx_2 = pHandle->pParams_str->ADCx_2;
+  int32_t wAux;
+  int16_t hCurrA = 0, hCurrB = 0;
+
+  /* Clear the flag to indicate the start of FOC algorithm*/
+  LL_TIM_ClearFlag_UPDATE (pHandle->pParams_str->TIMx);
+
+  wAux = (int32_t)(pHandle->wPhaseBOffset);
+  wAux -= (int32_t)(ADCx_1->JDR1);
+
+  /* Check saturation */
+  if (wAux > -INT16_MAX)
+  {
+    if (wAux < INT16_MAX)
+    {
+    }
+    else
+    {
+      wAux = INT16_MAX;
+    }
+  }
+  else
+  {
+    wAux = -INT16_MAX;
+  }
+
+  hCurrA = (int16_t)(wAux);
+
+  wAux = (int32_t)(pHandle->wPhaseBOffset);
+  wAux -= (int32_t)(ADCx_2->JDR1);
+
+  /* Check saturation */
+  if (wAux > -INT16_MAX)
+  {
+    if (wAux < INT16_MAX)
+    {
+    }
+    else
+    {
+      wAux = INT16_MAX;
+    }
+  }
+  else
+  {
+    wAux = -INT16_MAX;
+  }
+
+  hCurrB = (int16_t)(wAux);
+
+  pStator_Currents->qI_Component1 = hCurrA;
+  pStator_Currents->qI_Component2 = hCurrB;
+
+  pHandle->_Super.hIa = hCurrA;
+  pHandle->_Super.hIb = hCurrB;
+  pHandle->_Super.hIc = -hCurrA - hCurrB;
 }
 //}}}
 
@@ -642,7 +786,7 @@ void R3_4_F30X_Init(PWMC_R3_4_F3_Handle_t *pHandle)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
+void R3_4_F30X_CurrentReadingCalibration (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
@@ -794,7 +938,7 @@ void R3_4_F30X_CurrentReadingCalibration(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval Ia and Ib current in Curr_Components format
  */
-void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
+void R3_4_F30X_GetPhaseCurrents (PWMC_Handle_t* pHdl,Curr_Components* pStator_Currents)
 {
   uint8_t bSector;
   int32_t wAux;
@@ -940,7 +1084,6 @@ void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Cur
 }
 //}}}
 
-
 //{{{
 /**
  * @brief  It turns on low sides switches. This function is intended to be
@@ -949,7 +1092,7 @@ void R3_4_F30X_GetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Cur
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void R3_4_F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
+void R3_4_F30X_TurnOnLowSides (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -986,7 +1129,7 @@ void R3_4_F30X_TurnOnLowSides(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void R3_4_F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
+void R3_4_F30X_SwitchOnPWM (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -1062,7 +1205,7 @@ void R3_4_F30X_SwitchOnPWM(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
+void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -1133,84 +1276,6 @@ void R3_4_F30X_SwitchOffPWM(PWMC_Handle_t *pHdl)
 //__attribute__((section ("ccmram")))
 //{{{
 /**
- * @brief  Stores into the component's handle the voltage present on Ia and
- *         Ib current feedback analog channels when no current is flowing into the
- *         motor
- * @param  pHandle handler of the current instance of the PWM component
- */
-static uint16_t R3_4_F30X_WriteTIMRegisters(PWMC_Handle_t *pHdl)
-{
-  uint16_t hAux,hCCR4Aux;
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
-  pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
-
-  LL_TIM_OC_SetCompareCH1 (TIMx,pHandle->_Super.hCntPhA);
-  LL_TIM_OC_SetCompareCH2 (TIMx,pHandle->_Super.hCntPhB);
-  LL_TIM_OC_SetCompareCH3 (TIMx,pHandle->_Super.hCntPhC);
-  hCCR4Aux = (uint16_t)LL_TIM_OC_GetCompareCH4(TIMx);
-  LL_TIM_OC_DisablePreload(TIMx, LL_TIM_CHANNEL_CH4);
-  LL_TIM_OC_SetCompareCH4 (TIMx,0xFFFFu);
-  LL_TIM_OC_EnablePreload(TIMx, LL_TIM_CHANNEL_CH4);
-  LL_TIM_OC_SetCompareCH4 (TIMx, hCCR4Aux);
-
-  /* Switch Context */
-  if (pDOPAMPParams_str)
-  {
-    pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
-    pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
-  }
-  pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
-  pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
-
-  /* Limit for update event */
-  /* Check the status flag. If an update event has occurred before to set new
-  values of regs the FOC rate is too high */
-  if (LL_TIM_IsActiveFlag_UPDATE(TIMx))
-  {
-    hAux = MC_FOC_DURATION;
-  }
-  else
-  {
-    hAux = MC_NO_ERROR;
-  }
-  if (pHandle->_Super.SWerror == 1u)
-  {
-    hAux = MC_FOC_DURATION;
-    pHandle->_Super.SWerror = 0u;
-  }
-  return hAux;
-}
-//}}}
-
-//__attribute__((section ("ccmram")))
-//{{{
-/**
- * @brief  Configure the ADC for the current sampling during calibration.
- *         It means set the sampling point via TIMx_Ch4 value and polarity
- *         ADC sequence length and channels.
- *         And call the WriteTIMRegisters method.
- * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
- */
-static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
-
-  /* Set CC4 as PWM mode 2 (default) */
-  TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
-  TIMx->CCMR2 |= CCMR2_CH4_PWM2;
-
-  TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - 1u;
-
-  return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
-}
-//}}}
-
-//__attribute__((section ("ccmram")))
-//{{{
-/**
  * @brief  Configure the ADC for the current sampling related to sector 1.
  *         It means set the sampling point via TIMx_Ch4 value and polarity
  *         ADC sequence length and channels.
@@ -1218,7 +1283,7 @@ static uint16_t R3_4_F30X_SetADCSampPointCalibration(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1316,7 +1381,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect2(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect2 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1412,7 +1477,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect2(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect3(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect3 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1509,7 +1574,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect3(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect4(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect4 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1605,7 +1670,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect4(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect5(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect5 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1701,7 +1766,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect5(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_SetADCSampPointSect6 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1794,7 +1859,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect6(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void *R3_4_F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
+void *R3_4_F30X_TIMx_UP_IRQHandler (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   return &(pHandle->_Super.bMotor);
@@ -1808,7 +1873,7 @@ void *R3_4_F30X_TIMx_UP_IRQHandler(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void *R3_4_F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
+void *R3_4_F30X_BRK2_IRQHandler (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
 
@@ -1834,7 +1899,7 @@ void *R3_4_F30X_BRK2_IRQHandler(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void *R3_4_F30X_BRK_IRQHandler(PWMC_Handle_t *pHdl)
+void *R3_4_F30X_BRK_IRQHandler (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
 
@@ -1853,7 +1918,7 @@ void *R3_4_F30X_BRK_IRQHandler(PWMC_Handle_t *pHdl)
  * @param  pHandle Pointer on the target component instance
  * @retval It returns converted value or oxFFFF for conversion error
  */
-uint16_t R3_4_F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
+uint16_t R3_4_F30X_ExecRegularConv (PWMC_Handle_t* pHdl, uint8_t bChannel)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   ADC_TypeDef* ADCx = pHandle->pParams_str->regconvADCx;
@@ -1881,7 +1946,7 @@ uint16_t R3_4_F30X_ExecRegularConv(PWMC_Handle_t *pHdl, uint8_t bChannel)
  * @param  ADC channel, sampling time
  * @retval none
  */
-void R3_4_F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
+void R3_4_F30X_ADC_SetSamplingTime (PWMC_Handle_t* pHdl, ADConv_t ADConv_struct)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   uint32_t tmpreg2 = 0u;
@@ -1929,7 +1994,7 @@ void R3_4_F30X_ADC_SetSamplingTime(PWMC_Handle_t *pHdl, ADConv_t ADConv_struct)
  * @retval uint16_t It returns MC_BREAK_IN whether an overcurrent has been
  *                  detected since last method call, MC_NO_FAULTS otherwise.
  */
-uint16_t R3_4_F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
+uint16_t R3_4_F30X_IsOverCurrentOccurred (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   uint16_t retVal = MC_NO_FAULTS;
@@ -1957,7 +2022,7 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred(PWMC_Handle_t *pHdl)
  * @param  hDuty to be applied in uint16_t
  * @retval none
  */
-void R3_4_F30X_RLDetectionModeEnable(PWMC_Handle_t *pHdl)
+void R3_4_F30X_RLDetectionModeEnable (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -2023,7 +2088,7 @@ void R3_4_F30X_RLDetectionModeEnable(PWMC_Handle_t *pHdl)
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void R3_4_F30X_RLDetectionModeDisable(PWMC_Handle_t *pHdl)
+void R3_4_F30X_RLDetectionModeDisable (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -2116,7 +2181,7 @@ void R3_4_F30X_RLDetectionModeDisable(PWMC_Handle_t *pHdl)
  * @retval It returns the code error 'MC_FOC_DURATION' if any, 'MC_NO_ERROR'
  *         otherwise. These error codes are defined in mc_type.h
  */
-uint16_t R3_4_F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
+uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -2178,75 +2243,5 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty(PWMC_Handle_t *pHdl, uint16_t hDuty)
     pHandle->_Super.SWerror = 0u;
   }
   return hAux;
-}
-//}}}
-
-//__attribute__((section ("ccmram")))
-//{{{
-/**
- * @brief  It computes and return latest converted motor phase currents motor
- *         during RL detection phase
- * @param  pHandle Pointer on the target component instance
- * @retval Ia and Ib current in Curr_Components format
- */
-static void R3_4_F30X_RLGetPhaseCurrents(PWMC_Handle_t *pHdl,Curr_Components* pStator_Currents)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
-  ADC_TypeDef* ADCx_2 = pHandle->pParams_str->ADCx_2;
-  int32_t wAux;
-  int16_t hCurrA = 0, hCurrB = 0;
-
-  /* Clear the flag to indicate the start of FOC algorithm*/
-  LL_TIM_ClearFlag_UPDATE (pHandle->pParams_str->TIMx);
-
-  wAux = (int32_t)(pHandle->wPhaseBOffset);
-  wAux -= (int32_t)(ADCx_1->JDR1);
-
-  /* Check saturation */
-  if (wAux > -INT16_MAX)
-  {
-    if (wAux < INT16_MAX)
-    {
-    }
-    else
-    {
-      wAux = INT16_MAX;
-    }
-  }
-  else
-  {
-    wAux = -INT16_MAX;
-  }
-
-  hCurrA = (int16_t)(wAux);
-
-  wAux = (int32_t)(pHandle->wPhaseBOffset);
-  wAux -= (int32_t)(ADCx_2->JDR1);
-
-  /* Check saturation */
-  if (wAux > -INT16_MAX)
-  {
-    if (wAux < INT16_MAX)
-    {
-    }
-    else
-    {
-      wAux = INT16_MAX;
-    }
-  }
-  else
-  {
-    wAux = -INT16_MAX;
-  }
-
-  hCurrB = (int16_t)(wAux);
-
-  pStator_Currents->qI_Component1 = hCurrA;
-  pStator_Currents->qI_Component2 = hCurrB;
-
-  pHandle->_Super.hIa = hCurrA;
-  pHandle->_Super.hIb = hCurrB;
-  pHandle->_Super.hIc = -hCurrA - hCurrB;
 }
 //}}}
