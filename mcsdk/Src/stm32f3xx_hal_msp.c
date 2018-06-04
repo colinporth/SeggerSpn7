@@ -1,9 +1,9 @@
 #include "stm32f3xx_hal.h"
 
-extern void _Error_Handler(char *, int);
+extern void _Error_Handler(char*, int);
 
 //{{{
-void HAL_MspInit(void)
+void HAL_MspInit()
 {
   __HAL_RCC_SYSCFG_CLK_ENABLE();
 
@@ -27,10 +27,10 @@ void HAL_MspInit(void)
 }
 //}}}
 
-static uint32_t HAL_RCC_ADC12_CLK_ENABLED=0;
+static uint32_t HAL_RCC_ADC12_CLK_ENABLED = 0;
 
 //{{{
-void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
+void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -76,7 +76,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
   }
 //}}}
 //{{{
-void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
+void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc)
 {
 
   if(hadc->Instance==ADC1)
@@ -150,7 +150,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 //}}}
 
 //{{{
-void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
+void HAL_DAC_MspInit (DAC_HandleTypeDef* hdac)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -178,7 +178,7 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
 }
 //}}}
 //{{{
-void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
+void HAL_DAC_MspDeInit (DAC_HandleTypeDef* hdac)
 {
 
   if(hdac->Instance==DAC1)
@@ -203,7 +203,7 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
 //}}}
 
 //{{{
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
+void HAL_TIM_Base_MspInit (TIM_HandleTypeDef* htim_base)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -233,7 +233,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 }
 //}}}
 //{{{
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
+void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -263,7 +263,7 @@ void HAL_TIM_MspPostInit(TIM_HandleTypeDef* htim)
 }
 //}}}
 //{{{
-void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
+void HAL_TIM_Base_MspDeInit (TIM_HandleTypeDef* htim_base)
 {
 
   if(htim_base->Instance==TIM1)
@@ -293,7 +293,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 //}}}
 
 //{{{
-void HAL_UART_MspInit(UART_HandleTypeDef* huart)
+void HAL_UART_MspInit (UART_HandleTypeDef* huart)
 {
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -324,7 +324,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 }
 //}}}
 //{{{
-void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
+void HAL_UART_MspDeInit (UART_HandleTypeDef* huart)
 {
 
   if(huart->Instance==USART2)

@@ -100,7 +100,7 @@ public:
   void setSpeed();
 
   void adcSample (ADC_HandleTypeDef* hadc);
-  void tim6Tick();
+  void stepTick();
   void sysTick();
 
   // state
@@ -125,20 +125,20 @@ private:
   void TIM6_Init();
   void TIM16_Init();
 
-  void nucleoDisableChan();
-  void nucleoEnableInputChan12();
-  void nucleoEnableInputChan13();
-  void nucleoEnableInputChan23();
-  void nucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
-  void nucleoStartPwm();
-  void nucleoStopPwm();
-  void nucleoCurrentRefStart();
-  void nucleoCurrentRefStop();
-  void nucleoCurrentRefSetValue (uint16_t value);
-  void nucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
-  void nucleoLedOn();
-  void nucleoLedOff();
-  void nucleoInit();
+  void ihm07mDisableChan();
+  void ihm07mEnableInputChan12();
+  void ihm07mEnableInputChan13();
+  void ihm07mEnableInputChan23();
+  void ihm07mSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3);
+  void ihm07mStartPwm();
+  void ihm07mStopPwm();
+  void ihm07mCurrentRefStart();
+  void ihm07mCurrentRefStop();
+  void ihm07mCurrentRefSetValue (uint16_t value);
+  void ihm07mAdcChan (ADC_HandleTypeDef* adc, uint32_t chan);
+  void ihm07mLedOn();
+  void ihm07mLedOff();
+  void ihm07mInit();
 
   uint64_t fastSqrt (uint64_t input);
   uint16_t getDemagnValue (uint16_t piReference, int16_t speed);

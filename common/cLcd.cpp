@@ -1,4 +1,5 @@
 // cLcd.cpp
+//{{{  pinouts
 // LCD  PB14 3.3v power
 // SPI2 PB12 CS
 //      PB13 MOSI
@@ -29,7 +30,7 @@
 //              33 PA10 ->WH_PWM                                 PC4 34
 //              35 PA2                                               36
 //              37 PA3                                               38
-
+//}}}
 #include "cLcd.h"
 #include "font.h"
 //{{{  defines
@@ -76,7 +77,6 @@ bool cLcd::init() {
 
   // POWER_PIN hi
   GPIOB->BSRR = POWER_PIN;
-
   //{{{  config VCOM as TIM2 1Hz pwm
   __HAL_RCC_TIM2_CLK_ENABLE();
 
@@ -145,12 +145,13 @@ bool cLcd::init() {
   HAL_DMA_Init (&mSpiTxDma);
   __HAL_LINKDMA (&mSpiHandle, hdmatx, mSpiTxDma);
 
-  HAL_NVIC_SetPriority (DMA1_Channel5_IRQn, 0, 1);
+  //}}}
+
+  HAL_NVIC_SetPriority (DMA1_Channel5_IRQn, 6, 1);
   HAL_NVIC_EnableIRQ (DMA1_Channel5_IRQn);
 
   // SPI2 enable
   SPI2->CR1 |= SPI_CR1_SPE;
-  //}}}
 
   // init frameBuf command : 240 * (lineByte:15bytes:padding) : padding
   const int frameBufLen = 1 + (((getWidth()/8) + 2) * getHeight()) + 1;

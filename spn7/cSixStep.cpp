@@ -1,5 +1,5 @@
 // cSixSTep.cpp
-//{{{  ihm07m1 pins
+//{{{  ihm07m pins
 // CN7           1 PC10 ->Enable_CH1-L6230    Enable_CH2-L6230<- PC11 2
 //               3 PC12 ->Enable_CH3-L6230                       PD2  4
 //               5 VDD                                           E5V  6
@@ -148,7 +148,7 @@ void cSixStep::reset() {
 
   mSysClkFrequency = HAL_RCC_GetSysClockFreq();
 
-  nucleoSetChanCCR (0,0,0);
+  ihm07mSetChanCCR (0,0,0);
 
   mSpeedRef = 0;
   mCurrentReference = 0;
@@ -180,8 +180,8 @@ void cSixStep::reset() {
   mTargetSpeed = TARGET_SPEED;
   setPiParam (&piParam);
 
-  nucleoCurrentRefStart();
-  nucleoCurrentRefSetValue (mStartupCurrent);
+  ihm07mCurrentRefStart();
+  ihm07mCurrentRefSetValue (mStartupCurrent);
 
   rampMotor();
   }
@@ -217,7 +217,7 @@ void cSixStep::startMotor() {
   HAL_ADC_Start_IT (&hAdc2);
   HAL_ADC_Start_IT (&hAdc3);
 
-  nucleoLedOn();
+  ihm07mLedOn();
   }
 //}}}
 //{{{
@@ -225,17 +225,17 @@ void cSixStep::stopMotor (eSixStepStatus status) {
 
   mStatus = status;
 
-  nucleoStopPwm();
+  ihm07mStopPwm();
   hTim1.Instance->CR1 &= ~(TIM_CR1_CEN);
   hTim1.Instance->CNT = 0;
-  nucleoDisableChan();
+  ihm07mDisableChan();
 
   HAL_TIM_Base_Stop_IT (&hTim6);
   HAL_ADC_Stop_IT (&hAdc2);
   HAL_ADC_Stop_IT (&hAdc3);
 
-  nucleoCurrentRefStop();
-  nucleoLedOff();
+  ihm07mCurrentRefStop();
+  ihm07mLedOff();
 
   reset();
   }
@@ -324,7 +324,7 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
           //}}}
           }
       // adc2Sample curr or temp
-      nucleoAdcChan (&hAdc2, mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
+      ihm07mAdcChan (&hAdc2, mAdcIndex ? ADC_CHANNEL_8 : ADC_CHANNEL_7);
       }
     else {
       mAdcValue[mAdcIndex] = HAL_ADC_GetValue (hadc);
@@ -332,10 +332,10 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
       switch (mStep) {
         case 0:
         case 3:
-          nucleoAdcChan (&hAdc2, ADC_CHANNEL_4); break; // adc2Sample bemf3
+          ihm07mAdcChan (&hAdc2, ADC_CHANNEL_4); break; // adc2Sample bemf3
         case 2:
         case 5:
-          nucleoAdcChan (&hAdc2, ADC_CHANNEL_9); break; // adc2Sample bemf1
+          ihm07mAdcChan (&hAdc2, ADC_CHANNEL_9); break; // adc2Sample bemf1
         }
       }
     }
@@ -387,18 +387,18 @@ void cSixStep::adcSample (ADC_HandleTypeDef* hadc) {
           //}}}
           }
       // adc3Sample pot
-      nucleoAdcChan (&hAdc3, ADC_CHANNEL_1);
+      ihm07mAdcChan (&hAdc3, ADC_CHANNEL_1);
       }
     else {
       mAdcValue[2] = HAL_ADC_GetValue (hadc);
       // adc3Sample bemf2
-      nucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+      ihm07mAdcChan (&hAdc3, ADC_CHANNEL_12);
       }
     }
   }
 //}}}
 //{{{
-void cSixStep::tim6Tick() {
+void cSixStep::stepTick() {
 
   mArrLF = __HAL_TIM_GetAutoreload (&hTim6);
 
@@ -414,45 +414,45 @@ void cSixStep::tim6Tick() {
   //{{{  set pwm, bemf for step
   switch (mStep) {
     case 0:
-      nucleoSetChanCCR (mPulseValue, 0, 0);
-      nucleoEnableInputChan12();
+      ihm07mSetChanCCR (mPulseValue, 0, 0);
+      ihm07mEnableInputChan12();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
-        nucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
+        ihm07mAdcChan (&hAdc2, ADC_CHANNEL_4);
       break;
 
     case 1:
-      nucleoSetChanCCR (mPulseValue, 0, 0);
-      nucleoEnableInputChan13();
+      ihm07mSetChanCCR (mPulseValue, 0, 0);
+      ihm07mEnableInputChan13();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
-        nucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+        ihm07mAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 2:
-      nucleoSetChanCCR (0, mPulseValue, 0);
-      nucleoEnableInputChan23();
+      ihm07mSetChanCCR (0, mPulseValue, 0);
+      ihm07mEnableInputChan23();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
-        nucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
+        ihm07mAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
 
     case 3:
-      nucleoSetChanCCR (0, mPulseValue, 0);
-      nucleoEnableInputChan12();
+      ihm07mSetChanCCR (0, mPulseValue, 0);
+      ihm07mEnableInputChan12();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf3
-        nucleoAdcChan (&hAdc2, ADC_CHANNEL_4);
+        ihm07mAdcChan (&hAdc2, ADC_CHANNEL_4);
      break;
 
     case 4:
-      nucleoSetChanCCR (0, 0, mPulseValue);
-      nucleoEnableInputChan13();
+      ihm07mSetChanCCR (0, 0, mPulseValue);
+      ihm07mEnableInputChan13();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf2
-        nucleoAdcChan (&hAdc3, ADC_CHANNEL_12);
+        ihm07mAdcChan (&hAdc3, ADC_CHANNEL_12);
       break;
 
     case 5:
-      nucleoSetChanCCR (0, 0, mPulseValue);
-      nucleoEnableInputChan23();
+      ihm07mSetChanCCR (0, 0, mPulseValue);
+      ihm07mEnableInputChan23();
       if (__HAL_TIM_DIRECTION_STATUS (&hTim1)) // stepChange during downCount, adcSample bemf1
-        nucleoAdcChan (&hAdc2, ADC_CHANNEL_9);
+        ihm07mAdcChan (&hAdc2, ADC_CHANNEL_9);
       break;
      }
   //}}}
@@ -487,7 +487,7 @@ void cSixStep::sysTick() {
 
     hTim6.Init.Period = mArrValue;
     hTim6.Instance->ARR = (uint32_t)hTim6.Init.Period;
-    nucleoStartPwm();
+    ihm07mStartPwm();
     }
     //}}}
 
@@ -519,7 +519,7 @@ void cSixStep::sysTick() {
       if (piParam.Reference < 0)
         ref = -ref;
       mCurrentReference = ref;
-      nucleoCurrentRefSetValue (mCurrentReference);
+      ihm07mCurrentRefSetValue (mCurrentReference);
       }
     mDemagnValue = getDemagnValue (piParam.Reference, speedFiltered);
     }
@@ -551,7 +551,7 @@ void cSixStep::GPIO_Init() {
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
 
-  // config gpio pin PB2 - output ihm07m1 redLed
+  // config gpio pin PB2 - output ihm07m redLed
   GPIO_InitTypeDef gpioInit;
   gpioInit.Pin = GPIO_PIN_2;
   gpioInit.Mode = GPIO_MODE_OUTPUT_PP;
@@ -560,7 +560,7 @@ void cSixStep::GPIO_Init() {
   HAL_GPIO_Init (GPIOB, &gpioInit);
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
 
-  // config gpio PC13 input interrupt - nucleoF303re blueButton
+  // config gpio PC13 input interrupt - ihm07mF303re blueButton
   gpioInit.Pin = GPIO_PIN_13;
   gpioInit.Mode = GPIO_MODE_IT_RISING;
   gpioInit.Pull = GPIO_NOPULL;
@@ -896,7 +896,7 @@ void cSixStep::TIM16_Init() {
 //}}}
 
 //{{{
-void cSixStep::nucleoDisableChan() {
+void cSixStep::ihm07mDisableChan() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET);  // EN1 DISABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET);  // EN2 DISABLE
@@ -904,7 +904,7 @@ void cSixStep::nucleoDisableChan() {
   }
 //}}}
 //{{{
-void cSixStep::nucleoEnableInputChan12() {
+void cSixStep::ihm07mEnableInputChan12() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);    // EN1 ENABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);    // EN2 DISABLE
@@ -912,7 +912,7 @@ void cSixStep::nucleoEnableInputChan12() {
   }
 //}}}
 //{{{
-void cSixStep::nucleoEnableInputChan13() {
+void cSixStep::ihm07mEnableInputChan13() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_SET);   // EN1 ENABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_RESET); // EN2 DISABLE
@@ -920,7 +920,7 @@ void cSixStep::nucleoEnableInputChan13() {
   }
 //}}}
 //{{{
-void cSixStep::nucleoEnableInputChan23() {
+void cSixStep::ihm07mEnableInputChan23() {
 
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_10, GPIO_PIN_RESET); // EN1 DISABLE
   HAL_GPIO_WritePin (GPIOC, GPIO_PIN_11, GPIO_PIN_SET);   // EN2 ENABLE
@@ -928,21 +928,21 @@ void cSixStep::nucleoEnableInputChan23() {
   }
 //}}}
 //{{{
-void cSixStep::nucleoSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3) {
+void cSixStep::ihm07mSetChanCCR (uint16_t value1, uint16_t value2, uint16_t value3) {
   hTim1.Instance->CCR1 = value1;
   hTim1.Instance->CCR2 = value2;
   hTim1.Instance->CCR3 = value3;
   }
 //}}}
 //{{{
-void cSixStep::nucleoStartPwm() {
+void cSixStep::ihm07mStartPwm() {
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_1);  // TIM1_CH1 ENABLE
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_2);  // TIM1_CH2 ENABLE
   HAL_TIM_PWM_Start (&hTim1, TIM_CHANNEL_3);  // TIM1_CH3 ENABLE
   }
 //}}}
 //{{{
-void cSixStep::nucleoStopPwm() {
+void cSixStep::ihm07mStopPwm() {
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_1);  // TIM1_CH1 DISABLE
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_2);  // TIM1_CH2 DISABLE
   HAL_TIM_PWM_Stop (&hTim1, TIM_CHANNEL_3);  // TIM1_CH3 DISABLE
@@ -950,27 +950,27 @@ void cSixStep::nucleoStopPwm() {
 //}}}
 
 //{{{
-void cSixStep::nucleoCurrentRefStart() {
+void cSixStep::ihm07mCurrentRefStart() {
 
   hTim16.Instance->CCR1 = 0;
   HAL_TIM_PWM_Start (&hTim16, TIM_CHANNEL_1);
   }
 //}}}
 //{{{
-void cSixStep::nucleoCurrentRefStop() {
+void cSixStep::ihm07mCurrentRefStop() {
 
   hTim16.Instance->CCR1 = 0;
   HAL_TIM_PWM_Stop (&hTim16, TIM_CHANNEL_1);
   }
 //}}}
 //{{{
-void cSixStep::nucleoCurrentRefSetValue (uint16_t value) {
+void cSixStep::ihm07mCurrentRefSetValue (uint16_t value) {
   hTim16.Instance->CCR1 = (uint32_t)(value * hTim16.Instance->ARR) / 4096;
   }
 //}}}
 
 //{{{
-void cSixStep::nucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan) {
+void cSixStep::ihm07mAdcChan (ADC_HandleTypeDef* adc, uint32_t chan) {
 
   // stop and wait
   adc->Instance->CR |= ADC_CR_ADSTP;
@@ -984,12 +984,12 @@ void cSixStep::nucleoAdcChan (ADC_HandleTypeDef* adc, uint32_t chan) {
 //}}}
 
 //{{{
-void cSixStep::nucleoLedOn() {
+void cSixStep::ihm07mLedOn() {
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
   }
 //}}}
 //{{{
-void cSixStep::nucleoLedOff() {
+void cSixStep::ihm07mLedOff() {
   HAL_GPIO_WritePin (GPIOB, GPIO_PIN_2, GPIO_PIN_RESET);
   }
 //}}}
@@ -1027,7 +1027,7 @@ void cSixStep::rampMotor() {
   if (mStartupStepCount == 0) {
     uint32_t mech_accel_hz = ACCEL * mNumPolePair / 60;
     constant_k = ((uint64_t)100 * (uint64_t)4000000000) / (3 * mech_accel_hz);
-    nucleoCurrentRefSetValue (mStartupCurrent);
+    ihm07mCurrentRefSetValue (mStartupCurrent);
     mTimeVectorPrev = 0;
     }
 

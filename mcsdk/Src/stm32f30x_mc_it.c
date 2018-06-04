@@ -24,7 +24,7 @@ __attribute__((section ("ccmram")))
 #endif
 #endif
 //{{{
-void ADC1_2_IRQHandler(void)
+void ADC1_2_IRQHandler()
 {
   /* USER CODE BEGIN ADC1_2_IRQn 0 */
 
@@ -56,7 +56,7 @@ __attribute__((section ("ccmram")))
   * @param  None
   * @retval None
   */
-void ADC3_IRQHandler(void)
+void ADC3_IRQHandler()
 {
  /* USER CODE BEGIN ADC3_IRQn 0 */
 
@@ -80,7 +80,7 @@ __attribute__((section ("ccmram")))
   * @param  None
   * @retval None
   */
-void ADC4_IRQHandler(void)
+void ADC4_IRQHandler()
 {
  /* USER CODE BEGIN ADC4_IRQn 0 */
 
@@ -98,7 +98,7 @@ void ADC4_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void TIMx_UP_M1_IRQHandler(void)
+void TIMx_UP_M1_IRQHandler()
 {
  /* USER CODE BEGIN TIMx_UP_M1_IRQn 0 */
 
@@ -112,7 +112,7 @@ void TIMx_UP_M1_IRQHandler(void)
 }
 //}}}
 //{{{
-void TIMx_BRK_M1_IRQHandler(void)
+void TIMx_BRK_M1_IRQHandler()
 {
   /* USER CODE BEGIN TIMx_BRK_M1_IRQn 0 */
 
@@ -144,7 +144,7 @@ void TIMx_BRK_M1_IRQHandler(void)
   * @param  None
   * @retval None
   */
-void USART_IRQHandler(void)
+void USART_IRQHandler()
 {
  /* USER CODE BEGIN USART_IRQn 0 */
 
@@ -190,64 +190,39 @@ void USART_IRQHandler(void)
 //}}}
 
 //{{{
-void HardFault_Handler(void)
-{
- /* USER CODE BEGIN HardFault_IRQn 0 */
-
+void HardFault_Handler() {
  /* USER CODE END HardFault_IRQn 0 */
   TSK_HardwareFaultTask();
 
   /* Go to infinite loop when Hard Fault exception occurs */
-  while (1)
-  {
-    {
-      if (LL_USART_IsActiveFlag_ORE(USART)) /* Overrun error occurs */
-      {
-        /* Send Overrun message */
-        UFCP_OVR_IRQ_Handler(&pUSART);
-        LL_USART_ClearFlag_ORE(USART); /* Clear overrun flag */
+  while (1) {
+    if (LL_USART_IsActiveFlag_ORE(USART)) { 
+      /* Overrun error occurs Send Overrun message */
+      UFCP_OVR_IRQ_Handler(&pUSART);
+      LL_USART_ClearFlag_ORE(USART); /* Clear overrun flag */
+      UI_SerialCommunicationTimeOutStop();
+      }
+
+    else if (LL_USART_IsActiveFlag_TXE(USART))
+      UFCP_TX_IRQ_Handler (&pUSART);
+
+    else if (LL_USART_IsActiveFlag_RXNE(USART)) { 
+      /* Valid data have been received */
+      uint16_t retVal;
+      retVal = *(uint16_t*)(UFCP_RX_IRQ_Handler(&pUSART,LL_USART_ReceiveData8(USART)));
+      if (retVal == 1)
+        UI_SerialCommunicationTimeOutStart();
+      if (retVal == 2)
         UI_SerialCommunicationTimeOutStop();
-      }
-      else if (LL_USART_IsActiveFlag_TXE(USART))
-      {
-        UFCP_TX_IRQ_Handler(&pUSART);
-      }
-      else if (LL_USART_IsActiveFlag_RXNE(USART)) /* Valid data have been received */
-      {
-        uint16_t retVal;
-        retVal = *(uint16_t*)(UFCP_RX_IRQ_Handler(&pUSART,LL_USART_ReceiveData8(USART)));
-        if (retVal == 1)
-        {
-          UI_SerialCommunicationTimeOutStart();
-        }
-        if (retVal == 2)
-        {
-          UI_SerialCommunicationTimeOutStop();
-        }
-      }
-      else
-      {
       }
     }
   }
- /* USER CODE BEGIN HardFault_IRQn 1 */
-
- /* USER CODE END HardFault_IRQn 1 */
-
-}
 //}}}
 //{{{
-void SysTick_Handler(void)
-{
-  /* USER CODE BEGIN SysTick_IRQn 0 */
+void SysTick_Handler() {
 
-  /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   HAL_SYSTICK_IRQHandler();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
-  /* USER CODE END SysTick_IRQn 1 */
-    TB_Scheduler();
-  /* USER CODE BEGIN SysTick_IRQn 2 */
-  /* USER CODE END SysTick_IRQn 2 */
-}
+  TB_Scheduler();
+  }
 //}}}

@@ -139,7 +139,7 @@ void HAL_ADC_ConvCpltCallback (ADC_HandleTypeDef* hadc) {
 //{{{
 void HAL_TIM_PeriodElapsedCallback (TIM_HandleTypeDef* htim) {
   if (htim == &gSixStep.hTim6)
-    gSixStep.tim6Tick();
+    gSixStep.stepTick();
   }
 //}}}
 //{{{

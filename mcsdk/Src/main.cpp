@@ -1,6 +1,7 @@
 #include "main.h"
 #include "stm32f3xx_hal.h"
 #include "motorcontrol.h"
+#include "../common/cLcd.h"
 
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
@@ -369,14 +370,11 @@ static void MX_GPIO_Init()
 //}}}
 
 //{{{
-int main()
-{
-  HAL_Init();
+int main() {
 
-  /* Configure the system clock */
+  HAL_Init();
   SystemClock_Config();
 
-  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC1_Init();
   MX_ADC2_Init();
@@ -385,10 +383,18 @@ int main()
   MX_USART2_UART_Init();
   MX_MotorControl_Init();
 
-  /* Initialize interrupts */
   MX_NVIC_Init();
 
-  while (1) {
+  cLcd lcd;
+  lcd.init();
+
+  int loop = 0;
+  while (true) {
+    lcd.clear (cLcd::eOn);
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, "hello colin", cPoint(0,0));
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, "hello " + dec (loop++, 4), cPoint(0,40));
+    //gSixStep.getTraceVec()->draw (&lcd, 80, lcd.getHeight());
+    lcd.present();
     }
-}
+  }
 //}}}

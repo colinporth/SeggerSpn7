@@ -85,7 +85,7 @@
 /** @} */
 
 /** @brief Not initialized pointer */
-#define MC_NULL    (uint16_t)(0x0000u)
+#define MC_NULL    0
 
 /** @name Motor identification macros */
 /** @{ */

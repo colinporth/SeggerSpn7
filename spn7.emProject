@@ -227,7 +227,7 @@
       arm_endian="Little"
       arm_fp_abi="Hard"
       arm_fpu_type="FPv4-SP-D16"
-      arm_linker_heap_size="4096"
+      arm_linker_heap_size="50000"
       arm_linker_process_stack_size="0"
       arm_linker_stack_size="4096"
       arm_simulator_memory_simulation_parameter="RX 08000000,00080000,FFFFFFFF;RWX 20000000,00010000,CDCDCDCD"
@@ -540,5 +540,6 @@
     <file file_name="../common/font36.c" />
     <file file_name="../common/utils.cpp" />
     <file file_name="Src/main.cpp" />
+    <file file_name="../common/cLcd.cpp" />
   </project>
 </solution>
