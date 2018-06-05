@@ -37,7 +37,7 @@
 #include "pwm_curr_fdbk.h"
 #include "mc_type.h"
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief Returns the phase current of the motor as read by the ADC (in s16A unit)
@@ -59,7 +59,7 @@ void PWMC_GetPhaseCurrents (PWMC_Handle_t *pHandle,Curr_Components* pStator_Curr
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  Converts input voltages @f$ V_{\alpha} @f$ and @f$ V_{\beta} @f$ into PWM duty cycles

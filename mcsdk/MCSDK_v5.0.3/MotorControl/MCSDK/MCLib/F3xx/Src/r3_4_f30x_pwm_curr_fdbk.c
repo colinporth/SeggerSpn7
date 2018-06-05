@@ -1,5 +1,4 @@
-// three shunt resistors current sensing topology and 2 ADC peripherals
-// can be used in applications that drive two motors in which case two instances, 4 ADCs being used.
+// 3 shunt resistors current sensing topology, 2 ADC peripherals - 2 motors 2 instances, 4 ADCs
 #include "r3_4_f30x_pwm_curr_fdbk.h"
 #include "mc_type.h"
 
@@ -10,7 +9,6 @@
 #define CCMR2_CH4_PWM2          0x7000u
 #define OPAMP_CSR_DEFAULT_MASK  ((uint32_t)0xFFFFFF93u)
 
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Stores into the component's handle the voltage present on Ia and
@@ -18,7 +16,7 @@
  *         motor
  * @param  pHandle handler of the current instance of the PWM component
  */
-static uint16_t R3_4_F30X_WriteTIMRegisters (PWMC_Handle_t* pHdl) {
+__attribute__((section ("ccmram"))) static uint16_t R3_4_F30X_WriteTIMRegisters (PWMC_Handle_t* pHdl) {
 
   uint16_t hAux, hCCR4Aux;
   PWMC_R3_4_F3_Handle_t* pHandle = (PWMC_R3_4_F3_Handle_t*)pHdl;
@@ -58,8 +56,6 @@ static uint16_t R3_4_F30X_WriteTIMRegisters (PWMC_Handle_t* pHdl) {
   return hAux;
   }
 //}}}
-
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling during calibration.
@@ -69,7 +65,7 @@ static uint16_t R3_4_F30X_WriteTIMRegisters (PWMC_Handle_t* pHdl) {
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-static uint16_t R3_4_F30X_SetADCSampPointCalibration (PWMC_Handle_t* pHdl) {
+__attribute__((section ("ccmram"))) static uint16_t R3_4_F30X_SetADCSampPointCalibration (PWMC_Handle_t* pHdl) {
 
   PWMC_R3_4_F3_Handle_t* pHandle = (PWMC_R3_4_F3_Handle_t*)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
@@ -390,14 +386,13 @@ static void R3_4_F30X_RLSwitchOffPWM (PWMC_Handle_t* pHdl) {
   }
 //}}}
 
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor during RL detection phase
  * @param  pHandle Pointer on the target component instance
  * @retval Ia and Ib current in Curr_Components format
  */
-static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* pStator_Currents) {
+__attribute__((section ("ccmram"))) static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* pStator_Currents) {
 
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
@@ -808,14 +803,13 @@ void R3_4_F30X_CurrentReadingCalibration (PWMC_Handle_t* pHdl)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It computes and return latest converted motor phase currents motor
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval Ia and Ib current in Curr_Components format
  */
-void R3_4_F30X_GetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* pStator_Currents)
+__attribute__((section ("ccmram"))) void R3_4_F30X_GetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* pStator_Currents)
 {
   uint8_t bSector;
   int32_t wAux;
@@ -1121,12 +1115,11 @@ void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl) {
   }
 //}}}
 
-//__attribute__((section ("ccmram")))
 //{{{
 /*  Configure the ADC for the current sampling related to sector 1.
  * It means set the sampling point via TIMx_Ch4 value and polarity  ADC sequence length and channels.
  * And call the WriteTIMRegisters method */
-uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl) {
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl) {
 
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1197,7 +1190,6 @@ uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl) {
   return R3_4_F30X_WriteTIMRegisters (&pHandle->_Super);
   }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 2.
@@ -1205,7 +1197,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl) {
  *         ADC sequence length and channels.
  *         And call the WriteTIMRegisters method.
  */
-uint16_t R3_4_F30X_SetADCSampPointSect2 (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect2 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1290,7 +1282,6 @@ uint16_t R3_4_F30X_SetADCSampPointSect2 (PWMC_Handle_t* pHdl)
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 3.
@@ -1298,7 +1289,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect2 (PWMC_Handle_t* pHdl)
  *         ADC sequence length and channels.
  *         And call the WriteTIMRegisters method.
  */
-uint16_t R3_4_F30X_SetADCSampPointSect3 (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect3 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1384,7 +1375,6 @@ uint16_t R3_4_F30X_SetADCSampPointSect3 (PWMC_Handle_t* pHdl)
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 4.
@@ -1392,7 +1382,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect3 (PWMC_Handle_t* pHdl)
  *         ADC sequence length and channels.
  *         And call the WriteTIMRegisters method.
  */
-uint16_t R3_4_F30X_SetADCSampPointSect4 (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect4 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1477,7 +1467,6 @@ uint16_t R3_4_F30X_SetADCSampPointSect4 (PWMC_Handle_t* pHdl)
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 5.
@@ -1485,7 +1474,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect4 (PWMC_Handle_t* pHdl)
  *         ADC sequence length and channels.
  *         And call the WriteTIMRegisters method.
  */
-uint16_t R3_4_F30X_SetADCSampPointSect5 (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect5 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1570,7 +1559,6 @@ uint16_t R3_4_F30X_SetADCSampPointSect5 (PWMC_Handle_t* pHdl)
   return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
 }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  Configure the ADC for the current sampling related to sector 6.
@@ -1578,7 +1566,7 @@ uint16_t R3_4_F30X_SetADCSampPointSect5 (PWMC_Handle_t* pHdl)
  *         ADC sequence length and channels.
  *         And call the WriteTIMRegisters method.
  */
-uint16_t R3_4_F30X_SetADCSampPointSect6 (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) uint16_t R3_4_F30X_SetADCSampPointSect6 (PWMC_Handle_t* pHdl)
 {
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
@@ -1664,27 +1652,23 @@ uint16_t R3_4_F30X_SetADCSampPointSect6 (PWMC_Handle_t* pHdl)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Update event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void* R3_4_F30X_TIMx_UP_IRQHandler (PWMC_Handle_t* pHdl)
+__attribute__((section ("ccmram"))) void* R3_4_F30X_TIMx_UP_IRQHandler (PWMC_Handle_t* pHdl)
 {
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   return &(pHandle->_Super.bMotor);
 }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Break2 event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void* R3_4_F30X_BRK2_IRQHandler (PWMC_Handle_t* pHdl) {
+__attribute__((section ("ccmram"))) void* R3_4_F30X_BRK2_IRQHandler (PWMC_Handle_t* pHdl) {
 
   PWMC_R3_4_F3_Handle_t* pHandle = (PWMC_R3_4_F3_Handle_t*)pHdl;
 
@@ -1700,14 +1684,13 @@ void* R3_4_F30X_BRK2_IRQHandler (PWMC_Handle_t* pHdl) {
   return &(pHandle->_Super.bMotor);
   }
 //}}}
-//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  It contains the TIMx Break1 event interrupt
  * @param  pHandle: handler of the current instance of the PWM component
  * @retval none
  */
-void* R3_4_F30X_BRK_IRQHandler (PWMC_Handle_t* pHdl) {
+__attribute__((section ("ccmram"))) void* R3_4_F30X_BRK_IRQHandler (PWMC_Handle_t* pHdl) {
 
   PWMC_R3_4_F3_Handle_t* pHandle = (PWMC_R3_4_F3_Handle_t*)pHdl;
 
@@ -1748,7 +1731,6 @@ uint16_t R3_4_F30X_ExecRegularConv (PWMC_Handle_t* pHdl, uint8_t bChannel) {
  * @brief  It sets the specified sampling time for the specified ADC channel
  *         on ADCx. It must be called once for each channel utilized by user
  * @param  ADC channel, sampling time
- * @retval none
  */
 void R3_4_F30X_ADC_SetSamplingTime (PWMC_Handle_t* pHdl, ADConv_t ADConv_struct) {
 

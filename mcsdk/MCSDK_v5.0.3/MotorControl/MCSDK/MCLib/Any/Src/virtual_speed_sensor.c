@@ -52,7 +52,7 @@ void VSS_Clear (VirtualSpeedSensor_Handle_t *pHandle)
   }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
 * @brief  Update the rotor electrical angle integrating the last setled

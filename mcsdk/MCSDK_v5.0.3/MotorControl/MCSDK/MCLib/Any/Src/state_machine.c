@@ -227,7 +227,7 @@ State_t STM_FaultProcessing (STM_Handle_t* pHandle, uint16_t hSetErrors, uint16_
   }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  Returns the current state machine state

@@ -26,13 +26,9 @@ bool UI_SelectMC (UI_Handle_t *pHandle,uint8_t bSelectMC)
 {
   bool retVal = true;
   if (bSelectMC  >= pHandle->bDriveNum)
-  {
     retVal = false;
-  }
   else
-  {
     pHandle->bSelectedDrive = bSelectMC;
-  }
   return retVal;
 }
 //}}}

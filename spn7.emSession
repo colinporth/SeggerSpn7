@@ -830,6 +830,7 @@
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
   <BreakpointListItem trigger="" line="356" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/main.cpp" useHWbreakpoint="false"/>
   <BreakpointListItem trigger="" line="389" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="mcsdk/Src/main.cpp" useHWbreakpoint="false"/>
+  <BreakpointListItem trigger="" line="124" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/mc_tuning.h" useHWbreakpoint="false"/>
   <BreakpointListItem trigger="" line="56" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/X-NUCLEO-IHM07M1.c" useHWbreakpoint="false"/>
  </Breakpoints>
  <ExecutionProfileWindow/>
@@ -880,11 +881,7 @@
   <ProjectSessionItem path="spn7"/>
   <ProjectSessionItem path="spn7;mcsdk"/>
   <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3"/>
-  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;any"/>
-  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;f3xx"/>
   <ProjectSessionItem path="spn7;spn7"/>
-  <ProjectSessionItem path="spn7;spn7;inc"/>
-  <ProjectSessionItem path="spn7;spn7;System Files"/>
  </Project>
  <Register1>
   <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/msp;CPU/psp;CPU/cfbp" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="Hello" decimalNodes="" octalNodes="" unsignedNodes=""/>
@@ -944,10 +941,6 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="114" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/Src/stm32f30x_mc_it.c" selected="0" top="98" codecName=""/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1071" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/F3xx/Src/r3_4_f30x_pwm_curr_fdbk.c" selected="0" top="1055" codecName=""/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="329" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/Src/main.cpp" selected="1" top="313" codecName=""/>
- </Files>
+ <Files/>
  <ARMCrossStudioWindow activeProject="mcsdk" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3711"/>
 </session>

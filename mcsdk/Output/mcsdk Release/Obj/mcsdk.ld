@@ -114,8 +114,20 @@ SECTIONS
 
   . = ASSERT(__rodata_start__ == __rodata_end__ || (__rodata_end__ >= __FLASH_segment_start__ && __rodata_end__ <= __FLASH_segment_end__) , "error: .rodata is too large to fit in FLASH memory segment");
 
-  __ARM.exidx_load_start__ = ALIGN(__rodata_end__ , 4);
-  .ARM.exidx ALIGN(__rodata_end__ , 4) : AT(ALIGN(__rodata_end__ , 4))
+  __ccmram_load_start__ = ALIGN(__rodata_end__ , 4);
+  ccmram ALIGN(__rodata_end__ , 4) : AT(ALIGN(__rodata_end__ , 4))
+  {
+    __ccmram_start__ = .;
+    *(ccmram ccmram.*)
+  }
+  __ccmram_end__ = __ccmram_start__ + SIZEOF(ccmram);
+  __ccmram_size__ = SIZEOF(ccmram);
+  __ccmram_load_end__ = __ccmram_end__;
+
+  . = ASSERT(__ccmram_start__ == __ccmram_end__ || (__ccmram_end__ >= __FLASH_segment_start__ && __ccmram_end__ <= __FLASH_segment_end__) , "error: ccmram is too large to fit in FLASH memory segment");
+
+  __ARM.exidx_load_start__ = ALIGN(__ccmram_end__ , 4);
+  .ARM.exidx ALIGN(__ccmram_end__ , 4) : AT(ALIGN(__ccmram_end__ , 4))
   {
     __ARM.exidx_start__ = .;
     __exidx_start =   __ARM.exidx_start__;

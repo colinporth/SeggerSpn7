@@ -40,21 +40,17 @@
 //}}}
 
 //{{{
-PQD_MotorPowMeas_Handle_t PQD_MotorPowMeasM1 =
-{
-  .wConvFact = PQD_CONVERSION_FACTOR/*!< It is the conversion factor used to convert the
-                                         variables expressed in digit into variables expressed
-                                         in physical measurement unit. It is used to convert
-                                         the power in watts. It must be equal to
-                                         (1000 * 3 * Vdd)/(sqrt(3) * CurrentAmpGain) */
-};
+PQD_MotorPowMeas_Handle_t PQD_MotorPowMeasM1 = {
+  .wConvFact = PQD_CONVERSION_FACTOR  /*!< It is the conversion factor used to convert the
+                                           variables expressed in digit into variables expressed
+                                           in physical measurement unit. It is used to convert
+                                           the power in watts. It must be equal to
+                                          (1000 * 3 * Vdd)/(sqrt(3) * CurrentAmpGain) */
+  };
 //}}}
 PQD_MotorPowMeas_Handle_t* pPQD_MotorPowMeasM1 = &PQD_MotorPowMeasM1;
 
 //{{{
-/**
-  * @brief  PI / PID Speed loop parameters Motor 1
-  */
 PID_Handle_t PIDSpeedHandle_M1 =
 {
   .hDefKpGain          = (int16_t)PID_SPEED_KP_DEFAULT,       /*!< Default Kp gain, used to initialize Kp gain
@@ -97,12 +93,9 @@ PID_Handle_t PIDSpeedHandle_M1 =
   .hDefKdGain           = 0x0000U,
   .hKdDivisor           = 0x0000U,
   .hKdDivisorPOW2       = 0x0000U,
-};
+  };
 //}}}
 //{{{
-/**
-  * @brief  PI / PID Iq loop parameters Motor 1
-  */
 PID_Handle_t PIDIqHandle_M1 =
 {
   .hDefKpGain          = (int16_t)PID_TORQUE_KP_DEFAULT,   /*!< Default Kp gain, used to initialize Kp gain
@@ -145,12 +138,9 @@ PID_Handle_t PIDIqHandle_M1 =
   .hDefKdGain           = 0x0000U,
   .hKdDivisor           = 0x0000U,
   .hKdDivisorPOW2       = 0x0000U,
-};
+  };
 //}}}
 //{{{
-/**
-  * @brief  PI / PID Id loop parameters Motor 1
-  */
 PID_Handle_t PIDIdHandle_M1 =
 {
   .hDefKpGain          = (int16_t)PID_FLUX_KP_DEFAULT,    /*!< Default Kp gain, used to initialize Kp gain
@@ -193,15 +183,11 @@ PID_Handle_t PIDIdHandle_M1 =
   .hDefKdGain           = 0x0000U,
   .hKdDivisor           = 0x0000U,
   .hKdDivisorPOW2       = 0x0000U,
-};
+  };
 //}}}
 
 //{{{
-/**
-  * @brief  SpeednTorque Controller parameters Motor 1
-  */
-SpeednTorqCtrl_Handle_t SpeednTorqCtrlM1 =
-{
+SpeednTorqCtrl_Handle_t SpeednTorqCtrlM1 = {
   .STCFrequencyHz =               MEDIUM_FREQUENCY_TASK_RATE,            /*!< Frequency on which the user updates
                                                                                the torque reference calling
                                                                                STC_CalcTorqueReference method
@@ -238,11 +224,10 @@ SpeednTorqCtrl_Handle_t SpeednTorqCtrlM1 =
                                                                                This value represents actually the
                                                                                Iq current reference expressed in
                                                                                digit.*/
-};
+  };
 //}}}
 //{{{
-RevUpCtrl_Handle_t RevUpControlM1 =
-{
+RevUpCtrl_Handle_t RevUpControlM1 = {
   .hRUCFrequencyHz         = MEDIUM_FREQUENCY_TASK_RATE,         /*!< Frequency expressed in Hz at which the user
                                                                          clocks the RUC calling RUC_Exec method */
   .hStartingMecAngle       = (int16_t)((int32_t)(STARTING_ANGLE_DEG)* 65536/360), /*!< Starting angle of programmed rev up.*/
@@ -270,44 +255,33 @@ RevUpCtrl_Handle_t RevUpControlM1 =
                              {(uint16_t)PHASE4_DURATION,(int16_t)(PHASE4_FINAL_SPEED_RPM/6),(int16_t)PHASE4_FINAL_CURRENT,&RevUpControlM1.ParamsData[4]},
                              {(uint16_t)PHASE5_DURATION,(int16_t)(PHASE5_FINAL_SPEED_RPM/6),(int16_t)PHASE5_FINAL_CURRENT,(void*)MC_NULL},
                             },
-};
+  };
 //}}}
 
 //{{{
-/**
-  * @brief  Internal OPAMP parameters Motor 1 - three shunt - F30x - Independent Resources
-  */
-R3_4_F30XOPAMPParams_t R3_4_F30XOPAMPParamsM1 =
-{
-/* Internal OPAMP1 settings --------------------------------------------------*/
-  .wOPAMP_Selection                       = OPAMP1_SELECTION,         /*!< First OPAMP selection. It must be
-                                                                                     either equal to
-                                                                                     OPAMP_Selection_OPAMP1 or
-                                                                                     OPAMP_Selection_OPAMP3.*/
-
+R3_4_F30XOPAMPParams_t R3_4_F30XOPAMPParamsM1 = {
+  // Internal OPAMP1 settings
+  /*!< First OPAMP selection. It must be ether equal to OPAMP_Selection_OPAMP1 or OPAMP_Selection_OPAMP3.*/
+  .wOPAMP_Selection                       = OPAMP1_SELECTION,        
   .wOPAMP_InvertingInput                  = OPAMP1_INVERTINGINPUT,
   .wOPAMP_NonInvertingInput_PHA           = OPAMP1_NONINVERTINGINPUT_PHA,
   .wOPAMP_NonInvertingInput_PHB           = OPAMP1_NONINVERTINGINPUT_PHB,
-/* Internal OPAMP2 settings --------------------------------------------------*/
-  .wOPAMP2_Selection                       = OPAMP2_SELECTION,                   /*!< Second OPAMP selection. It must be
-                                                                                      either equal to
-                                                                                      OPAMP_Selection_OPAMP2 or
-                                                                                      OPAMP_Selection_OPAMP4.*/
 
+  // Internal OPAMP2 settings 
+  /*!< Second OPAMP selection. It must be either equal to OPAMP_Selection_OPAMP2 or OPAMP_Selection_OPAMP4.*/
+  .wOPAMP2_Selection                       = OPAMP2_SELECTION,                   
   .wOPAMP2_InvertingInput                  = OPAMP2_INVERTINGINPUT,
   .wOPAMP2_NonInvertingInput_PHB           = OPAMP2_NONINVERTINGINPUT_PHB,
   .wOPAMP2_NonInvertingInput_PHC           = OPAMP2_NONINVERTINGINPUT_PHC,
-};
+  };
 //}}}
 //{{{
-// Current sensor parameters Motor 1 - three shunt - F30x - Independent Resources
-R3_4_F30XParams_t R3_4_F30XParamsM1 =
-{
-/* Dual MC parameters --------------------------------------------------------*/
+R3_4_F30XParams_t R3_4_F30XParamsM1 = {
+  // Dual MC parameters
   .bFreqRatio       = FREQ_RATIO,
   .bIsHigherFreqTim = FREQ_RELATION,
 
-/* Current reading A/D Conversions initialization -----------------------------*/
+  // Current reading A/D Conversions initialization
  .ADCx_1 = ADC_1_PERIPH,
  .ADCx_2 = ADC_2_PERIPH,
  .bIaChannel       = PHASE_U_CURR_CHANNEL,
@@ -317,13 +291,13 @@ R3_4_F30XParams_t R3_4_F30XParamsM1 =
  .bIcChannel       = PHASE_W_CURR_CHANNEL,
  .b_IcSamplingTime = SAMPLING_TIME_SEL,
 
-/* PWM generation parameters --------------------------------------------------*/
+  // PWM generation parameters
   .bRepetitionCounter = REP_COUNTER,
   .hTafter            = TW_AFTER,
   .hTbefore           = TW_BEFORE,
   .TIMx               = PWM_TIMER_SELECTION,
 
-/* PWM Driving signals initialization ----------------------------------------*/
+  // PWM Driving signals initialization
  .LowSideOutputs = (LowSideOutputsFunction_t)LOW_SIDE_SIGNALS_ENABLING,
  .pwm_en_u_port      = M1_PWM_EN_U_GPIO_Port,
  .pwm_en_u_pin       = M1_PWM_EN_U_Pin,
@@ -332,13 +306,13 @@ R3_4_F30XParams_t R3_4_F30XParamsM1 =
  .pwm_en_w_port      = M1_PWM_EN_W_GPIO_Port,
  .pwm_en_w_pin       = M1_PWM_EN_W_Pin,
 
-/* Emergency input (BKIN2) signal initialization -----------------------------*/
+  // Emergency input (BKIN2) signal initialization
   .bBKIN2Mode     = BKIN2_MODE,
 
-/* Internal OPAMP common settings --------------------------------------------*/
+  // Internal OPAMP common settings
  .pOPAMPParams = R3_4_OPAMPPARAMSM1,
 
-/* Internal COMP settings ----------------------------------------------------*/
+  // Internal COMP settings
   .wCompOCPASelection     = MC_NULL,
   .bCompOCPAInvInput_MODE = MC_NULL,
   .wCompOCPBSelection     = MC_NULL,
@@ -349,38 +323,35 @@ R3_4_F30XParams_t R3_4_F30XParamsM1 =
   .wCompOVPSelection      = MC_NULL,
   .bCompOVPInvInput_MODE  = MC_NULL,
 
-/* DAC settings --------------------------------------------------------------*/
+  // DAC settings
   .hDAC_OCP_Threshold = OCPREF,
   .hDAC_OVP_Threshold = OVPREF,
 
-/* Regular conversion --------------------------------------------------------*/
+  // Regular conversion
   .regconvADCx = REGCONVADC
-
-};
+  };
 //}}}
-extern R3_4_F30XParams_t R3_4_F30XParamsM1;
 //{{{
-PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
-{
- {
-    .pFctGetPhaseCurrents              = &R3_4_F30X_GetPhaseCurrents,
-    .pFctSwitchOffPwm                  = &R3_4_F30X_SwitchOffPWM,
-    .pFctSwitchOnPwm                   = &R3_4_F30X_SwitchOnPWM,
-    .pFctCurrReadingCalib              = &R3_4_F30X_CurrentReadingCalibration,
-    .pFctTurnOnLowSides                = &R3_4_F30X_TurnOnLowSides,
-    .pFctSetSamplingTime               = &R3_4_F30X_ADC_SetSamplingTime,
-    .pFctSetADCSampPointSect1          = &R3_4_F30X_SetADCSampPointSect1,
-    .pFctSetADCSampPointSect2          = &R3_4_F30X_SetADCSampPointSect2,
-    .pFctSetADCSampPointSect3          = &R3_4_F30X_SetADCSampPointSect3,
-    .pFctSetADCSampPointSect4          = &R3_4_F30X_SetADCSampPointSect4,
-    .pFctSetADCSampPointSect5          = &R3_4_F30X_SetADCSampPointSect5,
-    .pFctSetADCSampPointSect6          = &R3_4_F30X_SetADCSampPointSect6,
-    .pFctRegularConvExec               = &R3_4_F30X_ExecRegularConv,
-    .pFctIsOverCurrentOccurred         = &R3_4_F30X_IsOverCurrentOccurred,
-    .pFctOCPSetReferenceVoltage        = MC_NULL,
-    .pFctRLDetectionModeEnable         = &R3_4_F30X_RLDetectionModeEnable,
-    .pFctRLDetectionModeDisable        = &R3_4_F30X_RLDetectionModeDisable,
-    .pFctRLDetectionModeSetDuty        = &R3_4_F30X_RLDetectionModeSetDuty,
+PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 = {
+     {
+    .pFctGetPhaseCurrents       = &R3_4_F30X_GetPhaseCurrents,
+    .pFctSwitchOffPwm           = &R3_4_F30X_SwitchOffPWM,
+    .pFctSwitchOnPwm            = &R3_4_F30X_SwitchOnPWM,
+    .pFctCurrReadingCalib       = &R3_4_F30X_CurrentReadingCalibration,
+    .pFctTurnOnLowSides         = &R3_4_F30X_TurnOnLowSides,
+    .pFctSetSamplingTime        = &R3_4_F30X_ADC_SetSamplingTime,
+    .pFctSetADCSampPointSect1   = &R3_4_F30X_SetADCSampPointSect1,
+    .pFctSetADCSampPointSect2   = &R3_4_F30X_SetADCSampPointSect2,
+    .pFctSetADCSampPointSect3   = &R3_4_F30X_SetADCSampPointSect3,
+    .pFctSetADCSampPointSect4   = &R3_4_F30X_SetADCSampPointSect4,
+    .pFctSetADCSampPointSect5   = &R3_4_F30X_SetADCSampPointSect5,
+    .pFctSetADCSampPointSect6   = &R3_4_F30X_SetADCSampPointSect6,
+    .pFctRegularConvExec        = &R3_4_F30X_ExecRegularConv,
+    .pFctIsOverCurrentOccurred  = &R3_4_F30X_IsOverCurrentOccurred,
+    .pFctOCPSetReferenceVoltage = MC_NULL,
+    .pFctRLDetectionModeEnable  = &R3_4_F30X_RLDetectionModeEnable,
+    .pFctRLDetectionModeDisable = &R3_4_F30X_RLDetectionModeDisable,
+    .pFctRLDetectionModeSetDuty = &R3_4_F30X_RLDetectionModeSetDuty,
     .hT_Sqrt3 = (PWM_PERIOD_CYCLES*SQRT3FACTOR)/16384u,
     .hSector = 0,
     .hCntPhA = 0,
@@ -401,7 +372,8 @@ PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
     .hDTCompCnt          = DTCOMPCNT,
     .Ton                 = TON,
     .Toff                = TOFF
- },
+     },
+
   .wPhaseAOffset = 0,
   .wPhaseBOffset = 0,
   .wPhaseCOffset = 0,
@@ -409,27 +381,25 @@ PWMC_R3_4_F3_Handle_t PWMC_R3_4_F3_Handle_M1 =
   .wOAMP2CR = 0,
   .Half_PWMPeriod = PWM_PERIOD_CYCLES/2u,
   .hRegConv = 0,
+
   .wADC1_JSQR = 0,
   .wADC2_JSQR = 0,
   .wADC_JSQR_phA = 0,
   .wADC_JSQR_phB = 0,
   .wADC_JSQR_phC = 0,
+
   .bIndex = 0,
   .ADC_ExternalTriggerInjected = 0,
   .OverCurrentFlag = false,
   .OverVoltageFlag = false,
   .BrakeActionLock = false,
   .pParams_str = &R3_4_F30XParamsM1,
-};
+  };
 //}}}
+extern R3_4_F30XParams_t R3_4_F30XParamsM1;
 
 //{{{
-/**
-  * @brief  SpeedNPosition sensor parameters Motor 1 - Base Class
-  */
-VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
-{
-
+VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 = {
   ._Super = {
     .bElToMecRatio                     =  POLE_PAIR_NUM,                /*!< Coefficient used to transform electrical to
                                                                            mechanical quantities and viceversa. It usually
@@ -451,6 +421,7 @@ VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
                                                                                    It's also used to convert measured speed from
                                                                                    tenth of Hz to dpp and viceversa.*/
     },
+
   .hSpeedSamplingFreqHz = MEDIUM_FREQUENCY_TASK_RATE, /*!< Frequency (Hz) at which motor speed is to
                                                             be computed. It must be equal to the frequency
                                                               at which function SPD_CalcAvrgMecSpeed01Hz
@@ -462,141 +433,119 @@ VirtualSpeedSensor_Handle_t VirtualSpeedSensorM1 =
                                   and the FOC Execution Frequency is set to FEF kHz,
                                   then hTransitionSteps = TPH * FEF. If set to zero,
                                   it disables soft transition. It's recommended to
-                                  set TPH as multiple of medium frequency task period
-                              */
-};
+                                  set TPH as multiple of medium frequency task period */
+  };
 //}}}
 
 //{{{
-/**
-  * @brief  SpeedNPosition sensor parameters Motor 1 - State Observer + PLL
-  */
-STO_PLL_Handle_t STO_PLL_M1 =
-{
+STO_PLL_Handle_t STO_PLL_M1 = {
   ._Super = {
-  .bElToMecRatio                     =  POLE_PAIR_NUM,                /*!< Coefficient used to transform electrical to
+  .bElToMecRatio               = POLE_PAIR_NUM,                /*!< Coefficient used to transform electrical to
                                                                            mechanical quantities and viceversa. It usually
                                                                            coincides with motor pole pairs number*/
-    .hMaxReliableMecSpeed01Hz          =  (uint16_t)(1.15*MAX_APPLICATION_SPEED/6), /*< Maximum value of measured speed that is
-                                                                                      considered to be valid. It's expressed
-                                                                                      in tenth of mechanical Hertz.*/
-    .hMinReliableMecSpeed01Hz          =  (uint16_t)(MIN_APPLICATION_SPEED/6),/*< Minimum value of measured speed that is
-                                                                                considered to be valid. It's expressed
-                                                                                in tenth of mechanical Hertz.*/
-    .bMaximumSpeedErrorsNumber         =  MEAS_ERRORS_BEFORE_FAULTS,            /*< Maximum value of not valid measurements
-                                                                                  before an error is reported.*/
-    .hMaxReliableMecAccel01HzP         =  65535,                                 /*< Maximum value of measured acceleration
-                                                                                   that is considered to be valid. It's
-                                                                                   expressed in 01HzP (tenth of Hertz per
-                                                                                   speed calculation period)*/
-    .hMeasurementFrequency             =  TF_REGULATION_RATE,                    /*< Frequency on which the user will request
-                                                                                   a measurement of the rotor electrical angle.
-                                                                                   It's also used to convert measured speed from
-                                                                                   tenth of Hz to dpp and viceversa.*/
+    .hMaxReliableMecSpeed01Hz  = (uint16_t)(1.15*MAX_APPLICATION_SPEED/6), /*< Maximum value of measured speed that is
+                                                                              considered to be valid. It's expressed
+                                                                              in tenth of mechanical Hertz.*/
+    .hMinReliableMecSpeed01Hz  = (uint16_t)(MIN_APPLICATION_SPEED/6),/*< Minimum value of measured speed that is
+                                                                        considered to be valid. It's expressed
+                                                                        in tenth of mechanical Hertz.*/
+    .bMaximumSpeedErrorsNumber = MEAS_ERRORS_BEFORE_FAULTS,            /*< Maximum value of not valid measurements
+                                                                          before an error is reported.*/
+    .hMaxReliableMecAccel01HzP = 65535,                                 /*< Maximum value of measured acceleration
+                                                                           that is considered to be valid. It's
+                                                                           expressed in 01HzP (tenth of Hertz per
+                                                                           speed calculation period)*/
+    .hMeasurementFrequency     = TF_REGULATION_RATE,                    /*< Frequency on which the user will request
+                                                                           a measurement of the rotor electrical angle.
+                                                                           It's also used to convert measured speed from
+                                                                           tenth of Hz to dpp and viceversa.*/
   },
- .hC1                         = C1,                                /*!< State observer constant C1, it can
-                                                                           be computed as F1 * Rs(ohm)/(Ls[H] *
-                                                                           State observer execution rate [Hz])*/
- .hC2                         = C2,                               /*!<  Variable containing state observer
-                                                                           constant C2, it can be computed as
-                                                                           F1 * K1/ State observer execution
-                                                                           rate [Hz] being K1 one of the two
-                                                                           observer gains   */
- .hC3                         = C3,                                /*!< State observer constant C3, it can
-                                                                           be computed as F1 * Max application
-                                                                           speed [rpm] * Motor B-emf constant
-                                                                           [Vllrms/krpm] * sqrt(2)/ (Ls [H] *
-                                                                           max measurable current (A) * State
-                                                                           observer execution rate [Hz])*/
- .hC4                         = C4,                                /*!< State Observer constant C4, it can
-                                                                           be computed as K2 * max measurable
-                                                                           current (A) / (Max application speed
-                                                                           [rpm] * Motor B-emf constant
-                                                                           [Vllrms/krpm] * sqrt(2) * F2 * State
-                                                                           observer execution rate [Hz]) being
-                                                                           K2 one of the two observer gains  */
- .hC5                         = C5,                                /*!< State Observer constant C5, it can
+ .hC1 = C1,                                /*!< State observer constant C1, it can
+                                                   be computed as F1 * Rs(ohm)/(Ls[H] *
+                                                   State observer execution rate [Hz])*/
+ .hC2 = C2,                               /*!<  Variable containing state observer
+                                                   constant C2, it can be computed as
+                                                   F1 * K1/ State observer execution
+                                                   rate [Hz] being K1 one of the two
+                                                   observer gains   */
+ .hC3 = C3,                                /*!< State observer constant C3, it can
+                                                   be computed as F1 * Max application
+                                                   speed [rpm] * Motor B-emf constant
+                                                   [Vllrms/krpm] * sqrt(2)/ (Ls [H] *
+                                                   max measurable current (A) * State
+                                                   observer execution rate [Hz])*/
+ .hC4 = C4,                                /*!< State Observer constant C4, it can
+                                                   be computed as K2 * max measurable
+                                                   current (A) / (Max application speed
+                                                   [rpm] * Motor B-emf constant
+                                                   [Vllrms/krpm] * sqrt(2) * F2 * State
+                                                   observer execution rate [Hz]) being
+                                                   K2 one of the two observer gains  */
+ .hC5 = C5,                                /*!< State Observer constant C5, it can
                                                                            be computed as F1 * max measurable
                                                                            voltage / (2 * Ls [Hz] * max
                                                                            measurable current * State observer
                                                                            execution rate [Hz]) */
- .hF1                         = F1,                                /*!< State observer scaling factor F1 */
- .hF2                         = F2,                                /*!< State observer scaling factor F2 */
+ .hF1 = F1,                                /*!< State observer scaling factor F1 */
+ .hF2 = F2,                                /*!< State observer scaling factor F2 */
  .PIRegulator = {
-     .hDefKpGain = PLL_KP_GAIN,               /*!< Default Kp gain, used to initialize Kp gain
-                                     software variable*/
-     .hDefKiGain = PLL_KI_GAIN,               /*!< Default Ki gain, used to initialize Ki gain
-                                     software variable*/
-   .hDefKdGain = 0x0000U,                /* Derivative term is not used. */
-     .hKpDivisor = PLL_KPDIV,                       /*!< Kp gain divisor, used in conjuction with
-                                     Kp gain allows obtaining fractional values.
-                                     If FULL_MISRA_C_COMPLIANCY is not defined
-                                     the divisor is implemented through
-                                     algebrical right shifts to speed up PI
-                                     execution. Only in this case this parameter
-                                     specifies the number of right shifts to be
-                                     executed */
-     .hKiDivisor = PLL_KIDIV,                     /*!< Ki gain divisor, used in conjuction with
+   .hDefKpGain = PLL_KP_GAIN,        /*!< Default Kp gain, used to initialize Kp gain software variable*/
+   .hDefKiGain = PLL_KI_GAIN,        /*!< Default Ki gain, used to initialize Ki gain software variable*/
+   .hDefKdGain = 0x0000U,            /* Derivative term is not used. */
+   .hKpDivisor = PLL_KPDIV,          /*!< Kp gain divisor, used in conjuction with Kp gain allows obtaining fractional values.
+                                     If FULL_MISRA_C_COMPLIANCY is not defined the divisor is implemented through
+                                     algebrical right shifts to speed up PI execution. Only in this case this parameter
+                                     specifies the number of right shifts to be executed */
+   .hKiDivisor = PLL_KIDIV,          /*!< Ki gain divisor, used in conjuction with
                                      Ki gain allows obtaining fractional values.
-                                     If FULL_MISRA_C_COMPLIANCY is not defined
-                                     the divisor is implemented through
-                                     algebrical right shifts to speed up PI
-                                     execution. Only in this case this parameter
-                                     specifies the number of right shifts to be
-                                     executed */
-   .hKdDivisor = 0x0000U,      /* Derivative term is not used. */
-     .wUpperIntegralLimit = INT32_MAX,                   /*!< Upper limit used to saturate the integral
-                                     term given by Ki / Ki divisor * integral of
-                                     process variable error */
-     .wLowerIntegralLimit = -INT32_MAX,                  /*!< Lower limit used to saturate the integral
-                                     term given by Ki / Ki divisor * integral of
-                                     process variable error */
-     .hUpperOutputLimit = INT16_MAX,                   /*!< Upper limit used to saturate the PI output
-                                     */
-     .hLowerOutputLimit = -INT16_MAX,                  /*!< Lower limit used to saturate the PI output
-                                     */
-     .hKpDivisorPOW2 = PLL_KPDIV_LOG,             /*!< Kp gain divisor expressed as power of 2.
+                                     If FULL_MISRA_C_COMPLIANCY is not defined the divisor is implemented through
+                                     algebrical right shifts to speed up PI execution. Only in this case this parameter
+                                     specifies the number of right shifts to be executed */
+   .hKdDivisor = 0x0000U,            /* Derivative term is not used. */
+   .wUpperIntegralLimit = INT32_MAX, /*!< Upper limit used to saturate the integral
+                                     term given by Ki / Ki divisor * integral of process variable error */
+   .wLowerIntegralLimit = -INT32_MAX,/*!< Lower limit used to saturate the integral
+                                     term given by Ki / Ki divisor * integral of process variable error */
+   .hUpperOutputLimit = INT16_MAX,   /*!< Upper limit used to saturate the PI output */
+   .hLowerOutputLimit = -INT16_MAX,  /*!< Lower limit used to saturate the PI output */
+   .hKpDivisorPOW2 = PLL_KPDIV_LOG,  /*!< Kp gain divisor expressed as power of 2.
                                      E.g. if gain divisor is 512 the value
                                      must be 9 because 2^9 = 512 */
-     .hKiDivisorPOW2 = PLL_KIDIV_LOG,              /*!< Ki gain divisor expressed as power of 2.
-                                     E.g. if gain divisor is 512 the value
-                                     must be 9 because 2^9 = 512 */
-     .hKdDivisorPOW2       = 0x0000U,  /* Derivative term is not used. */
+   .hKiDivisorPOW2 = PLL_KIDIV_LOG,  /*!< Ki gain divisor expressed as power of 2.
+                                     E.g. if gain divisor is 512 the value must be 9 because 2^9 = 512 */
+   .hKdDivisorPOW2       = 0x0000U,  /* Derivative term is not used. */
+   },           /*!< It contains the parameters of the PI object necessary for PLL implementation */
 
-   },           /*!< It contains the parameters of the PI
-                                     object necessary for PLL
-                                     implementation */
-
- .SpeedBufferSize01Hz                =  STO_FIFO_DEPTH_01HZ,              /*!< Depth of FIFO used to average
-                                                                                    estimated speed exported by
-                                                                                    SPD_GetAvrgMecSpeed01Hz. It
-                                                                                    must be an integer number between 1
-                                                                                    and 64 */
- .SpeedBufferSizedpp                 =  STO_FIFO_DEPTH_DPP,               /*!< Depth of FIFO used for both averaging
-                                                                                    estimated speed exported by
-                                                                                    SPD_GetElSpeedDpp and state
-                                                                                    observer equations. It must be an
-                                                                                    integer number between 1 and
-                                                                                    bSpeedBufferSize01Hz */
- .VariancePercentage                 =  PERCENTAGE_FACTOR,                /*!< Parameter expressing the maximum
-                                                                                    allowed variance of speed estimation
-                                                                                    */
- .SpeedValidationBand_H              =  SPEED_BAND_UPPER_LIMIT,           /*!< It expresses how much estimated speed
-                                                                                    can exceed forced stator electrical
-                                                                                    frequency during start-up without
-                                                                                    being considered wrong. The
-                                                                                    measurement unit is 1/16 of forced
-                                                                                    speed */
- .SpeedValidationBand_L              =  SPEED_BAND_LOWER_LIMIT,             /*!< It expresses how much estimated speed
-                                                                                    can be below forced stator electrical
-                                                                                    frequency during start-up without
-                                                                                    being considered wrong. The
-                                                                                    measurement unit is 1/16 of forced
-                                                                                    speed */
- .MinStartUpValidSpeed               =  OBS_MINIMUM_SPEED,                  /*!< Minimum mechanical speed (expressed in
-                                                                                   01Hz required to validate the start-up
+ .SpeedBufferSize01Hz                =  STO_FIFO_DEPTH_01HZ,     /*!< Depth of FIFO used to average
+                                                                           estimated speed exported by
+                                                                           SPD_GetAvrgMecSpeed01Hz. It
+                                                                           must be an integer number between 1
+                                                                           and 64 */
+ .SpeedBufferSizedpp                 =  STO_FIFO_DEPTH_DPP,      /*!< Depth of FIFO used for both averaging
+                                                                           estimated speed exported by
+                                                                           SPD_GetElSpeedDpp and state
+                                                                           observer equations. It must be an
+                                                                           integer number between 1 and
+                                                                           bSpeedBufferSize01Hz */
+ .VariancePercentage                 =  PERCENTAGE_FACTOR,       /*!< Parameter expressing the maximum
+                                                                           allowed variance of speed estimation
+                                                                           */
+ .SpeedValidationBand_H              =  SPEED_BAND_UPPER_LIMIT,  /*!< It expresses how much estimated speed
+                                                                           can exceed forced stator electrical
+                                                                           frequency during start-up without
+                                                                           being considered wrong. The
+                                                                           measurement unit is 1/16 of forced
+                                                                           speed */
+ .SpeedValidationBand_L              =  SPEED_BAND_LOWER_LIMIT,    /*!< It expresses how much estimated speed
+                                                                           can be below forced stator electrical
+                                                                           frequency during start-up without
+                                                                           being considered wrong. The
+                                                                           measurement unit is 1/16 of forced
+                                                                           speed */
+ .MinStartUpValidSpeed               =  OBS_MINIMUM_SPEED,         /*!< Minimum mechanical speed (expressed in
+                                                                          01Hz required to validate the start-up
                                                                                    */
- .StartUpConsistThreshold            =  NB_CONSECUTIVE_TESTS,          /*!< Number of consecutive tests on speed
+ .StartUpConsistThreshold            =  NB_CONSECUTIVE_TESTS,      /*!< Number of consecutive tests on speed
                                                                                     consistency to be passed before
                                                                                     validating the start-up */
  .Reliability_hysteresys             =  OBS_MEAS_ERRORS_BEFORE_FAULTS,        /*!< Number of reliability failed
@@ -627,24 +576,22 @@ STO_PLL_Handle_t STO_PLL_M1 =
  .SpeedBufferSizedppLOG              =  STO_FIFO_DEPTH_DPP_LOG              /*!< bSpeedBufferSizedpp expressed as power of 2.
                                                                                  E.g. if gain divisor is 512 the value
                                                                                  must be 9 because 2^9 = 512 */
-};
+  };
 //}}}
 STO_PLL_Handle_t* pSTO_PLL_M1 = &STO_PLL_M1;
 //{{{
-STO_Handle_t STO_M1 =
-{
+STO_Handle_t STO_M1 = {
   ._Super                        = (SpeednPosFdbk_Handle_t*)&STO_PLL_M1,
   .pFctForceConvergency1         = &STO_PLL_ForceConvergency1,
   .pFctForceConvergency2         = &STO_PLL_ForceConvergency2,
   .pFctStoOtfResetPLL            = &STO_OTF_ResetPLL,
   .pFctSTO_SpeedReliabilityCheck = &STO_PLL_IsVarianceTight
 ,
-};
+  };
 //}}}
 
 //{{{
-NTC_Handle_t TempSensorParamsM1 =
-{
+NTC_Handle_t TempSensorParamsM1 = {
   .bSensorType = REAL_SENSOR,
   .bTsensADChannel         = TEMP_FDBK_CHANNEL,
   .hTsensPort              = M1_TEMPERATURE_GPIO_Port,
@@ -656,7 +603,7 @@ NTC_Handle_t TempSensorParamsM1 =
   .hSensitivity            = (uint16_t)(MCU_SUPPLY_VOLTAGE/dV_dT),
   .wV0                     = (uint16_t)(V0_V *65536/ MCU_SUPPLY_VOLTAGE),
   .hT0                     = T0_C,
-};
+  };
 //}}}
 //{{{
 RDivider_Handle_t RealBusVoltageSensorParamsM1 =
@@ -714,53 +661,45 @@ RDivider_Handle_t RealBusVoltageSensorParamsM1 =
 //}}}
 
 //{{{
-UI_Handle_t UI_Params =
-{
-        .bDriveNum = 0,
-        .pFct_DACInit = &DAC_Init,
-        .pFct_DACExec = &DAC_Exec,
-        .pFctDACSetChannelConfig    = &DAC_SetChannelConfig,
-        .pFctDACGetChannelConfig    = &DAC_GetChannelConfig,
-        .pFctDACSetUserChannelValue = &DAC_SetUserChannelValue,
-        .pFctDACGetUserChannelValue = &DAC_GetUserChannelValue,
-};
+UI_Handle_t UI_Params = {
+  .bDriveNum = 0,
+  .pFct_DACInit = &DAC_Init,
+  .pFct_DACExec = &DAC_Exec,
+  .pFctDACSetChannelConfig    = &DAC_SetChannelConfig,
+  .pFctDACGetChannelConfig    = &DAC_GetChannelConfig,
+  .pFctDACSetUserChannelValue = &DAC_SetUserChannelValue,
+  .pFctDACGetUserChannelValue = &DAC_GetUserChannelValue,
+  };
 //}}}
 //{{{
-DAC_UI_Handle_t DAC_UI_Params =
-{
+DAC_UI_Handle_t DAC_UI_Params = {
   .hDAC_CH1_ENABLED = DEBUG_DAC_CH1,          /*!< Set to ENABLE to assign the channel 1 to the DAC object
                         otherwise set DISABLE */
   .hDAC_CH2_ENABLED = DEBUG_DAC_CH2           /*!< Set to ENABLE to assign the channel 2 to the DAC object
                         otherwise set DISABLE */
-};
+  };
 //}}}
 
 //{{{
-RampExtMngr_Handle_t RampExtMngrHFParamsM1 =
-{
+RampExtMngr_Handle_t RampExtMngrHFParamsM1 = {
   .FrequencyHz = TF_REGULATION_RATE /*!< Execution frequency expressed in Hz */
-};
+  };
 //}}}
 
 //{{{
-/**
-  * @brief  CircleLimitation Component parameters Motor 1 - Base Component
-  */
-CircleLimitation_Handle_t CircleLimitationM1 =
-{
+CircleLimitation_Handle_t CircleLimitationM1 = {
   .MaxModule          = MAX_MODULE,         /*!< Circle limitation maximum allowed
                          module */
   .Circle_limit_table = MMITABLE,         /*!< Circle limitation table */
   .Start_index        = START_INDEX,    /*!< Circle limitation table indexing
                          start */
-};
+  };
 //}}}
 
 //{{{
-UFCP_Handle_t pUSART =
-{
-    ._Super.RxTimeout = 0,
-    .USARTx              = USART,
-    .UIIRQn              = UI_IRQ_USART,
-};
+UFCP_Handle_t pUSART = {
+  ._Super.RxTimeout = 0,
+  .USARTx              = USART,
+  .UIIRQn              = UI_IRQ_USART,
+  };
 //}}}

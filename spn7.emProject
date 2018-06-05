@@ -418,12 +418,8 @@
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/bus_voltage_sensor.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/circle_limitation.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/digital_output.h" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/enc_align_ctrl.h" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/encoder_speed_pos_fdbk.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/feed_forward_ctrl.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/flux_weakening_ctrl.h" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/hall_speed_pos_fdbk.h" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/ics_dd_pwmncurrfdbk.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/inrush_current_limiter.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/max_torque_per_ampere.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/mc_extended_api.h" />
@@ -482,9 +478,6 @@
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/bus_voltage_sensor.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/circle_limitation.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/digital_output.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/enc_align_ctrl.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/encoder_speed_pos_fdbk.c" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/hall_speed_pos_fdbk.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/inrush_current_limiter.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/mc_interface.c" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/mc_irq_handler.c" />

@@ -93,7 +93,7 @@ bool SPD_Check (SpeednPosFdbk_Handle_t* pHandle) {
   }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This method must be called - at least - with the same periodicity

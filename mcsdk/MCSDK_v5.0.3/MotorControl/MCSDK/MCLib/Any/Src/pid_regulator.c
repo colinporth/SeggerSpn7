@@ -32,7 +32,7 @@
  * @param  pHandle: handler of the current instance of the PID component
  * @retval None
  */
-void PID_HandleInit (PID_Handle_t *pHandle)
+void PID_HandleInit (PID_Handle_t* pHandle)
 {
   pHandle->hKpGain =  pHandle->hDefKpGain;
   pHandle->hKiGain =  pHandle->hDefKiGain;
@@ -48,7 +48,7 @@ void PID_HandleInit (PID_Handle_t *pHandle)
  * @param  hKpGain: new Kp gain
  * @retval None
  */
-void PID_SetKP (PID_Handle_t *pHandle, int16_t hKpGain)
+void PID_SetKP (PID_Handle_t* pHandle, int16_t hKpGain)
 {
   pHandle->hKpGain = hKpGain;
 }
@@ -60,7 +60,7 @@ void PID_SetKP (PID_Handle_t *pHandle, int16_t hKpGain)
  * @param  hKiGain: new Ki gain
  * @retval None
  */
-void PID_SetKI (PID_Handle_t *pHandle, int16_t hKiGain)
+void PID_SetKI (PID_Handle_t* pHandle, int16_t hKiGain)
 {
   pHandle->hKiGain = hKiGain;
 }
@@ -71,7 +71,7 @@ void PID_SetKI (PID_Handle_t *pHandle, int16_t hKiGain)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Kp gain
  */
-int16_t PID_GetKP (PID_Handle_t *pHandle)
+int16_t PID_GetKP (PID_Handle_t* pHandle)
 {
   return(pHandle->hKpGain);
 }
@@ -82,7 +82,7 @@ int16_t PID_GetKP (PID_Handle_t *pHandle)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Ki gain
  */
-int16_t PID_GetKI (PID_Handle_t *pHandle)
+int16_t PID_GetKI (PID_Handle_t* pHandle)
 {
   return(pHandle->hKiGain);
 }
@@ -93,7 +93,7 @@ int16_t PID_GetKI (PID_Handle_t *pHandle)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval default Kp gain
  */
-int16_t PID_GetDefaultKP (PID_Handle_t *pHandle)
+int16_t PID_GetDefaultKP (PID_Handle_t* pHandle)
 {
   return(pHandle->hDefKpGain);
 }
@@ -104,7 +104,7 @@ int16_t PID_GetDefaultKP (PID_Handle_t *pHandle)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval default Ki gain
  */
-int16_t PID_GetDefaultKI (PID_Handle_t *pHandle)
+int16_t PID_GetDefaultKI (PID_Handle_t* pHandle)
 {
   return(pHandle->hDefKiGain);
 }
@@ -117,7 +117,7 @@ int16_t PID_GetDefaultKI (PID_Handle_t *pHandle)
  * @param  wIntegralTermValue: new integral term value
  * @retval None
  */
-void PID_SetIntegralTerm (PID_Handle_t *pHandle, int32_t wIntegralTermValue)
+void PID_SetIntegralTerm (PID_Handle_t* pHandle, int32_t wIntegralTermValue)
 {
   pHandle->wIntegralTerm = wIntegralTermValue;
 
@@ -131,7 +131,7 @@ void PID_SetIntegralTerm (PID_Handle_t *pHandle, int32_t wIntegralTermValue)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Kp gain divisor
  */
-uint16_t PID_GetKPDivisor (PID_Handle_t *pHandle)
+uint16_t PID_GetKPDivisor (PID_Handle_t* pHandle)
 {
   return (pHandle->hKpDivisor);
 }
@@ -143,7 +143,7 @@ uint16_t PID_GetKPDivisor (PID_Handle_t *pHandle)
  * @param  hKpDivisorPOW2: new Kp divisor expressed as power of 2
  * @retval None
  */
-void PID_SetKPDivisorPOW2 (PID_Handle_t *pHandle, uint16_t hKpDivisorPOW2)
+void PID_SetKPDivisorPOW2 (PID_Handle_t* pHandle, uint16_t hKpDivisorPOW2)
 {
   pHandle->hKpDivisorPOW2 = hKpDivisorPOW2;
   pHandle->hKpDivisor = ((uint16_t)(1u) << hKpDivisorPOW2);
@@ -155,7 +155,7 @@ void PID_SetKPDivisorPOW2 (PID_Handle_t *pHandle, uint16_t hKpDivisorPOW2)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Ki gain divisor
  */
-uint16_t PID_GetKIDivisor (PID_Handle_t *pHandle)
+uint16_t PID_GetKIDivisor (PID_Handle_t* pHandle)
 {
   return (pHandle->hKiDivisor);
 }
@@ -167,7 +167,7 @@ uint16_t PID_GetKIDivisor (PID_Handle_t *pHandle)
  * @param  hKiDivisorPOW2: new Ki divisor expressed as power of 2
  * @retval None
  */
-void PID_SetKIDivisorPOW2 (PID_Handle_t *pHandle, uint16_t hKiDivisorPOW2)
+void PID_SetKIDivisorPOW2 (PID_Handle_t* pHandle, uint16_t hKiDivisorPOW2)
 {
   int32_t wKiDiv = ((int32_t)(1u) << hKiDivisorPOW2);
   pHandle->hKiDivisorPOW2 = hKiDivisorPOW2;
@@ -184,7 +184,7 @@ void PID_SetKIDivisorPOW2 (PID_Handle_t *pHandle, uint16_t hKiDivisorPOW2)
  * @param  wLowerLimit: new lower integral term limit value
  * @retval None
  */
-void PID_SetLowerIntegralTermLimit (PID_Handle_t *pHandle, int32_t wLowerLimit)
+void PID_SetLowerIntegralTermLimit (PID_Handle_t* pHandle, int32_t wLowerLimit)
 {
   pHandle->wLowerIntegralLimit = wLowerLimit;
 }
@@ -196,7 +196,7 @@ void PID_SetLowerIntegralTermLimit (PID_Handle_t *pHandle, int32_t wLowerLimit)
  * @param  wUpperLimit: new upper integral term limit value
  * @retval None
  */
-void PID_SetUpperIntegralTermLimit (PID_Handle_t *pHandle, int32_t wUpperLimit)
+void PID_SetUpperIntegralTermLimit (PID_Handle_t* pHandle, int32_t wUpperLimit)
 {
   pHandle->wUpperIntegralLimit = wUpperLimit;
 }
@@ -209,7 +209,7 @@ void PID_SetUpperIntegralTermLimit (PID_Handle_t *pHandle, int32_t wUpperLimit)
  * @param  hLowerLimit: new lower output limit value
  * @retval None
  */
-void PID_SetLowerOutputLimit (PID_Handle_t *pHandle, int16_t hLowerLimit)
+void PID_SetLowerOutputLimit (PID_Handle_t* pHandle, int16_t hLowerLimit)
 {
   pHandle->hLowerOutputLimit = hLowerLimit;
 }
@@ -221,7 +221,7 @@ void PID_SetLowerOutputLimit (PID_Handle_t *pHandle, int16_t hLowerLimit)
  * @param  hUpperLimit: new upper output limit value
  * @retval None
  */
-void PID_SetUpperOutputLimit (PID_Handle_t *pHandle, int16_t hUpperLimit)
+void PID_SetUpperOutputLimit (PID_Handle_t* pHandle, int16_t hUpperLimit)
 {
   pHandle->hUpperOutputLimit = hUpperLimit;
 }
@@ -235,7 +235,7 @@ void PID_SetUpperOutputLimit (PID_Handle_t *pHandle, int16_t hUpperLimit)
  * @param  wPrevProcessVarError: New previous error variable
  * @retval None
  */
-void PID_SetPrevError (PID_Handle_t *pHandle, int32_t wPrevProcessVarError)
+void PID_SetPrevError (PID_Handle_t* pHandle, int32_t wPrevProcessVarError)
 {
   pHandle->wPrevProcessVarError = wPrevProcessVarError;
   return;
@@ -249,7 +249,7 @@ void PID_SetPrevError (PID_Handle_t *pHandle, int32_t wPrevProcessVarError)
  * @param  hKdGain: new Kd gain
  * @retval None
  */
-void PID_SetKD (PID_Handle_t *pHandle, int16_t hKdGain)
+void PID_SetKD (PID_Handle_t* pHandle, int16_t hKdGain)
 {
   pHandle->hKdGain = hKdGain;
 }
@@ -261,7 +261,7 @@ void PID_SetKD (PID_Handle_t *pHandle, int16_t hKdGain)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Kd gain
  */
-int16_t PID_GetKD (PID_Handle_t *pHandle)
+int16_t PID_GetKD (PID_Handle_t* pHandle)
 {
   return pHandle->hKdGain;
 }
@@ -272,7 +272,7 @@ int16_t PID_GetKD (PID_Handle_t *pHandle)
  * @param  pHandle: handler of the current instance of the PID component
  * @retval Kd gain divisor
  */
-uint16_t PID_GetKDDivisor (PID_Handle_t *pHandle)
+uint16_t PID_GetKDDivisor (PID_Handle_t* pHandle)
 {
   return (pHandle->hKdDivisor);
 }
@@ -286,7 +286,7 @@ uint16_t PID_GetKDDivisor (PID_Handle_t *pHandle)
 void PID_SetKDDivisorPOW2 (PID_Handle_t* pHandle, uint16_t hKdDivisorPOW2 );
 
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  This function compute the output of a PI regulator sum of its
@@ -381,7 +381,7 @@ int16_t PI_Controller (PID_Handle_t* pHandle, int32_t wProcessVarError)
 //}}}
 
 #if 0
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  This function compute the output of a PID regulator sum of its

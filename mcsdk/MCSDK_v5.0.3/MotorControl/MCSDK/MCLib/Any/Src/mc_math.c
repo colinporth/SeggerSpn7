@@ -46,7 +46,7 @@
 
 const int16_t hSin_Cos_Table[256] = SIN_COS_TABLE;
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator currents Ia and qIb (which are
@@ -110,7 +110,7 @@ Curr_Components MCM_Clarke (Curr_Components Curr_Input)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator currents Ialpha and Ibeta, which
@@ -210,7 +210,7 @@ Curr_Components MCM_Park (Curr_Components Curr_Input, int16_t Theta)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function transforms stator voltage qVq and qVd, that belong to
@@ -259,7 +259,7 @@ Volt_Components MCM_Rev_Park (Volt_Components Volt_Input, int16_t Theta)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function returns cosine and sine functions of the angle fed in
@@ -309,7 +309,7 @@ Trig_Components MCM_Trig_Functions (int16_t hAngle)
 }
 //}}}
 
-//__attribute__((section ("ccmram")))
+__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  It calculates the square root of a non-negative int32_t. It returns 0
