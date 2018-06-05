@@ -5,7 +5,6 @@
   * @brief  Initializes all the object variables, usually it has to be called
   *         once right after object creation.
   * @param pHandle pointer on the component instance to initialize.
-  * @retval none.
   */
 void STM_Init (STM_Handle_t* pHandle) {
 
@@ -186,13 +185,11 @@ bool STM_NextState (STM_Handle_t* pHandle, State_t bState) {
 
   if (bChangeState)
     pHandle->bState = bNewState;
-  else {
-    if (!((bState == IDLE_START) || (bState == IDLE_ALIGNMENT) || (bState == ANY_STOP)))
-      /* If new state is not a user command START/STOP raise a software error */
-      STM_FaultProcessing(pHandle, MC_SW_ERROR, 0u);
-    }
+  else if (!((bState == IDLE_START) || (bState == IDLE_ALIGNMENT) || (bState == ANY_STOP)))
+    /* If new state is not a user command START/STOP raise a software error */
+    STM_FaultProcessing(pHandle, MC_SW_ERROR, 0u);
 
-  return(bChangeState);
+  return bChangeState;
   }
 //}}}
 //{{{
@@ -263,7 +260,7 @@ bool STM_FaultAcknowledged (STM_Handle_t* pHandle) {
     bToBeReturned = true;
     }
 
-  return(bToBeReturned);
+  return bToBeReturned;
   }
 //}}}
 //{{{
@@ -281,7 +278,7 @@ bool STM_FaultAcknowledged (STM_Handle_t* pHandle) {
 uint32_t STM_GetFaultState (STM_Handle_t* pHandle) {
 
   uint32_t LocalFaultState = (uint32_t)(pHandle->hFaultOccurred);
-  LocalFaultState |= (uint32_t)(pHandle->hFaultNow)<<16;
+  LocalFaultState = (uint32_t)(pHandle->hFaultNow)<<16;
   return LocalFaultState;
- }
+  }
 //}}}
