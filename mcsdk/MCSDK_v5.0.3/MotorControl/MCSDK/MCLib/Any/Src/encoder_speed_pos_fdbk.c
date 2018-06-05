@@ -1,8 +1,3 @@
-#include "encoder_speed_pos_fdbk.h"
-#include "mc_irq_handler.h"
-#include "mc_library_isr_priority_conf.h"
-#include "mc_type.h"
-
 //{{{
 /** @defgroup Encoder Encoder Speed & Position Feedback
   * @brief Quadrature Encoder based Speed & Position Feedback implementation
@@ -11,6 +6,11 @@
   * the position of the rotor of the motor.
   */
 //}}}
+#include "encoder_speed_pos_fdbk.h"
+#include "mc_irq_handler.h"
+#include "mc_library_isr_priority_conf.h"
+#include "mc_type.h"
+
 //{{{
 /**
   * @brief  It initializes the hardware peripherals (TIMx, GPIO and NVIC)

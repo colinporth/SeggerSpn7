@@ -1,14 +1,14 @@
 #include "circle_limitation.h"
 #include "mc_type.h"
 
-Volt_Components Circle_Limitation (CircleLimitation_Handle_t *pHandle, Volt_Components Vqd) {
+Volt_Components Circle_Limitation (CircleLimitation_Handle_t* pHandle, Volt_Components Vqd) {
 
   Volt_Components local_vqd = Vqd;
 
   int32_t sw_temp = (int32_t)(Vqd.qV_Component1) * Vqd.qV_Component1 +
                     (int32_t)(Vqd.qV_Component2) * Vqd.qV_Component2;
 
-  uint32_t uw_temp = (uint32_t) sw_temp;
+  uint32_t uw_temp = (uint32_t)sw_temp;
 
   /* uw_temp min value 0, max value 2*32767*32767 */
   if (uw_temp > (uint32_t)(pHandle->MaxModule) * pHandle->MaxModule) {
@@ -27,5 +27,5 @@ Volt_Components Circle_Limitation (CircleLimitation_Handle_t *pHandle, Volt_Comp
     local_vqd.qV_Component2 = (int16_t)(sw_temp/32768);
     }
 
-  return(local_vqd);
+  return local_vqd;
   }

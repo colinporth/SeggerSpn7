@@ -1,4 +1,3 @@
-#include "ntc_temperature_sensor.h"
 //{{{
 /** @defgroup TemperatureSensor NTC Temperature Sensor
   * @brief Allows to read the temperature of the heat sink
@@ -25,6 +24,7 @@
   * @{
   */
 //}}}
+#include "ntc_temperature_sensor.h"
 
 uint16_t NTC_SetFaultState(NTC_Handle_t *pHandle);
 

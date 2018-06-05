@@ -1,5 +1,3 @@
-#include "mc_irq_handler.h"
-#include <stddef.h>
 //{{{
 /** @defgroup MC_IRQ_HANDLER Motor Control IRQ Handler
   * @brief Performs registration and execution of Interrupts handlers used for Motor Control
@@ -44,10 +42,12 @@
   * @{
   */
 //}}}
+#include "mc_irq_handler.h"
+#include <stddef.h>
 
 typedef struct {
   MCIRQ_Handler_t Handler;
-  void *           Handle;
+  void*           Handle;
   } MCIRQ_HandlerConfigItem_t;
 
 #define MCIRQ_MAX_HANDLERS 4

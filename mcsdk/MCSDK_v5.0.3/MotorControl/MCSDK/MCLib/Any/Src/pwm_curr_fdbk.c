@@ -1,5 +1,3 @@
-#include "pwm_curr_fdbk.h"
-#include "mc_type.h"
 //{{{
 
 /** @defgroup pwm_curr_fdbk PWM & Current Feedback
@@ -36,6 +34,8 @@
   * @{
   */
 //}}}
+#include "pwm_curr_fdbk.h"
+#include "mc_type.h"
 
 //__attribute__((section ("ccmram")))
 //{{{

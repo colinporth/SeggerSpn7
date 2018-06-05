@@ -138,23 +138,6 @@ void MC_StopMotor1() {
 
 //{{{
 /**
-  * @brief  Returns the status of the last buffered command for Motor 1.
-  * The status can be one of the following values:
-  * - #MCI_BUFFER_EMPTY: no buffered command is currently programmed.
-  * - #MCI_COMMAND_NOT_ALREADY_EXECUTED: A command has been buffered but the conditions for its
-  *   execution have not occurred yet. The command is still in the buffer, pending execution.
-  * - #MCI_COMMAND_EXECUTED_SUCCESFULLY: the last buffered command has been executed successfully.
-  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
-  * - #MCI_COMMAND_EXECUTED_UNSUCCESFULLY: the buffered command has been executed unsuccessfully.
-  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
-  */
-MCI_CommandState_t MC_GetCommandStateMotor1() {
-
-  return MCI_IsCommandAcknowledged (pMCI[M1]);
-  }
-//}}}
-//{{{
-/**
  * @brief Stops the execution of the on-going speed ramp for Motor 1, if any.
  *
  *  If a speed ramp is currently being executed, it is immediately stopped, the rotation
@@ -175,6 +158,23 @@ bool MC_HasRampCompletedMotor1()
   return MCI_RampCompleted( pMCI[M1] );
 }
 
+//}}}
+
+//{{{
+/**
+  * @brief  Returns the status of the last buffered command for Motor 1.
+  * The status can be one of the following values:
+  * - #MCI_BUFFER_EMPTY: no buffered command is currently programmed.
+  * - #MCI_COMMAND_NOT_ALREADY_EXECUTED: A command has been buffered but the conditions for its
+  *   execution have not occurred yet. The command is still in the buffer, pending execution.
+  * - #MCI_COMMAND_EXECUTED_SUCCESFULLY: the last buffered command has been executed successfully.
+  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
+  * - #MCI_COMMAND_EXECUTED_UNSUCCESFULLY: the buffered command has been executed unsuccessfully.
+  *   In this case calling this function reset the command state to #BC_BUFFER_EMPTY.
+  */
+MCI_CommandState_t MC_GetCommandStateMotor1() {
+  return MCI_IsCommandAcknowledged (pMCI[M1]);
+  }
 //}}}
 
 //{{{

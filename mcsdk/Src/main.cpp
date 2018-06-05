@@ -1,6 +1,7 @@
 #include "main.h"
 #include "stm32f3xx_hal.h"
 #include "motorcontrol.h"
+#include "mc_api.h"
 #include "../common/cLcd.h"
 
 ADC_HandleTypeDef hadc1;
@@ -344,11 +345,17 @@ int main() {
   cLcd lcd;
   lcd.init();
 
-  int loop = 0;
   while (true) {
     lcd.clear (cLcd::eOn);
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, "hello colin", cPoint(0,0));
-    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft, "hello " + dec (loop++, 4), cPoint(0,40));
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+                    "hello colin" + dec (MC_GetLastRampFinalSpeedMotor1(), 4),
+                    cPoint(0,0));
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+                    "speed " + dec (MC_GetMecSpeedAverageMotor1(), 4),
+                    cPoint(0,40));
+    lcd.drawString (cLcd::eOff, cLcd::eBig, cLcd::eLeft,
+                    "speed " + dec (MC_GetCommandStateMotor1(), 4),
+                    cPoint(0,80));
     //gSixStep.getTraceVec()->draw (&lcd, 80, lcd.getHeight());
     lcd.present();
     }

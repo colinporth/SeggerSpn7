@@ -154,8 +154,8 @@ static void R3_4_F30X_SetAOReferenceVoltage (uint32_t DAC_Channel, uint16_t hDAC
   }
 //}}}
 //{{{
-static uint32_t R3_4_F30X_ADC_InjectedChannelConfig (ADC_TypeDef* ADCx, uint8_t ADC_Channel, uint8_t Rank, 
-    uint8_t ADC_SampleTime, uint8_t SequencerLength, 
+static uint32_t R3_4_F30X_ADC_InjectedChannelConfig (ADC_TypeDef* ADCx, uint8_t ADC_Channel, uint8_t Rank,
+    uint8_t ADC_SampleTime, uint8_t SequencerLength,
     uint16_t ADC_ExternalTriggerInjectedPolarity, uint16_t ADC_ExternalTriggerInjected) {
 
   uint32_t tmpreg1 = 0u, tmpreg2 = 0u, tmpregA = 0u;
@@ -393,8 +393,7 @@ static void R3_4_F30X_RLSwitchOffPWM (PWMC_Handle_t* pHdl) {
 //__attribute__((section ("ccmram")))
 //{{{
 /**
- * @brief  It computes and return latest converted motor phase currents motor
- *         during RL detection phase
+ * @brief  It computes and return latest converted motor phase currents motor during RL detection phase
  * @param  pHandle Pointer on the target component instance
  * @retval Ia and Ib current in Curr_Components format
  */
@@ -415,10 +414,10 @@ static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* 
   /* Check saturation */
   if (wAux > -INT16_MAX) {
     if (wAux < INT16_MAX) {
-    }
+      }
     else {
       wAux = INT16_MAX;
-     }
+      }
     }
   else {
     wAux = -INT16_MAX;
@@ -431,7 +430,7 @@ static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* 
   /* Check saturation */
   if (wAux > -INT16_MAX) {
     if (wAux < INT16_MAX) {
-    }
+      }
     else {
       wAux = INT16_MAX;
       }
@@ -453,12 +452,10 @@ static void R3_4_F30X_RLGetPhaseCurrents (PWMC_Handle_t* pHdl, Curr_Components* 
 
 //{{{
 /**
- * @brief  It initializes TIMx, ADC, GPIO, and NVIC for current reading
- *         in three shunt topology using STM32F30x
+ * @brief  It initializes TIMx, ADC, GPIO, and NVIC for current reading in three shunt topology using STM32F30x
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void R3_4_F30X_Init (PWMC_R3_4_F3_Handle_t *pHandle) {
+void R3_4_F30X_Init (PWMC_R3_4_F3_Handle_t* pHandle) {
 
   pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -472,22 +469,21 @@ void R3_4_F30X_Init (PWMC_R3_4_F3_Handle_t *pHandle) {
   if ((uint32_t)pHandle == (uint32_t)&pHandle->_Super) {
     /* disable IT and flags in case of LL driver usage
      * workaround for unwanted interrupt enabling done by LL driver */
-    LL_ADC_DisableIT_EOC(ADCx_1);
-    LL_ADC_ClearFlag_EOC(ADCx_1);
-    LL_ADC_DisableIT_JEOC(ADCx_1);
-    LL_ADC_ClearFlag_JEOC(ADCx_1);
-    LL_ADC_DisableIT_EOC(ADCx_2);
-    LL_ADC_ClearFlag_EOC(ADCx_2);
-    LL_ADC_DisableIT_JEOC(ADCx_2);
-    LL_ADC_ClearFlag_JEOC(ADCx_2);
-    LL_ADC_DisableIT_EOC(pHandle->pParams_str->regconvADCx);
-    LL_ADC_ClearFlag_EOC(pHandle->pParams_str->regconvADCx);
-    LL_ADC_DisableIT_JEOC(pHandle->pParams_str->regconvADCx);
-    LL_ADC_ClearFlag_JEOC(pHandle->pParams_str->regconvADCx);
+    LL_ADC_DisableIT_EOC (ADCx_1);
+    LL_ADC_ClearFlag_EOC (ADCx_1);
+    LL_ADC_DisableIT_JEOC (ADCx_1);
+    LL_ADC_ClearFlag_JEOC (ADCx_1);
+    LL_ADC_DisableIT_EOC (ADCx_2);
+    LL_ADC_ClearFlag_EOC (ADCx_2);
+    LL_ADC_DisableIT_JEOC (ADCx_2);
+    LL_ADC_ClearFlag_JEOC (ADCx_2);
+    LL_ADC_DisableIT_EOC (pHandle->pParams_str->regconvADCx);
+    LL_ADC_ClearFlag_EOC (pHandle->pParams_str->regconvADCx);
+    LL_ADC_DisableIT_JEOC (pHandle->pParams_str->regconvADCx);
+    LL_ADC_ClearFlag_JEOC (pHandle->pParams_str->regconvADCx);
 
-    /* disable main TIM counter to ensure
-     * a synchronous start by TIM2 trigger */
-    LL_TIM_DisableCounter(TIMx);
+    /* disable main TIM counter to ensure a synchronous start by TIM2 trigger */
+    LL_TIM_DisableCounter (TIMx);
 
     if (TIMx == TIM1)
       pHandle->ADC_ExternalTriggerInjected = LL_ADC_INJ_TRIG_EXT_TIM1_TRGO;
@@ -495,15 +491,15 @@ void R3_4_F30X_Init (PWMC_R3_4_F3_Handle_t *pHandle) {
       pHandle->ADC_ExternalTriggerInjected = LL_ADC_INJ_TRIG_EXT_TIM8_TRGO;
 
     if ((pHandle->pParams_str->bBKIN2Mode) != NONE)
-      LL_TIM_ClearFlag_BRK2(TIMx);
-    LL_TIM_EnableIT_BRK(TIMx);
+      LL_TIM_ClearFlag_BRK2 (TIMx);
+    LL_TIM_EnableIT_BRK (TIMx);
 
     if(TIMx == TIM1)
       /* TIM1 Counter Clock stopped when the core is halted */
-      LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM1_STOP);
+      LL_DBGMCU_APB2_GRP1_FreezePeriph (LL_DBGMCU_APB2_GRP1_TIM1_STOP);
     else
       /* TIM8 Counter Clock stopped when the core is halted */
-      LL_DBGMCU_APB2_GRP1_FreezePeriph(LL_DBGMCU_APB2_GRP1_TIM8_STOP);
+      LL_DBGMCU_APB2_GRP1_FreezePeriph (LL_DBGMCU_APB2_GRP1_TIM8_STOP);
 
     /* Prepare timer for synchronization */
     LL_TIM_GenerateEvent_UPDATE(TIMx);
@@ -511,146 +507,143 @@ void R3_4_F30X_Init (PWMC_R3_4_F3_Handle_t *pHandle) {
       if (pHandle->pParams_str->bIsHigherFreqTim == HIGHER_FREQ) {
         if (pHandle->pParams_str->bRepetitionCounter == 3u) {
           /* Set TIMx repetition counter to 1 */
-          LL_TIM_SetRepetitionCounter(TIMx, 1);
-          LL_TIM_GenerateEvent_UPDATE(TIMx);
+          LL_TIM_SetRepetitionCounter (TIMx, 1);
+          LL_TIM_GenerateEvent_UPDATE (TIMx);
           /* Repetition counter will be set to 3 at next Update */
-          LL_TIM_SetRepetitionCounter(TIMx, 3);
+          LL_TIM_SetRepetitionCounter (TIMx, 3);
           }
         }
-      LL_TIM_SetCounter(TIMx, (uint32_t)(pHandle->Half_PWMPeriod)-1u);
+      LL_TIM_SetCounter (TIMx, (uint32_t)(pHandle->Half_PWMPeriod)-1u);
       }
     else {
       /* bFreqRatio equal to 1 or 3 */
       if (pHandle->_Super.bMotor == M1) {
-        if(pHandle->pParams_str->bRepetitionCounter == 1u) 
-          LL_TIM_SetCounter(TIMx, (uint32_t)(pHandle->Half_PWMPeriod)-1u);
+        if(pHandle->pParams_str->bRepetitionCounter == 1u)
+          LL_TIM_SetCounter (TIMx, (uint32_t)(pHandle->Half_PWMPeriod)-1u);
         else if (pHandle->pParams_str->bRepetitionCounter == 3u) {
           /* Set TIMx repetition counter to 1 */
-          LL_TIM_SetRepetitionCounter(TIMx, 1);
-          LL_TIM_GenerateEvent_UPDATE(TIMx);
+          LL_TIM_SetRepetitionCounter (TIMx, 1);
+          LL_TIM_GenerateEvent_UPDATE (TIMx);
           /* Repetition counter will be set to 3 at next Update */
-          LL_TIM_SetRepetitionCounter(TIMx, 3);
+          LL_TIM_SetRepetitionCounter (TIMx, 3);
           }
         }
       }
 
     if (pDOPAMPParams_str) {
-      LL_OPAMP_Enable(pDOPAMPParams_str->wOPAMP_Selection);
-      LL_OPAMP_Enable(pDOPAMPParams_str->wOPAMP2_Selection);
+      LL_OPAMP_Enable (pDOPAMPParams_str->wOPAMP_Selection);
+      LL_OPAMP_Enable (pDOPAMPParams_str->wOPAMP2_Selection);
       }
 
     /* Over current protection phase A */
     if (COMP_OCPAx) {
       /* Inverting input*/
       if (pHandle->pParams_str->bCompOCPAInvInput_MODE != EXT_MODE) {
-        if (LL_COMP_GetInputMinus(COMP_OCPAx) == LL_COMP_INPUT_MINUS_DAC1_CH1)
-          R3_4_F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_1, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
-        else if (LL_COMP_GetInputMinus(COMP_OCPAx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
-          R3_4_F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
+        if (LL_COMP_GetInputMinus (COMP_OCPAx) == LL_COMP_INPUT_MINUS_DAC1_CH1)
+          R3_4_F30X_SetAOReferenceVoltage (LL_DAC_CHANNEL_1, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
+        else if (LL_COMP_GetInputMinus (COMP_OCPAx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
+          R3_4_F30X_SetAOReferenceVoltage (LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OCP_Threshold));
         }
 
       /* Wait to stabilize DAC voltage */
       {
         volatile uint16_t waittime = 0u;
-        for (waittime=0u;waittime<1000u;waittime++) {}
+        for (waittime = 0u; waittime < 1000u; waittime++) {}
       }
 
       /* Output */
       LL_COMP_Enable (COMP_OCPAx);
-      LL_COMP_Lock(COMP_OCPAx);
+      LL_COMP_Lock (COMP_OCPAx);
       }
 
     /* Over current protection phase B */
     if (COMP_OCPBx) {
       /* Output */
       LL_COMP_Enable (COMP_OCPBx);
-      LL_COMP_Lock(COMP_OCPBx);
+      LL_COMP_Lock (COMP_OCPBx);
       }
 
     /* Over current protection phase C */
     if (COMP_OCPCx) {
       /* Output */
       LL_COMP_Enable (COMP_OCPCx);
-      LL_COMP_Lock(COMP_OCPCx);
+      LL_COMP_Lock (COMP_OCPCx);
       }
 
     /* Over voltage protection */
     if (COMP_OVPx) {
       /* Inverting input*/
       if (pHandle->pParams_str->bCompOVPInvInput_MODE != EXT_MODE) {
-        if (LL_COMP_GetInputMinus(COMP_OVPx) == LL_COMP_INPUT_MINUS_DAC1_CH1) 
+        if (LL_COMP_GetInputMinus (COMP_OVPx) == LL_COMP_INPUT_MINUS_DAC1_CH1)
           R3_4_F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_1, (uint16_t)(pHandle->pParams_str->hDAC_OVP_Threshold));
-        else if (LL_COMP_GetInputMinus(COMP_OVPx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
-          R3_4_F30X_SetAOReferenceVoltage(LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OVP_Threshold));
+        else if (LL_COMP_GetInputMinus (COMP_OVPx) == LL_COMP_INPUT_MINUS_DAC1_CH2)
+          R3_4_F30X_SetAOReferenceVoltage (LL_DAC_CHANNEL_2, (uint16_t)(pHandle->pParams_str->hDAC_OVP_Threshold));
         }
 
       /* Wait to stabilize DAC voltage */
       {
         volatile uint16_t waittime = 0u;
-        for(waittime=0u;waittime<1000u;waittime++) {}
-      }
-      /* Output */
-      LL_COMP_Enable (COMP_OVPx);
-      LL_COMP_Lock(COMP_OVPx);
+        for (waittime = 0u; waittime < 1000u; waittime++) {}
       }
 
-    LL_ADC_EnableInternalRegulator(ADCx_1);
-    LL_ADC_EnableInternalRegulator(ADCx_2);
+      /* Output */
+      LL_COMP_Enable (COMP_OVPx);
+      LL_COMP_Lock (COMP_OVPx);
+      }
+
+    LL_ADC_EnableInternalRegulator (ADCx_1);
+    LL_ADC_EnableInternalRegulator (ADCx_2);
 
     /* Wait for Regulator Startup time, once for both */
     uint16_t waittime = 0u;
-    for(waittime=0u;waittime<65000u;waittime++) {}
+    for (waittime = 0u; waittime < 65000u; waittime++) {}
 
     LL_ADC_StartCalibration(ADCx_1, LL_ADC_SINGLE_ENDED);
-    while (LL_ADC_IsCalibrationOnGoing(ADCx_1)) {}
+    while (LL_ADC_IsCalibrationOnGoing (ADCx_1)) {}
 
     LL_ADC_StartCalibration(ADCx_2,LL_ADC_SINGLE_ENDED);
-    while (LL_ADC_IsCalibrationOnGoing(ADCx_2)) {}
+    while (LL_ADC_IsCalibrationOnGoing (ADCx_2)) {}
 
     if (pHandle->_Super.bMotor == M1) {
       if ((pHandle->pParams_str->regconvADCx != ADCx_1) && (pHandle->pParams_str->regconvADCx != ADCx_2)) {
+          LL_ADC_EnableInternalRegulator (pHandle->pParams_str->regconvADCx);
+
+        /* Wait for Regulator Startup time, once for both */
         {
-          LL_ADC_EnableInternalRegulator(pHandle->pParams_str->regconvADCx);
-
-          /* Wait for Regulator Startup time, once for both */
-          {
-            uint16_t waittime = 0u;
-            for(waittime=0u;waittime<65000u;waittime++) {}
-          }
-
-          LL_ADC_StartCalibration(pHandle->pParams_str->regconvADCx,LL_ADC_SINGLE_ENDED);
-          while (LL_ADC_IsCalibrationOnGoing(pHandle->pParams_str->regconvADCx) ) {}
+          uint16_t waittime = 0u;
+          for(waittime=0u;waittime<65000u;waittime++) {}
         }
+
+        LL_ADC_StartCalibration(pHandle->pParams_str->regconvADCx,LL_ADC_SINGLE_ENDED);
+        while (LL_ADC_IsCalibrationOnGoing(pHandle->pParams_str->regconvADCx) ) {}
         }
       }
 
-
-    /* ADCx_1 and ADCx_2 registers configuration ---------------------------------*/
-    /* Enable ADCx_1 and ADCx_2 */
-    LL_ADC_Enable(ADCx_1);
-    LL_ADC_Enable(ADCx_2);
+    /* ADCx_1 and ADCx_2 registers configuration, Enable ADCx_1 and ADCx_2 */
+    LL_ADC_Enable (ADCx_1);
+    LL_ADC_Enable (ADCx_2);
 
     if (pHandle->_Super.bMotor == M1) {
       if ((pHandle->pParams_str->regconvADCx != ADCx_1) && (pHandle->pParams_str->regconvADCx != ADCx_2))
-        LL_ADC_Enable(pHandle->pParams_str->regconvADCx);
+        LL_ADC_Enable (pHandle->pParams_str->regconvADCx);
       }
 
     /* reset regular conversion sequencer length set by cubeMX */
-    LL_ADC_REG_SetSequencerLength(pHandle->pParams_str->regconvADCx, LL_ADC_REG_SEQ_SCAN_DISABLE);
+    LL_ADC_REG_SetSequencerLength (pHandle->pParams_str->regconvADCx, LL_ADC_REG_SEQ_SCAN_DISABLE);
 
-    pHandle->wADC_JSQR_phA = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_1, pHandle->pParams_str->bIaChannel, 1u, pHandle->pParams_str->b_IaSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
-    pHandle->wADC_JSQR_phB = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_2, pHandle->pParams_str->bIbChannel, 1u, pHandle->pParams_str->b_IbSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
-    pHandle->wADC_JSQR_phC = R3_4_F30X_ADC_InjectedChannelConfig(ADCx_2, pHandle->pParams_str->bIcChannel, 1u, pHandle->pParams_str->b_IcSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
-    R3_4_F30X_ADC_InjectedChannelConfig(ADCx_2, pHandle->pParams_str->bIaChannel, 1u, pHandle->pParams_str->b_IaSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
-    R3_4_F30X_ADC_InjectedChannelConfig(ADCx_1, pHandle->pParams_str->bIbChannel, 1u, pHandle->pParams_str->b_IbSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
-    R3_4_F30X_ADC_InjectedChannelConfig(ADCx_1, pHandle->pParams_str->bIcChannel, 1u, pHandle->pParams_str->b_IcSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    pHandle->wADC_JSQR_phA = R3_4_F30X_ADC_InjectedChannelConfig (ADCx_1, pHandle->pParams_str->bIaChannel, 1u, pHandle->pParams_str->b_IaSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    pHandle->wADC_JSQR_phB = R3_4_F30X_ADC_InjectedChannelConfig (ADCx_2, pHandle->pParams_str->bIbChannel, 1u, pHandle->pParams_str->b_IbSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    pHandle->wADC_JSQR_phC = R3_4_F30X_ADC_InjectedChannelConfig (ADCx_2, pHandle->pParams_str->bIcChannel, 1u, pHandle->pParams_str->b_IcSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    R3_4_F30X_ADC_InjectedChannelConfig (ADCx_2, pHandle->pParams_str->bIaChannel, 1u, pHandle->pParams_str->b_IaSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    R3_4_F30X_ADC_InjectedChannelConfig (ADCx_1, pHandle->pParams_str->bIbChannel, 1u, pHandle->pParams_str->b_IbSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
+    R3_4_F30X_ADC_InjectedChannelConfig (ADCx_1, pHandle->pParams_str->bIcChannel, 1u, pHandle->pParams_str->b_IcSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING, pHandle->ADC_ExternalTriggerInjected);
 
     if (pHandle->pParams_str->pOPAMPParams) {
       pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phA;
       pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phB;
       }
-    LL_ADC_INJ_SetQueueMode(ADCx_1, LL_ADC_INJ_QUEUE_2CONTEXTS_END_EMPTY);
-    LL_ADC_INJ_SetQueueMode(ADCx_2, LL_ADC_INJ_QUEUE_2CONTEXTS_END_EMPTY);
+    LL_ADC_INJ_SetQueueMode (ADCx_1, LL_ADC_INJ_QUEUE_2CONTEXTS_END_EMPTY);
+    LL_ADC_INJ_SetQueueMode (ADCx_2, LL_ADC_INJ_QUEUE_2CONTEXTS_END_EMPTY);
 
 
     /* Clear the flags */
@@ -1003,19 +996,15 @@ void R3_4_F30X_TurnOnLowSides (PWMC_Handle_t* pHdl) {
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
     LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
     }
-
-  return;
   }
 //}}}
 //{{{
 /**
- * @brief  It enables PWM generation on the proper Timer peripheral acting on MOE
- *         bit
+ * @brief  It enables PWM generation on the proper Timer peripheral acting on MOE *         bit
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void R3_4_F30X_SwitchOnPWM (PWMC_Handle_t* pHdl)
-{
+void R3_4_F30X_SwitchOnPWM (PWMC_Handle_t* pHdl) {
+
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
   ADC_TypeDef* ADCx_1 = pHandle->pParams_str->ADCx_1;
@@ -1026,92 +1015,76 @@ void R3_4_F30X_SwitchOnPWM (PWMC_Handle_t* pHdl)
 
   /* wait for a new PWM period */
   LL_TIM_ClearFlag_UPDATE(TIMx);
-  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
-  {}
+  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0) {}
+
   /* Clear Update Flag */
   LL_TIM_ClearFlag_UPDATE(TIMx);
 
   /* Set all duty to 50% */
-  if (pHandle->_Super.RLDetectionMode == true)
-  {
+  if (pHandle->_Super.RLDetectionMode == true) {
     LL_TIM_OC_SetCompareCH1 (TIMx,1u);
     ADCx_2->JSQR = pHandle->wADC2_JSQR;
-  }
+    }
   else
-  {
     LL_TIM_OC_SetCompareCH1 (TIMx,(uint32_t)(pHandle->Half_PWMPeriod) >> 1);
-  }
   LL_TIM_OC_SetCompareCH2 (TIMx,(uint32_t)(pHandle->Half_PWMPeriod) >> 1);
   LL_TIM_OC_SetCompareCH3 (TIMx,(uint32_t)(pHandle->Half_PWMPeriod) >> 1);
   LL_TIM_OC_SetCompareCH4 (TIMx,(uint32_t)(pHandle->Half_PWMPeriod) - 5u);
 
-  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0)
-  {}
+  while (LL_TIM_IsActiveFlag_UPDATE(TIMx) == 0) {}
 
   /* Main PWM Output Enable */
   TIMx->BDTR |= LL_TIM_OSSI_ENABLE;
   LL_TIM_EnableAllOutputs (TIMx);
 
-  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-  {
-    if ((TIMx->CCER & TIMxCCER_MASK_CH123) != 0u)
-    {
+  if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO) {
+    if ((TIMx->CCER & TIMxCCER_MASK_CH123) != 0u) {
       LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
       LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
       LL_GPIO_SetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
-    }
-    else
-    {
+      }
+    else {
       /* It is executed during calibration phase the EN signal shall stay off */
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+      }
     }
-  }
 
   /* Switch Context */
-  if (pDOPAMPParams_str)
-  {
+  if (pDOPAMPParams_str) {
     pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
     pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
-  }
+    }
   ADCx_1->JSQR = pHandle->wADC1_JSQR;
   if (pHandle->_Super.RLDetectionMode == false)
-  {
     ADCx_2->JSQR = pHandle->wADC2_JSQR;
   }
-  return;
-}
 //}}}
 //{{{
 /**
- * @brief  It disables PWM generation on the proper Timer peripheral acting on
- *         MOE bit
+ * @brief  It disables PWM generation on the proper Timer peripheral acting on MOE bit
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl)
-{
+void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl) {
+
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
 
   pHandle->_Super.bTurnOnLowSidesAction = false;
 
   /* Main PWM Output Disable */
-  if (pHandle->BrakeActionLock == true)
-  {
-  }
-  else
-  {
+  if (pHandle->BrakeActionLock == true) {
+    }
+  else {
     TIMx->BDTR &= ~((uint32_t)(LL_TIM_OSSI_ENABLE));
 
-    if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-    {
+    if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO) {
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_u_port, pHandle->pParams_str->pwm_en_u_pin);
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_v_port, pHandle->pParams_str->pwm_en_v_pin);
       LL_GPIO_ResetOutputPin(pHandle->pParams_str->pwm_en_w_port, pHandle->pParams_str->pwm_en_w_pin);
+      }
     }
-  }
   LL_TIM_DisableAllOutputs(TIMx);
 
   /* Flushing JSQR queue of context by setting JADSTP = 1 (JQM)=1 */
@@ -1120,20 +1093,12 @@ void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl)
 
   LL_ADC_DisableIT_JEOS(pHandle->pParams_str->ADCx_1);
 
-  pHandle->pParams_str->ADCx_1->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(pHandle->pParams_str->ADCx_1,
-                                                                           0u,
-                                                                           1u,
-                                                                           0u,
-                                                                           1u,
-                                                                           LL_ADC_INJ_TRIG_EXT_RISING,
-                                                                           pHandle->ADC_ExternalTriggerInjected);
-  pHandle->pParams_str->ADCx_2->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(pHandle->pParams_str->ADCx_2,
-                                                                           0u,
-                                                                           1u,
-                                                                           0u,
-                                                                           1u,
-                                                                           LL_ADC_INJ_TRIG_EXT_RISING,
-                                                                           pHandle->ADC_ExternalTriggerInjected);
+  pHandle->pParams_str->ADCx_1->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(
+    pHandle->pParams_str->ADCx_1, 0u, 1u, 0u, 1u, LL_ADC_INJ_TRIG_EXT_RISING,
+    pHandle->ADC_ExternalTriggerInjected);
+  pHandle->pParams_str->ADCx_2->JSQR = R3_4_F30X_ADC_InjectedChannelConfig(
+    pHandle->pParams_str->ADCx_2, 0u, 1u, 0u, 1u, LL_ADC_INJ_TRIG_EXT_RISING,
+    pHandle->ADC_ExternalTriggerInjected);
 
   LL_ADC_INJ_StartConversion(pHandle->pParams_str->ADCx_1);
   LL_ADC_INJ_StartConversion(pHandle->pParams_str->ADCx_2);
@@ -1153,21 +1118,16 @@ void R3_4_F30X_SwitchOffPWM (PWMC_Handle_t* pHdl)
   LL_ADC_ClearFlag_JEOS(pHandle->pParams_str->ADCx_1);
   LL_ADC_ClearFlag_JEOS(pHandle->pParams_str->ADCx_2);
   LL_ADC_EnableIT_JEOS(pHandle->pParams_str->ADCx_1);
-
-  return;
-}
+  }
 //}}}
 
 //__attribute__((section ("ccmram")))
 //{{{
-/**
- * @brief  Configure the ADC for the current sampling related to sector 1.
- *         It means set the sampling point via TIMx_Ch4 value and polarity
- *         ADC sequence length and channels.
- *         And call the WriteTIMRegisters method.
- */
-uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl)
-{
+/*  Configure the ADC for the current sampling related to sector 1.
+ * It means set the sampling point via TIMx_Ch4 value and polarity  ADC sequence length and channels.
+ * And call the WriteTIMRegisters method */
+uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl) {
+
   uint16_t hCntSmp, hDeltaDuty;
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
@@ -1179,12 +1139,10 @@ uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl)
 
   /* Check if sampling AB in the middle of PWM is possible */
   if (((uint16_t)(pHandle->Half_PWMPeriod-pHandle->_Super.hCntPhA) > pHandle->pParams_str->hTafter) &&
-          ((uint16_t)(pHandle->Half_PWMPeriod-pHandle->_Super.hCntPhB) > pHandle->pParams_str->hTafter))
-  {
+      ((uint16_t)(pHandle->Half_PWMPeriod-pHandle->_Super.hCntPhB) > pHandle->pParams_str->hTafter)) {
     TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - 1u;
     pHandle->_Super.hSector = SECTOR_4; /* Dummy just for the GetPhaseCurrent */
-    if (pDOPAMPParams_str)
-    {
+    if (pDOPAMPParams_str) {
       pHandle->wOAMP1CR = pDOPAMPParams_str->wOPAMP_Selection->CSR;
       pHandle->wOAMP1CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
       pHandle->wOAMP1CR |= pDOPAMPParams_str->wOPAMP_InvertingInput | pDOPAMPParams_str->wOPAMP_NonInvertingInput_PHA;
@@ -1192,46 +1150,33 @@ uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl)
       pHandle->wOAMP2CR = pDOPAMPParams_str->wOPAMP2_Selection->CSR;
       pHandle->wOAMP2CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
       pHandle->wOAMP2CR |= pDOPAMPParams_str->wOPAMP2_InvertingInput | pDOPAMPParams_str->wOPAMP2_NonInvertingInput_PHB;
-
-    }
-    else
-    {
+      }
+    else {
       pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phA;
       pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phB;
+      }
     }
-  }
-  else
-  {
+  else {
     if ((uint16_t)(pHandle->Half_PWMPeriod-pHandle->_Super.hCntPhA) > pHandle->pParams_str->hTafter)
-    {
       hCntSmp = pHandle->Half_PWMPeriod - 1u;
-    }
-    else
-    {
+    else {
       hDeltaDuty = (uint16_t)(pHandle->_Super.hCntPhA - pHandle->_Super.hCntPhB);
 
       /* Definition of crossing point */
       if (hDeltaDuty > (uint16_t)(pHandle->Half_PWMPeriod-pHandle->_Super.hCntPhA)*2u)
-      {
         hCntSmp = pHandle->_Super.hCntPhA - pHandle->pParams_str->hTbefore;
-      }
-      else
-      {
+      else {
         hCntSmp = pHandle->_Super.hCntPhA + pHandle->pParams_str->hTafter;
-
-        if (hCntSmp >= pHandle->Half_PWMPeriod)
-        {
+        if (hCntSmp >= pHandle->Half_PWMPeriod) {
           /* Set CC4 as PWM mode 1 */
           TIMx->CCMR2 &= CCMR2_CH4_DISABLE;
           TIMx->CCMR2 |= CCMR2_CH4_PWM1;
-
           hCntSmp = (2u * pHandle->Half_PWMPeriod) - hCntSmp - 1u;
+          }
         }
       }
-    }
 
-    if (pDOPAMPParams_str)
-    {
+    if (pDOPAMPParams_str) {
       pHandle->wOAMP1CR = pDOPAMPParams_str->wOPAMP_Selection->CSR;
       pHandle->wOAMP1CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
       pHandle->wOAMP1CR |= pDOPAMPParams_str->wOPAMP_InvertingInput | pDOPAMPParams_str->wOPAMP_NonInvertingInput_PHB;
@@ -1239,19 +1184,18 @@ uint16_t R3_4_F30X_SetADCSampPointSect1 (PWMC_Handle_t* pHdl)
       pHandle->wOAMP2CR = pDOPAMPParams_str->wOPAMP2_Selection->CSR;
       pHandle->wOAMP2CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
       pHandle->wOAMP2CR |= pDOPAMPParams_str->wOPAMP2_InvertingInput | pDOPAMPParams_str->wOPAMP2_NonInvertingInput_PHC;
-
-    }
-    else
-    {
+      }
+    else {
       pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phB;
       pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phC;
-    }
+      }
 
     /* Set TIMx_CH4 value */
     TIMx->CCR4 = hCntSmp;
+    }
+
+  return R3_4_F30X_WriteTIMRegisters (&pHandle->_Super);
   }
-  return R3_4_F30X_WriteTIMRegisters(&pHandle->_Super);
-}
 //}}}
 //__attribute__((section ("ccmram")))
 //{{{
@@ -1814,9 +1758,8 @@ void R3_4_F30X_ADC_SetSamplingTime (PWMC_Handle_t* pHdl, ADConv_t ADConv_struct)
   uint8_t ADC_SampleTime = ADConv_struct.SamplTime;
 
   /* Channel sampling configuration */
-  /* if ADC_CHANNEL_10 ... ADC_CHANNEL_18 is selected */
   if (ADC_Channel > MC_ADC_CHANNEL_9) {
-
+    /* if ADC_CHANNEL_10 ... ADC_CHANNEL_18 is selected */
     uint32_t wAux,wAux2;
     /* Get the old register value */
     /* Calculate the mask to clear */
@@ -1828,7 +1771,6 @@ void R3_4_F30X_ADC_SetSamplingTime (PWMC_Handle_t* pHdl, ADConv_t ADConv_struct)
     /* Calculate the mask to set */
     wAux = (uint32_t)(ADC_SampleTime);
     pHandle->pParams_str->regconvADCx->SMPR2 |=  wAux << wAux2;
-
     }
   else {
     /* ADC_Channel include in ADC_CHANNEL_[0..9] */
@@ -1867,7 +1809,7 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred (PWMC_Handle_t* pHdl) {
   if (pHandle->OverCurrentFlag == true ) {
     retVal |= MC_BREAK_IN;
     pHandle->OverCurrentFlag = false;
-   }
+    }
 
   return retVal;
   }
@@ -1878,7 +1820,6 @@ uint16_t R3_4_F30X_IsOverCurrentOccurred (PWMC_Handle_t* pHdl) {
  * @brief  It is used to set the PWM mode for R/L detection.
  * @param  pHandle: handler of the current instance of the PWM component
  * @param  hDuty to be applied in uint16_t
- * @retval none
  */
 void R3_4_F30X_RLDetectionModeEnable (PWMC_Handle_t* pHdl) {
 
@@ -1926,89 +1867,60 @@ void R3_4_F30X_RLDetectionModeEnable (PWMC_Handle_t* pHdl) {
   pHandle->_Super.pFctSwitchOnPwm = &R3_4_F30X_RLSwitchOnPWM;
   pHandle->_Super.pFctSwitchOffPwm = &R3_4_F30X_RLSwitchOffPWM;
   pHandle->_Super.RLDetectionMode = true;
-}
+  }
 //}}}
 //{{{
 /**
  * @brief  It is used to disable the PWM mode for R/L detection.
  * @param  pHandle: handler of the current instance of the PWM component
- * @retval none
  */
-void R3_4_F30X_RLDetectionModeDisable (PWMC_Handle_t* pHdl)
-{
-  PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
-  TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
+void R3_4_F30X_RLDetectionModeDisable (PWMC_Handle_t* pHdl) {
 
-  if (pHandle->_Super.RLDetectionMode == true)
-  {
+  PWMC_R3_4_F3_Handle_t* pHandle = (PWMC_R3_4_F3_Handle_t*)pHdl;
+  TIM_TypeDef* TIMx = pHandle->pParams_str->TIMx;
+
+  if (pHandle->_Super.RLDetectionMode == true) {
     /*  Channel1 configuration */
     LL_TIM_OC_SetMode (TIMx, LL_TIM_CHANNEL_CH1, LL_TIM_OCMODE_PWM1);
-    LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH1);
+    LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH1);
 
     if ((pHandle->pParams_str-> LowSideOutputs)== LS_PWM_TIMER)
-    {
-      LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH1N);
-    }
+      LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH1N);
     else if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-    {
-      LL_TIM_CC_DisableChannel(TIMx, LL_TIM_CHANNEL_CH1N);
-    }
-    else
-    {
-    }
+      LL_TIM_CC_DisableChannel (TIMx, LL_TIM_CHANNEL_CH1N);
 
-    LL_TIM_OC_SetCompareCH1(TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
+    LL_TIM_OC_SetCompareCH1 (TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
 
     /*  Channel2 configuration */
     LL_TIM_OC_SetMode (TIMx, LL_TIM_CHANNEL_CH2, LL_TIM_OCMODE_PWM1);
-    LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH2);
+    LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH2);
 
     if ((pHandle->pParams_str-> LowSideOutputs)== LS_PWM_TIMER)
-    {
-      LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH2N);
-    }
+      LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH2N);
     else if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-    {
-      LL_TIM_CC_DisableChannel(TIMx, LL_TIM_CHANNEL_CH2N);
-    }
-    else
-    {
-    }
+      LL_TIM_CC_DisableChannel (TIMx, LL_TIM_CHANNEL_CH2N);
 
-    LL_TIM_OC_SetCompareCH2(TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
+    LL_TIM_OC_SetCompareCH2 (TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
 
     /*  Channel3 configuration */
     LL_TIM_OC_SetMode (TIMx, LL_TIM_CHANNEL_CH3, LL_TIM_OCMODE_PWM1);
-    LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH3);
+    LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH3);
 
     if ((pHandle->pParams_str-> LowSideOutputs)== LS_PWM_TIMER)
-    {
-      LL_TIM_CC_EnableChannel(TIMx, LL_TIM_CHANNEL_CH3N);
-    }
+      LL_TIM_CC_EnableChannel (TIMx, LL_TIM_CHANNEL_CH3N);
     else if ((pHandle->pParams_str->LowSideOutputs)== ES_GPIO)
-    {
-      LL_TIM_CC_DisableChannel(TIMx, LL_TIM_CHANNEL_CH3N);
-    }
-    else
-    {
-    }
+      LL_TIM_CC_DisableChannel (TIMx, LL_TIM_CHANNEL_CH3N);
 
-    LL_TIM_OC_SetCompareCH3(TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
+    LL_TIM_OC_SetCompareCH3 (TIMx, (uint32_t)(pHandle->Half_PWMPeriod) >> 1);
 
-    pHandle->wADC_JSQR_phA = R3_4_F30X_ADC_InjectedChannelConfig(pHandle->pParams_str->ADCx_1,
-                                                                 pHandle->pParams_str->bIaChannel,
-                                                                 1u,
-                                                                 pHandle->pParams_str->b_IaSamplingTime,
-                                                                 1u,
-                                                                 LL_ADC_INJ_TRIG_EXT_RISING,
-                                                                 pHandle->ADC_ExternalTriggerInjected);
-    pHandle->wADC_JSQR_phB = R3_4_F30X_ADC_InjectedChannelConfig(pHandle->pParams_str->ADCx_2,
-                                                                 pHandle->pParams_str->bIbChannel,
-                                                                 1u,
-                                                                 pHandle->pParams_str->b_IbSamplingTime,
-                                                                 1u,
-                                                                 LL_ADC_INJ_TRIG_EXT_RISING,
-                                                                 pHandle->ADC_ExternalTriggerInjected);
+    pHandle->wADC_JSQR_phA = R3_4_F30X_ADC_InjectedChannelConfig (
+      pHandle->pParams_str->ADCx_1, pHandle->pParams_str->bIaChannel, 1u,
+      pHandle->pParams_str->b_IaSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING,
+      pHandle->ADC_ExternalTriggerInjected);
+    pHandle->wADC_JSQR_phB = R3_4_F30X_ADC_InjectedChannelConfig (
+      pHandle->pParams_str->ADCx_2, pHandle->pParams_str->bIbChannel, 1u,
+      pHandle->pParams_str->b_IbSamplingTime, 1u, LL_ADC_INJ_TRIG_EXT_RISING,
+      pHandle->ADC_ExternalTriggerInjected);
 
     pHandle->_Super.pFctGetPhaseCurrents = &R3_4_F30X_GetPhaseCurrents;
     pHandle->_Super.pFctTurnOnLowSides = &R3_4_F30X_TurnOnLowSides;
@@ -2016,8 +1928,8 @@ void R3_4_F30X_RLDetectionModeDisable (PWMC_Handle_t* pHdl)
     pHandle->_Super.pFctSwitchOffPwm = &R3_4_F30X_SwitchOffPWM;
 
     pHandle->_Super.RLDetectionMode = false;
+    }
   }
-}
 //}}}
 //{{{
 /**
@@ -2027,8 +1939,8 @@ void R3_4_F30X_RLDetectionModeDisable (PWMC_Handle_t* pHdl)
  * @retval It returns the code error 'MC_FOC_DURATION' if any, 'MC_NO_ERROR'
  *         otherwise. These error codes are defined in mc_type.h
  */
-uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty)
-{
+uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty) {
+
   PWMC_R3_4_F3_Handle_t *pHandle = (PWMC_R3_4_F3_Handle_t *)pHdl;
   TIM_TypeDef*  TIMx = pHandle->pParams_str->TIMx;
   pR3_4_F30XOPAMPParams_t pDOPAMPParams_str = pHandle->pParams_str->pOPAMPParams;
@@ -2044,8 +1956,7 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty)
   TIMx->CCR4 = (uint32_t)(pHandle->Half_PWMPeriod) - pHandle->_Super.Ton;
   TIMx->CCR3 = pHandle->_Super.Toff;
 
-  if (pDOPAMPParams_str)
-  {
+  if (pDOPAMPParams_str) {
     pHandle->wOAMP1CR = pDOPAMPParams_str->wOPAMP_Selection->CSR;
     pHandle->wOAMP1CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
     pHandle->wOAMP1CR |= pDOPAMPParams_str->wOPAMP_InvertingInput | pDOPAMPParams_str->wOPAMP_NonInvertingInput_PHA;
@@ -2053,22 +1964,19 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty)
     pHandle->wOAMP2CR = pDOPAMPParams_str->wOPAMP2_Selection->CSR;
     pHandle->wOAMP2CR &= (uint32_t) (OPAMP_CSR_DEFAULT_MASK);
     pHandle->wOAMP2CR |= pDOPAMPParams_str->wOPAMP2_InvertingInput | pDOPAMPParams_str->wOPAMP2_NonInvertingInput_PHB;
-
-  }
-  else
-  {
+    }
+  else {
     pHandle->wADC1_JSQR = pHandle->wADC_JSQR_phA;
     pHandle->wADC2_JSQR = pHandle->wADC_JSQR_phB;
-  }
+    }
 
   TIMx->CCR1 = pHandle->_Super.hCntPhA;
 
   /* Switch Context */
-  if (pDOPAMPParams_str)
-  {
+  if (pDOPAMPParams_str) {
     pDOPAMPParams_str->wOPAMP_Selection->CSR = pHandle->wOAMP1CR;
     pDOPAMPParams_str->wOPAMP2_Selection->CSR = pHandle->wOAMP2CR;
-  }
+    }
   pHandle->pParams_str->ADCx_1->JSQR = pHandle->wADC1_JSQR;
   pHandle->pParams_str->ADCx_2->JSQR = pHandle->wADC2_JSQR;
 
@@ -2076,18 +1984,13 @@ uint16_t R3_4_F30X_RLDetectionModeSetDuty (PWMC_Handle_t* pHdl, uint16_t hDuty)
   /* Check the status flag. If an update event has occurred before to set new
   values of regs the FOC rate is too high */
   if (LL_TIM_IsActiveFlag_UPDATE(TIMx))
-  {
     hAux = MC_FOC_DURATION;
-  }
   else
-  {
     hAux = MC_NO_ERROR;
-  }
-  if (pHandle->_Super.SWerror == 1u)
-  {
+  if (pHandle->_Super.SWerror == 1u) {
     hAux = MC_FOC_DURATION;
     pHandle->_Super.SWerror = 0u;
-  }
+    }
   return hAux;
-}
+  }
 //}}}

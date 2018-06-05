@@ -1,4 +1,3 @@
-#include "mc_type.h"
 //{{{
 /** @defgroup pwm_curr_fdbk PWM & Current Feedback
   *
@@ -34,7 +33,7 @@
   * @{
   */
 //}}}
-
+#include "mc_type.h"
 
 /**
  * @brief  It perform the start of all the timers required by the control.

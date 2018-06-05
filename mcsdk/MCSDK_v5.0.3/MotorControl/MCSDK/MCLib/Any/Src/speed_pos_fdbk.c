@@ -1,4 +1,3 @@
-#include "speed_pos_fdbk.h"
 //{{{
 /** @defgroup SpeednPosFdbk Speed & Position Feedback
  *
@@ -20,6 +19,7 @@
   * @{
   */
 //}}}
+#include "speed_pos_fdbk.h"
 
 //{{{
 /**

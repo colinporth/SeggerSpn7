@@ -1,4 +1,3 @@
-#include "virtual_speed_sensor.h"
 //{{{
 /** @defgroup VirtualSpeedSensor Virtual Speed & Position Feedback
   * @brief Virtual Speed Speed & Position Feedback implementation
@@ -8,6 +7,7 @@
   * This component is used during the revup phases of the motor in a sensorless subsystem.
   */
 //}}}
+#include "virtual_speed_sensor.h"
 
 //{{{
   /**
