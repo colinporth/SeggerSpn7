@@ -186,10 +186,10 @@ static void TSK_MediumFrequencyTask() {
     //}}}
     //{{{
     case CLEAR:
-      FOCVars[M1].bDriveInput = EXTERNAL;                               /* only for sensorless */
-      STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);                             /* only for sensorless */
-      RUC_Clear(&RevUpControlM1,MCI_GetImposedMotorDirection(oMCInterface[M1]));/* only for sensorless */
-      SWO_transitionStartM1 = false;                                    /* only for sensorless */
+      FOCVars[M1].bDriveInput = EXTERNAL;                                        /* only for sensorless */
+      STC_SetSpeedSensor(pSTC[M1],&VirtualSpeedSensorM1._Super);                 /* only for sensorless */
+      RUC_Clear(&RevUpControlM1,MCI_GetImposedMotorDirection(oMCInterface[M1])); /* only for sensorless */
+      SWO_transitionStartM1 = false;                                             /* only for sensorless */
       STO_PLL_Clear(&STO_PLL_M1);
       if (STM_NextState(&STM[M1], START) == true) {
         FOC_Clear(M1);
@@ -544,7 +544,7 @@ void MCboot (MCI_Handle_t* pMCIList[NBR_OF_MOTORS],MCT_Handle_t* pMCTList[NBR_OF
   STC_Init (pSTC[M1],pPIDSpeed[M1], &STO_PLL_M1._Super);
   VSS_Init (&VirtualSpeedSensorM1);
   // only if sensorless
-  RUC_Init (&RevUpControlM1,pSTC[M1],&VirtualSpeedSensorM1, &STO_M1, pwmcHandle[M1]); 
+  RUC_Init (&RevUpControlM1,pSTC[M1],&VirtualSpeedSensorM1, &STO_M1, pwmcHandle[M1]);
 
   // PID component initialization: current regulation
   PID_HandleInit(&PIDIqHandle_M1);

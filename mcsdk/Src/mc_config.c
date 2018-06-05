@@ -629,7 +629,7 @@ STO_PLL_Handle_t STO_PLL_M1 =
                                                                                  must be 9 because 2^9 = 512 */
 };
 //}}}
-STO_PLL_Handle_t *pSTO_PLL_M1 = &STO_PLL_M1;
+STO_PLL_Handle_t* pSTO_PLL_M1 = &STO_PLL_M1;
 //{{{
 STO_Handle_t STO_M1 =
 {
@@ -725,7 +725,6 @@ UI_Handle_t UI_Params =
         .pFctDACGetUserChannelValue = &DAC_GetUserChannelValue,
 };
 //}}}
-
 //{{{
 DAC_UI_Handle_t DAC_UI_Params =
 {

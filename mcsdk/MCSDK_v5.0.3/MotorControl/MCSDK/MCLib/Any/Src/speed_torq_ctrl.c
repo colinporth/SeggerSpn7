@@ -29,6 +29,19 @@ void STC_Init (SpeednTorqCtrl_Handle_t* pHandle, PID_Handle_t* pPI, SpeednPosFdb
   pHandle->IncDecAmount = 0;
 }
 //}}}
+//{{{
+/**
+  * @brief  It should be called before each motor restart. If STC is set in
+            speed mode, this method resets the integral term of speed regulator.
+  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
+  * @retval none.
+  */
+void STC_Clear (SpeednTorqCtrl_Handle_t* pHandle) {
+
+  if (pHandle->Mode == STC_SPEED_MODE)
+    PID_SetIntegralTerm(pHandle->PISpeed,0);
+  }
+//}}}
 
 //{{{
 /**
@@ -52,20 +65,6 @@ SpeednPosFdbk_Handle_t* STC_GetSpeedSensor (SpeednTorqCtrl_Handle_t* pHandle)
 {
   return (pHandle->SPD);
 }
-//}}}
-
-//{{{
-/**
-  * @brief  It should be called before each motor restart. If STC is set in
-            speed mode, this method resets the integral term of speed regulator.
-  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @retval none.
-  */
-void STC_Clear (SpeednTorqCtrl_Handle_t* pHandle) {
-
-  if (pHandle->Mode == STC_SPEED_MODE)
-    PID_SetIntegralTerm(pHandle->PISpeed,0);
-  }
 //}}}
 
 //{{{

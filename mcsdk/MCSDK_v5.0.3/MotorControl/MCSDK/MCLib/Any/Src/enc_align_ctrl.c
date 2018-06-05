@@ -10,7 +10,7 @@
 * @param  pENC: the encoder used by the EAC.
 * @retval none.
 */
-void EAC_Init(EncAlign_Handle_t *pHandle, SpeednTorqCtrl_Handle_t *pSTC, VirtualSpeedSensor_Handle_t *pVSS, ENCODER_Handle_t *pENC )
+void EAC_Init (EncAlign_Handle_t *pHandle, SpeednTorqCtrl_Handle_t *pSTC, VirtualSpeedSensor_Handle_t *pVSS, ENCODER_Handle_t *pENC )
 {
   pHandle->pSTC = pSTC;
   pHandle->pVSS = pVSS;
@@ -28,7 +28,7 @@ void EAC_Init(EncAlign_Handle_t *pHandle, SpeednTorqCtrl_Handle_t *pSTC, Virtual
   * @param  pHandle: handler of the current instance of the EncAlignCtrl component.
   * @retval none.
   */
-void EAC_StartAlignment(EncAlign_Handle_t *pHandle)
+void EAC_StartAlignment (EncAlign_Handle_t *pHandle)
 {
   uint32_t wAux;
 
@@ -66,7 +66,7 @@ void EAC_StartAlignment(EncAlign_Handle_t *pHandle)
   * @retval bool It returns true when the programmed alignment has been
   *         completed.
   */
-bool EAC_Exec(EncAlign_Handle_t *pHandle)
+bool EAC_Exec (EncAlign_Handle_t *pHandle)
 {
   bool retVal = true;
 
@@ -97,7 +97,7 @@ bool EAC_Exec(EncAlign_Handle_t *pHandle)
   *         one time, false if hasn't been never aligned.
   * @param  pHandle: handler of the current instance of the EncAlignCtrl component.
   */
-bool EAC_IsAligned(EncAlign_Handle_t *pHandle)
+bool EAC_IsAligned (EncAlign_Handle_t *pHandle)
 {
   return pHandle->EncAligned;
 }
@@ -109,7 +109,7 @@ bool EAC_IsAligned(EncAlign_Handle_t *pHandle)
   * @param  restart: Set to true if a restart is programmed else false
   * @retval none.
   */
-void EAC_SetRestartState(EncAlign_Handle_t *pHandle, bool restart)
+void EAC_SetRestartState (EncAlign_Handle_t *pHandle, bool restart)
 {
   pHandle->EncRestart = restart;
 }
@@ -119,7 +119,7 @@ void EAC_SetRestartState(EncAlign_Handle_t *pHandle, bool restart)
   * @brief  Returns true if a restart after an encoder alignment has been requested.
   * @param  pHandle: handler of the current instance of the EncAlignCtrl component.
   */
-bool EAC_GetRestartState(EncAlign_Handle_t *pHandle)
+bool EAC_GetRestartState (EncAlign_Handle_t *pHandle)
 {
   return pHandle->EncRestart;
 }

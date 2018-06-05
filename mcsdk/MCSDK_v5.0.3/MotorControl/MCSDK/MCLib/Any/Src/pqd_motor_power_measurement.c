@@ -8,8 +8,7 @@
   * @param power handle.
   * @retval int16_t The measured motor power expressed in watt.
   */
-void PQD_CalcElMotorPower(PQD_MotorPowMeas_Handle_t *pHandle)
-{
+void PQD_CalcElMotorPower(PQD_MotorPowMeas_Handle_t *pHandle) {
 
   int32_t wAux,wAux2,wAux3;
   Curr_Components Iqd = pHandle->pFOCVars->Iqd;
@@ -27,5 +26,4 @@ void PQD_CalcElMotorPower(PQD_MotorPowMeas_Handle_t *pHandle)
   wAux3 /= 65536;
 
   MPM_CalcElMotorPower(&pHandle->_super,wAux3);
-
-}
+  }

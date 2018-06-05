@@ -29,7 +29,7 @@
   * @retval int16_t rotor electrical angle (s16degrees)
   */
 int16_t SPD_GetElAngle (SpeednPosFdbk_Handle_t* pHandle) {
-  return ( pHandle->hElAngle);
+  return pHandle->hElAngle;
   }
 //}}}
 //{{{
@@ -44,7 +44,7 @@ int16_t SPD_GetElAngle (SpeednPosFdbk_Handle_t* pHandle) {
   * @retval int16_t rotor mechanical angle (s16degrees)
   */
 int16_t SPD_GetMecAngle (SpeednPosFdbk_Handle_t* pHandle) {
-  return ( pHandle->hMecAngle);
+  return pHandle->hMecAngle;
   }
 //}}}
 //{{{
@@ -55,7 +55,7 @@ int16_t SPD_GetMecAngle (SpeednPosFdbk_Handle_t* pHandle) {
   * @retval int16_t rotor average mechanical speed (01Hz)
   */
 int16_t SPD_GetAvrgMecSpeed01Hz (SpeednPosFdbk_Handle_t* pHandle) {
-  return ( pHandle->hAvrMecSpeed01Hz);
+  return pHandle->hAvrMecSpeed01Hz;
   }
 //}}}
 //{{{
@@ -86,21 +86,14 @@ int16_t SPD_GetElSpeedDpp (SpeednPosFdbk_Handle_t* pHandle) {
 bool SPD_Check (SpeednPosFdbk_Handle_t* pHandle) {
 
   bool SpeedSensorReliability = true;
-  if (pHandle->bSpeedErrorNumber ==
-      pHandle->bMaximumSpeedErrorsNumber)
+  if (pHandle->bSpeedErrorNumber == pHandle->bMaximumSpeedErrorsNumber)
     SpeedSensorReliability = false;
 
-  return(SpeedSensorReliability);
+  return SpeedSensorReliability;
   }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This method must be called - at least - with the same periodicity
@@ -117,79 +110,58 @@ __attribute__((section ("ccmram")))
   *         mechanical speed (01Hz)
   * @retval none
   */
-bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed01Hz)
-{
+bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed01Hz) {
+
   bool SpeedSensorReliability = true;
   uint8_t bSpeedErrorNumber;
   uint8_t bMaximumSpeedErrorsNumber = pHandle->bMaximumSpeedErrorsNumber;
 
-    bool SpeedError = false;
+  bool SpeedError = false;
   uint16_t hAbsMecSpeed01Hz, hAbsMecAccel01HzP;
   int16_t hAux;
 
   bSpeedErrorNumber = pHandle->bSpeedErrorNumber;
 
-    /* Compute absoulte value of mechanical speed */
-   if (*pMecSpeed01Hz < 0)
-  {
-      hAux = -(*pMecSpeed01Hz);
-      hAbsMecSpeed01Hz = (uint16_t)(hAux);
+  /* Compute absoulte value of mechanical speed */
+  if (*pMecSpeed01Hz < 0) {
+    hAux = -(*pMecSpeed01Hz);
+    hAbsMecSpeed01Hz = (uint16_t)(hAux);
     }
-    else
-    {
-      hAbsMecSpeed01Hz = (uint16_t)(*pMecSpeed01Hz);
+  else
+   hAbsMecSpeed01Hz = (uint16_t)(*pMecSpeed01Hz);
+
+  if (hAbsMecSpeed01Hz > pHandle->hMaxReliableMecSpeed01Hz)
+    SpeedError = true;
+  if (hAbsMecSpeed01Hz < pHandle->hMinReliableMecSpeed01Hz)
+    SpeedError = true;
+
+  /* Compute absoulte value of mechanical acceleration */
+  if (pHandle->hMecAccel01HzP < 0) {
+    hAux = -pHandle->hMecAccel01HzP;
+    hAbsMecAccel01HzP = (uint16_t)(hAux);
+    }
+  else
+    hAbsMecAccel01HzP = (uint16_t)(pHandle->hMecAccel01HzP);
+
+  if ( hAbsMecAccel01HzP > pHandle->hMaxReliableMecAccel01HzP)
+    SpeedError = true;
+
+  if (SpeedError == true) {
+    if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
+      bSpeedErrorNumber++;
+    }
+  else {
+    if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
+      bSpeedErrorNumber = 0u;
     }
 
-    if (hAbsMecSpeed01Hz > pHandle->hMaxReliableMecSpeed01Hz)
-    {
-      SpeedError = true;
-    }
+  if (bSpeedErrorNumber == bMaximumSpeedErrorsNumber)
+    SpeedSensorReliability = false;
 
-    if (hAbsMecSpeed01Hz < pHandle->hMinReliableMecSpeed01Hz)
-    {
-      SpeedError = true;
-    }
+  pHandle->bSpeedErrorNumber = bSpeedErrorNumber;
 
-    /* Compute absoulte value of mechanical acceleration */
-    if (pHandle->hMecAccel01HzP < 0)
-    {
-      hAux = -(pHandle->hMecAccel01HzP);
-      hAbsMecAccel01HzP = (uint16_t)(hAux);
-    }
-    else
-    {
-      hAbsMecAccel01HzP = (uint16_t)(pHandle->hMecAccel01HzP);
-    }
-
-    if ( hAbsMecAccel01HzP > pHandle->hMaxReliableMecAccel01HzP)
-    {
-      SpeedError = true;
-    }
-
-    if (SpeedError == true)
-    {
-      if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
-      {
-        bSpeedErrorNumber++;
-      }
-    }
-    else
-    {
-      if (bSpeedErrorNumber < bMaximumSpeedErrorsNumber)
-      {
-        bSpeedErrorNumber = 0u;
-      }
-    }
-
-    if (bSpeedErrorNumber == bMaximumSpeedErrorsNumber)
-    {
-      SpeedSensorReliability = false;
-    }
-
-    pHandle->bSpeedErrorNumber = bSpeedErrorNumber;
-
-  return(SpeedSensorReliability);
-}
+  return SpeedSensorReliability;
+  }
 //}}}
 
 //{{{
@@ -221,7 +193,7 @@ int16_t SPD_GetS16Speed (SpeednPosFdbk_Handle_t* pHandle) {
   * @retval uint8_t The motor pole pairs number.
   */
 uint8_t SPD_GetElToMecRatio (SpeednPosFdbk_Handle_t* pHandle) {
-  return (pHandle->bElToMecRatio);
+  return pHandle->bElToMecRatio;
   }
 //}}}
 //{{{

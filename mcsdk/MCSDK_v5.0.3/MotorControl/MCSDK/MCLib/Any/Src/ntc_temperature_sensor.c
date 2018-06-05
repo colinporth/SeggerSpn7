@@ -81,7 +81,6 @@ void NTC_Init (NTC_Handle_t* pHandle, PWMC_Handle_t* pPWMnCurrentSensor)
 
 }
 //}}}
-
 //{{{
 /**
  * @brief Initializes internal average temperature computed value

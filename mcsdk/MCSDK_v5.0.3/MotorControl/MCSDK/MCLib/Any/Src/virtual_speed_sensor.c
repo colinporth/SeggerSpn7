@@ -1,18 +1,11 @@
-/* Includes ------------------------------------------------------------------*/
 #include "virtual_speed_sensor.h"
 //{{{
 /** @defgroup VirtualSpeedSensor Virtual Speed & Position Feedback
   * @brief Virtual Speed Speed & Position Feedback implementation
-  *
   * This component provides a "virtual" implementation of the speed and position feedback features.
   * This implementation provides a theoretical estimation of the speed and position of the rotor of
   * the motor based on a mechanical acceleration and an initial angle set by the application.
-  *
   * This component is used during the revup phases of the motor in a sensorless subsystem.
-  *
-  * @todo Document the Virtual Speed Sensor "module".
-  *
-  * @{
   */
 //}}}
 
@@ -59,13 +52,7 @@ void VSS_Clear (VirtualSpeedSensor_Handle_t *pHandle)
   }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
 * @brief  Update the rotor electrical angle integrating the last setled

@@ -124,7 +124,7 @@ bool STM_NextState (STM_Handle_t* pHandle, State_t bState) {
     //}}}
     //{{{
     case CLEAR:
-      if ((bState == START) || (bState == ANY_STOP)) { 
+      if ((bState == START) || (bState == ANY_STOP)) {
         bNewState = bState;
         bChangeState = true;
       }
@@ -230,13 +230,7 @@ State_t STM_FaultProcessing (STM_Handle_t* pHandle, uint16_t hSetErrors, uint16_
   }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  Returns the current state machine state

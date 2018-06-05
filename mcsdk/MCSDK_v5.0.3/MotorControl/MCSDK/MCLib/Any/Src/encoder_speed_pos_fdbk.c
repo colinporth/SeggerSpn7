@@ -1,21 +1,14 @@
 #include "encoder_speed_pos_fdbk.h"
 #include "mc_irq_handler.h"
-
 #include "mc_library_isr_priority_conf.h"
 #include "mc_type.h"
 
 //{{{
 /** @defgroup Encoder Encoder Speed & Position Feedback
   * @brief Quadrature Encoder based Speed & Position Feedback implementation
-  *
   * This component is used in applications controlling a motor equipped with a quadrature encoder.
-  *
   * This component uses the output of a quadrature encoder to provide a measure of the speed and
   * the position of the rotor of the motor.
-  *
-  * @todo Document the Encoder Speed & Position Feedback "module".
-  *
-  * @{
   */
 //}}}
 //{{{

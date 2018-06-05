@@ -291,13 +291,7 @@ uint16_t PID_GetKDDivisor(PID_Handle_t *pHandle)
 void PID_SetKDDivisorPOW2( PID_Handle_t *pHandle, uint16_t hKdDivisorPOW2 );
 
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  This function compute the output of a PI regulator sum of its
@@ -392,13 +386,7 @@ int16_t PI_Controller(PID_Handle_t *pHandle, int32_t wProcessVarError)
 //}}}
 
 #if 0
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
  * @brief  This function compute the output of a PID regulator sum of its

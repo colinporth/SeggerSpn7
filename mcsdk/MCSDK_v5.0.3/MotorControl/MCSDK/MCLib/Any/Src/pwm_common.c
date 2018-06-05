@@ -43,13 +43,11 @@
  *          When this function is called, TIM1 and/or TIM8 must be in frozen state
  *          with CNT, ARR, REP RATE and trigger correctly set (these setting are
  *          usually performed in the Init method accordingly with the configuration)
- * @param  none
- * @retval none
  */
 void startTimers() {
 
   uint32_t isTIM2ClockOn = LL_APB1_GRP1_IsEnabledClock (LL_APB1_GRP1_PERIPH_TIM2);
-  if (isTIM2ClockOn == 0) {  
+  if (isTIM2ClockOn == 0) {
     /* Temporary Enable TIM2 clock if not already on */
     LL_APB1_GRP1_EnableClock (LL_APB1_GRP1_PERIPH_TIM2);
     LL_TIM_GenerateEvent_UPDATE (TIM2);

@@ -1,12 +1,10 @@
 #include "speed_pos_fdbk.h"
 #include "hall_speed_pos_fdbk.h"
 #include "mc_irq_handler.h"
-
 #include "mc_library_isr_priority_conf.h"
 #include "mc_type.h"
 
 #define LOW_RES_THRESHOLD   ((uint16_t)0x5500u)
-
 #define HALL_COUNTER_RESET  ((uint16_t) 0u)
 
 #define S16_120_PHASE_SHIFT (int16_t)(65536/3)
@@ -31,9 +29,8 @@
 #define CCER_CC1E_Set               ((uint16_t)0x0001)
 #define CCER_CC1E_Reset             ((uint16_t)0xFFFE)
 
-static void HALL_Init_Electrical_Angle(HALL_Handle_t *pHandle);
-static int16_t HALL_CalcAvrgElSpeedDpp(HALL_Handle_t *pHandle);
-
+static void HALL_Init_Electrical_Angle (HALL_Handle_t *pHandle);
+static int16_t HALL_CalcAvrgElSpeedDpp (HALL_Handle_t *pHandle);
 //{{{
 /**
   * @brief  It initializes the hardware peripherals (TIMx, GPIO and NVIC)
@@ -42,7 +39,7 @@ static int16_t HALL_CalcAvrgElSpeedDpp(HALL_Handle_t *pHandle);
   * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
   * @retval none
   */
-void HALL_Init(HALL_Handle_t *pHandle)
+void HALL_Init (HALL_Handle_t *pHandle)
 {
   TIM_TypeDef* TIMx = pHandle->TIMx;
 
@@ -128,7 +125,6 @@ void HALL_Init(HALL_Handle_t *pHandle)
   }
 }
 //}}}
-
 //{{{
 /**
 * @brief  Clear software FIFO where are "pushed" latest speed information
@@ -137,7 +133,7 @@ void HALL_Init(HALL_Handle_t *pHandle)
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component*
 * @retval none
 */
-void HALL_Clear(HALL_Handle_t *pHandle)
+void HALL_Clear (HALL_Handle_t *pHandle)
 {
   TIM_TypeDef* TIMx = pHandle->TIMx;
 
@@ -181,13 +177,7 @@ void HALL_Clear(HALL_Handle_t *pHandle)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
 * @brief  Update the rotor electrical angle integrating the last measured
@@ -195,7 +185,7 @@ __attribute__((section ("ccmram")))
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
 * @retval int16_t Measured electrical angle in s16degree format.
 */
-int16_t HALL_CalcElAngle(HALL_Handle_t *pHandle)
+int16_t HALL_CalcElAngle (HALL_Handle_t *pHandle)
 {
 
   if (pHandle->_Super.hElSpeedDpp != HALL_MAX_PSEUDO_SPEED)
@@ -213,7 +203,6 @@ int16_t HALL_CalcElAngle(HALL_Handle_t *pHandle)
   return pHandle->_Super.hElAngle;
 }
 //}}}
-
 
 //{{{
 /**
@@ -236,7 +225,7 @@ int16_t HALL_CalcElAngle(HALL_Handle_t *pHandle)
   * @retval true = sensor information is reliable
   *         false = sensor information is not reliable
   */
-bool HALL_CalcAvrgMecSpeed01Hz(HALL_Handle_t *pHandle, int16_t *hMecSpeed01Hz)
+bool HALL_CalcAvrgMecSpeed01Hz (HALL_Handle_t *pHandle, int16_t *hMecSpeed01Hz)
 {
   TIM_TypeDef* TIMx = pHandle->TIMx;
   int16_t SpeedMeasAux;
@@ -314,13 +303,7 @@ bool HALL_CalcAvrgMecSpeed01Hz(HALL_Handle_t *pHandle, int16_t *hMecSpeed01Hz)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
 * @brief  Example of private method of the class HALL to implement an MC IRQ function
@@ -328,7 +311,7 @@ __attribute__((section ("ccmram")))
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
 * @retval none
 */
-void * HALL_TIMx_CC_IRQHandler(void *pHandleVoid)
+void* HALL_TIMx_CC_IRQHandler (void *pHandleVoid)
 {
   HALL_Handle_t *pHandle = (HALL_Handle_t *) pHandleVoid;
   TIM_TypeDef* TIMx = pHandle->TIMx;
@@ -597,13 +580,7 @@ void * HALL_TIMx_CC_IRQHandler(void *pHandleVoid)
 }
 //}}}
 
-#if defined (CCMRAM)
-#if defined (__ICCARM__)
-#pragma location = ".ccmram"
-#elif defined (__CC_ARM)
-__attribute__((section ("ccmram")))
-#endif
-#endif
+//__attribute__((section ("ccmram")))
 //{{{
 /**
 * @brief  Example of private method of the class HALL to implement an MC IRQ function
@@ -611,7 +588,7 @@ __attribute__((section ("ccmram")))
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
 * @retval none
 */
-void * HALL_TIMx_UP_IRQHandler(void *pHandleVoid)
+void* HALL_TIMx_UP_IRQHandler (void *pHandleVoid)
 {
   HALL_Handle_t *pHandle = (HALL_Handle_t *) pHandleVoid;
   TIM_TypeDef* TIMx = pHandle->TIMx;
@@ -669,7 +646,7 @@ void * HALL_TIMx_UP_IRQHandler(void *pHandleVoid)
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
 * @retval int16_t the average rotor electrical speed express in dpp
 */
-static int16_t HALL_CalcAvrgElSpeedDpp(HALL_Handle_t *pHandle)
+static int16_t HALL_CalcAvrgElSpeedDpp (HALL_Handle_t *pHandle)
 {
 
   if (pHandle->NewSpeedAcquisition == 1)
@@ -699,7 +676,7 @@ static int16_t HALL_CalcAvrgElSpeedDpp(HALL_Handle_t *pHandle)
 * @param  pHandle: handler of the current instance of the hall_speed_pos_fdbk component
 * @retval none
 */
-static void HALL_Init_Electrical_Angle(HALL_Handle_t *pHandle)
+static void HALL_Init_Electrical_Angle (HALL_Handle_t *pHandle)
 {
 
     if (pHandle->SensorPlacement == DEGREES_120)
@@ -759,7 +736,7 @@ static void HALL_Init_Electrical_Angle(HALL_Handle_t *pHandle)
   * @param  hMecAngle istantaneous measure of rotor mechanical angle
   * @retval none
   */
-void HALL_SetMecAngle(HALL_Handle_t *pHandle, int16_t hMecAngle)
+void HALL_SetMecAngle (HALL_Handle_t *pHandle, int16_t hMecAngle)
 {
 }
 //}}}
