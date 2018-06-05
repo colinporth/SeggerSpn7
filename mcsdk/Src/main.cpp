@@ -10,6 +10,8 @@ DAC_HandleTypeDef hdac1;
 TIM_HandleTypeDef htim1;
 UART_HandleTypeDef huart2;
 
+cLcd lcd;
+
 extern "C" { void HAL_TIM_MspPostInit (TIM_HandleTypeDef* htim); }
 
 //{{{
@@ -342,7 +344,6 @@ int main() {
 
   MX_NVIC_Init();
 
-  cLcd lcd;
   lcd.init();
 
   while (true) {

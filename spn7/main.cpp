@@ -105,6 +105,8 @@ const char* kStatusStr[12] = {
 cSixStep gSixStep;
 uint32_t gLastButtonPress = 0;
 
+cLcd lcd;
+
 //{{{
 extern "C" {
   void ADC1_2_IRQHandler() { HAL_ADC_IRQHandler (&gSixStep.hAdc2); }
@@ -224,7 +226,6 @@ int main() {
 
   gSixStep.init();
 
-  cLcd lcd;
   lcd.init();
 
   while (true) {

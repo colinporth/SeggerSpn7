@@ -277,19 +277,14 @@ void PWMC_TurnOnLowSides (PWMC_Handle_t *pHandle)
 /**
   * @brief  Executes a regular conversion on the first ADC used by the motor control
   *         subsystem for current reading and returns the converted value.
-  *
   * User must guarantee by design (that is, by properly selecting tasks priorities) that
   * this function can only be interrupted by TIMx_UP_ISR and ADC1_2_ISR or ADC1_ISR.
-  *
   * This function is not re-entrant (that is: it cannot safely be executed twice at the
   * same time).
-  *
   * It returns 0xFFFF in case of conversion error.
-  *
   * @note This function should not be called directly by the application. The application
   * should use MC_ProgramRegularConversion(), MC_GetRegularConversionValue() and
   * MC_GetRegularConversionState() instead.
-  *
   * @param  pHandle handle on the target instance of the PWMC component
   * @param  bChannel ADC channel used for the regular conversion
   * @retval Returns the converted value or oxFFFF in case of a conversion error

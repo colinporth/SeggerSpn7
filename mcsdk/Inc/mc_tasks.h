@@ -1,5 +1,4 @@
 #pragma once
-
 #include "mc_tuning.h"
 #include "mc_interface.h"
 #include "pwm_curr_fdbk.h"
