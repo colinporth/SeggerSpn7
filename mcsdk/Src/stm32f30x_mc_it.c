@@ -15,9 +15,8 @@
 #include "stm32f3xx_it.h"
 #include "mc_config.h"
 
-//__attribute__((section ("ccmram")))
 //{{{
-void ADC1_2_IRQHandler()
+__attribute__((section ("ccmram"))) void ADC1_2_IRQHandler()
 {
   // Clear Flags Single or M1
   LL_ADC_ClearFlag_JEOS( ADC1 );
@@ -25,27 +24,23 @@ void ADC1_2_IRQHandler()
   UI_DACUpdate(TSK_HighFrequencyTask());
 }
 //}}}
-
-//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function handles ADC3 interrupt request.
   * @param  None
   * @retval None
   */
-void ADC3_IRQHandler()
+__attribute__((section ("ccmram"))) void ADC3_IRQHandler()
 {
 }
 //}}}
-
-//__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This function handles ADC4 interrupt request.
   * @param  None
   * @retval None
   */
-void ADC4_IRQHandler()
+__attribute__((section ("ccmram"))) void ADC4_IRQHandler()
 {
 }
 //}}}

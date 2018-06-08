@@ -13,12 +13,10 @@
   *         It can be equal to MC_NULL if the STC is initialized in torque mode
   *         and it will never be configured in speed mode.
   * @param  oSPD the speed sensor used to perform the speed regulation.
-  *         It can be equal to MC_NULL if the STC is used only in torque
-  *         mode.
-  * @retval none.
+  *         It can be equal to MC_NULL if the STC is used only in torque mode.
   */
-void STC_Init (SpeednTorqCtrl_Handle_t* pHandle, PID_Handle_t* pPI, SpeednPosFdbk_Handle_t* SPD_Handle)
-{
+void STC_Init (SpeednTorqCtrl_Handle_t* pHandle, PID_Handle_t* pPI, SpeednPosFdbk_Handle_t* SPD_Handle) {
+
   pHandle->PISpeed = pPI;
   pHandle->SPD = SPD_Handle;
   pHandle->Mode = pHandle->ModeDefault;
@@ -27,44 +25,19 @@ void STC_Init (SpeednTorqCtrl_Handle_t* pHandle, PID_Handle_t* pPI, SpeednPosFdb
   pHandle->TargetFinal = 0;
   pHandle->RampRemainingStep = 0u;
   pHandle->IncDecAmount = 0;
-}
+  }
 //}}}
 //{{{
 /**
   * @brief  It should be called before each motor restart. If STC is set in
             speed mode, this method resets the integral term of speed regulator.
   * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @retval none.
   */
 void STC_Clear (SpeednTorqCtrl_Handle_t* pHandle) {
 
   if (pHandle->Mode == STC_SPEED_MODE)
     PID_SetIntegralTerm(pHandle->PISpeed,0);
   }
-//}}}
-
-//{{{
-/**
-  * @brief It sets in real time the speed sensor utilized by the STC.
-  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @param SPD_Handle Speed sensor component to be set.
-  * @retval none
-  */
-void STC_SetSpeedSensor (SpeednTorqCtrl_Handle_t* pHandle, SpeednPosFdbk_Handle_t* SPD_Handle)
-{
-  pHandle->SPD = SPD_Handle;
-}
-//}}}
-//{{{
-/**
-  * @brief It returns the speed sensor utilized by the FOC.
-  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @retval SpeednPosFdbk_Handle_t speed sensor utilized by the FOC.
-  */
-SpeednPosFdbk_Handle_t* STC_GetSpeedSensor (SpeednTorqCtrl_Handle_t* pHandle)
-{
-  return (pHandle->SPD);
-}
 //}}}
 
 //{{{
@@ -95,7 +68,38 @@ int16_t STC_GetTorqueRef (SpeednTorqCtrl_Handle_t* pHandle)
   return ((int16_t)(pHandle->TorqueRef/65536));
 }
 //}}}
+//{{{
+/**
+  * @brief It returns the speed sensor utilized by the FOC.
+  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
+  * @retval SpeednPosFdbk_Handle_t speed sensor utilized by the FOC.
+  */
+SpeednPosFdbk_Handle_t* STC_GetSpeedSensor (SpeednTorqCtrl_Handle_t* pHandle) {
+  return (pHandle->SPD);
+  }
+//}}}
+//{{{
+/**
+  * @brief It sets in real time the speed sensor utilized by the STC.
+  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
+  * @param SPD_Handle Speed sensor component to be set.
+  */
+void STC_SetSpeedSensor (SpeednTorqCtrl_Handle_t* pHandle, SpeednPosFdbk_Handle_t* SPD_Handle) {
+  pHandle->SPD = SPD_Handle;
+  }
+//}}}
 
+//{{{
+/**
+  * @brief  Get the modality of the speed and torque controller.
+  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
+  * @retval STC_Modality_t It returns the modality of STC. It can be one of
+  *         these two values: STC_TORQUE_MODE or STC_SPEED_MODE.
+  */
+STC_Modality_t STC_GetControlMode (SpeednTorqCtrl_Handle_t* pHandle) {
+  return pHandle->Mode;
+  }
+//}}}
 //{{{
 /**
   * @brief  Set the modality of the speed and torque controller. Two modality
@@ -112,25 +116,11 @@ int16_t STC_GetTorqueRef (SpeednTorqCtrl_Handle_t* pHandle)
   * @param  bMode modality of STC. It can be one of these two settings:
   *         STC_TORQUE_MODE to enable the Torque mode or STC_SPEED_MODE to
   *         enable the Speed mode.
-  * @retval none
   */
-void STC_SetControlMode (SpeednTorqCtrl_Handle_t* pHandle, STC_Modality_t bMode)
-{
+void STC_SetControlMode (SpeednTorqCtrl_Handle_t* pHandle, STC_Modality_t bMode) {
   pHandle->Mode = bMode;
   pHandle->RampRemainingStep = 0u; /* Interrupts previous ramp. */
-}
-//}}}
-//{{{
-/**
-  * @brief  Get the modality of the speed and torque controller.
-  * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @retval STC_Modality_t It returns the modality of STC. It can be one of
-  *         these two values: STC_TORQUE_MODE or STC_SPEED_MODE.
-  */
-STC_Modality_t STC_GetControlMode (SpeednTorqCtrl_Handle_t* pHandle)
-{
-  return pHandle->Mode;
-}
+  }
 //}}}
 
 //{{{
@@ -234,7 +224,6 @@ bool STC_ExecRamp (SpeednTorqCtrl_Handle_t* pHandle, int16_t hTargetFinal, uint3
   * @retval none
   */
 void STC_StopRamp (SpeednTorqCtrl_Handle_t* pHandle) {
-
   pHandle->RampRemainingStep = 0u;
   pHandle->IncDecAmount = 0;
   }
@@ -305,8 +294,7 @@ int16_t STC_CalcTorqueReference (SpeednTorqCtrl_Handle_t* pHandle) {
   * @retval int16_t It returns the Default mechanical rotor speed. reference
   *         expressed in tenths of HZ.
   */
-int16_t STC_GetMecSpeedRef01HzDefault (SpeednTorqCtrl_Handle_t* pHandle)
-{
+int16_t STC_GetMecSpeedRef01HzDefault (SpeednTorqCtrl_Handle_t* pHandle) {
   return pHandle->MecSpeedRef01HzDefault;
   }
 //}}}
@@ -318,8 +306,7 @@ int16_t STC_GetMecSpeedRef01HzDefault (SpeednTorqCtrl_Handle_t* pHandle)
   * @retval uint16_t It returns the application maximum positive value of rotor
             speed expressed in tenth of mechanical Hertz.
   */
-uint16_t STC_GetMaxAppPositiveMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle)
-{
+uint16_t STC_GetMaxAppPositiveMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle) {
   return pHandle->MaxAppPositiveMecSpeed01Hz;
   }
 //}}}
@@ -331,8 +318,7 @@ uint16_t STC_GetMaxAppPositiveMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle)
   * @retval uint16_t It returns the application minimum negative value of rotor
             speed expressed in tenth of mechanical Hertz.
   */
-int16_t STC_GetMinAppNegativeMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle)
-{
+int16_t STC_GetMinAppNegativeMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle) {
   return pHandle->MinAppNegativeMecSpeed01Hz;
   }
 //}}}
@@ -343,13 +329,12 @@ int16_t STC_GetMinAppNegativeMecSpeed01Hz (SpeednTorqCtrl_Handle_t* pHandle)
   * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
   * @retval bool It returns true if the ramp is completed, false otherwise.
   */
-bool STC_RampCompleted (SpeednTorqCtrl_Handle_t* pHandle)
-{
+bool STC_RampCompleted (SpeednTorqCtrl_Handle_t* pHandle) {
   bool retVal = false;
   if (pHandle->RampRemainingStep == 0u)
     retVal = true;
   return retVal;
-}
+  }
 //}}}
 //{{{
 /**
@@ -375,28 +360,25 @@ bool STC_StopSpeedRamp (SpeednTorqCtrl_Handle_t* pHandle) {
   * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
   * @retval default values of Iqdref.
   */
-Curr_Components STC_GetDefaultIqdref (SpeednTorqCtrl_Handle_t* pHandle)
-{
+Curr_Components STC_GetDefaultIqdref (SpeednTorqCtrl_Handle_t* pHandle) {
+
   Curr_Components IqdRefDefault;
   IqdRefDefault.qI_Component1 = pHandle->TorqueRefDefault;
   IqdRefDefault.qI_Component2 = pHandle->IdrefDefault;
   return IqdRefDefault;
-}
+  }
 //}}}
 
 //{{{
 /**
   * @brief  Change the nominal current .
   * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @param  hNominalCurrent This value represents actually the maximum Iq current
-            expressed in digit.
-  * @retval none
+  * @param  hNominalCurrent This value represents actually the maximum Iq current expressed in digit.
   */
-void STC_SetNominalCurrent (SpeednTorqCtrl_Handle_t* pHandle, uint16_t hNominalCurrent)
-{
+void STC_SetNominalCurrent (SpeednTorqCtrl_Handle_t* pHandle, uint16_t hNominalCurrent) {
   pHandle->MaxPositiveTorque = hNominalCurrent;
   pHandle->MinNegativeTorque = -hNominalCurrent;
-}
+  }
 //}}}
 
 //{{{
@@ -404,10 +386,8 @@ void STC_SetNominalCurrent (SpeednTorqCtrl_Handle_t* pHandle, uint16_t hNominalC
   * @brief  Force the speed reference to the curren speed. It is used
   *         at the START_RUN state to initialize the speed reference.
   * @param  pHandle: handler of the current instance of the SpeednTorqCtrl component
-  * @retval none
   */
-void STC_ForceSpeedReferenceToCurrentSpeed (SpeednTorqCtrl_Handle_t* pHandle)
-{
+void STC_ForceSpeedReferenceToCurrentSpeed (SpeednTorqCtrl_Handle_t* pHandle) {
   pHandle->SpeedRef01HzExt = (int32_t)SPD_GetAvrgMecSpeed01Hz(pHandle->SPD) * (int32_t)65536;
-}
+  }
 //}}}

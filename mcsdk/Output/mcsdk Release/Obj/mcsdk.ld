@@ -3,6 +3,7 @@ MEMORY
   UNPLACED_SECTIONS (wx) : ORIGIN = 0x100000000, LENGTH = 0
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 0x00080000
   SRAM (wx) : ORIGIN = 0x20000000, LENGTH = 0x00010000
+  CCMRAM (wx) : ORIGIN = 0x01000000, LENGTH = 0x00001000
 }
 
 SECTIONS
@@ -13,6 +14,9 @@ SECTIONS
   __SRAM_segment_start__ = 0x20000000;
   __SRAM_segment_end__ = 0x20010000;
   __SRAM_segment_size__ = 0x00010000;
+  __CCMRAM_segment_start__ = 0x01000000;
+  __CCMRAM_segment_end__ = 0x01001000;
+  __CCMRAM_segment_size__ = 0x00001000;
 
   __HEAPSIZE__ = 50000;
   __STACKSIZE_PROCESS__ = 0;

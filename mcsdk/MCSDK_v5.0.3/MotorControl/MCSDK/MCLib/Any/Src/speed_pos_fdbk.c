@@ -49,8 +49,7 @@ int16_t SPD_GetMecAngle (SpeednPosFdbk_Handle_t* pHandle) {
 //}}}
 //{{{
 /**
-  * @brief  It returns the last computed average mechanical speed, expressed in
-  *         01Hz (tenth of Hertz).
+  * @brief  It returns the last computed average mechanical speed, expressed in 01Hz (tenth of Hertz).
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor average mechanical speed (01Hz)
   */
@@ -62,8 +61,7 @@ int16_t SPD_GetAvrgMecSpeed01Hz (SpeednPosFdbk_Handle_t* pHandle) {
 /**
   * @brief  It returns the last computed electrical speed, expressed in Dpp.
   *         1 Dpp = 1 s16Degree/control Period. The control period is the period
-  *         on which the rotor electrical angle is computed (through function
-  *         SPD_CalcElectricalAngle).
+  *         on which the rotor electrical angle is computed (through function SPD_CalcElectricalAngle).
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
   * @retval int16_t rotor electrical speed (Dpp)
   */
@@ -93,7 +91,6 @@ bool SPD_Check (SpeednPosFdbk_Handle_t* pHandle) {
   }
 //}}}
 
-__attribute__((section ("ccmram")))
 //{{{
 /**
   * @brief  This method must be called - at least - with the same periodicity
@@ -106,11 +103,9 @@ __attribute__((section ("ccmram")))
   *         true = sensor information is reliable
   *         false = sensor information is not reliable
   * @param  pHandle: handler of the current instance of the SpeednPosFdbk component
-  * @param  pMecSpeed01Hz pointer to int16_t, used to return the rotor average
-  *         mechanical speed (01Hz)
-  * @retval none
+  * @param  pMecSpeed01Hz pointer to int16_t, used to return the rotor average mechanical speed (01Hz)
   */
-bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed01Hz) {
+__attribute__((section ("ccmram"))) bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed01Hz) {
 
   bool SpeedSensorReliability = true;
   uint8_t bSpeedErrorNumber;
@@ -143,7 +138,7 @@ bool SPD_IsMecSpeedReliable (SpeednPosFdbk_Handle_t* pHandle, int16_t* pMecSpeed
   else
     hAbsMecAccel01HzP = (uint16_t)(pHandle->hMecAccel01HzP);
 
-  if ( hAbsMecAccel01HzP > pHandle->hMaxReliableMecAccel01HzP)
+  if (hAbsMecAccel01HzP > pHandle->hMaxReliableMecAccel01HzP)
     SpeedError = true;
 
   if (SpeedError == true) {

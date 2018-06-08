@@ -5,19 +5,18 @@
   * @brief  It initializes bus voltage conversion (ADC channel, conversion time,
   *         GPIO port and pin). It must be called only after PWMC_Init.
   * @param  pHandle related RDivider_Handle_t
-  * @retval none
   */
 void RVBS_Init (RDivider_Handle_t* pHandle, PWMC_Handle_t* PWMnCurrentSensor) {
 
-  ADConv_t ADConv_struct;
 
   pHandle->PWMnCurrentSensor = PWMnCurrentSensor;
 
   /* Configure AD chaneel sampling time */
+  ADConv_t ADConv_struct;
   ADConv_struct.Channel = pHandle->VbusADChannel;
   ADConv_struct.SamplTime = pHandle->VbusSamplingTime;
-  PWMC_ADC_SetSamplingTime(PWMnCurrentSensor, ADConv_struct);
-  RVBS_Clear(pHandle);
+  PWMC_ADC_SetSamplingTime (PWMnCurrentSensor, ADConv_struct);
+  RVBS_Clear (pHandle);
   }
 //}}}
 //{{{
@@ -25,7 +24,6 @@ void RVBS_Init (RDivider_Handle_t* pHandle, PWMC_Handle_t* PWMnCurrentSensor) {
   * @brief  It clears bus voltage FW variable containing average bus voltage
   *         value
   * @param  pHandle related RDivider_Handle_t
-  * @retval none
   */
 void RVBS_Clear (RDivider_Handle_t* pHandle) {
 
@@ -98,7 +96,7 @@ uint16_t RVBS_CalcAvVbusFilt (RDivider_Handle_t* pHandle) {
       pHandle->index++;
     else
       pHandle->index = 0;
-  }
+    }
 
   pHandle->_Super.FaultState = RVBS_CheckFaultState(pHandle);
   return(pHandle->_Super.FaultState);
@@ -114,11 +112,9 @@ uint16_t RVBS_CalcAvVbusFilt (RDivider_Handle_t* pHandle) {
 uint16_t RVBS_CalcAvVbus (RDivider_Handle_t* pHandle) {
 
   uint32_t wtemp;
-  uint16_t hAux;
   uint8_t i;
 
-  hAux = PWMC_ExecRegularConv(pHandle->PWMnCurrentSensor, pHandle->VbusADChannel);
-
+  uint16_t hAux = PWMC_ExecRegularConv(pHandle->PWMnCurrentSensor, pHandle->VbusADChannel);
   if (hAux != 0xFFFF) {
     pHandle->aBuffer[pHandle->index] = hAux;
     wtemp = 0;
@@ -132,10 +128,10 @@ uint16_t RVBS_CalcAvVbus (RDivider_Handle_t* pHandle) {
       pHandle->index++;
     else
       pHandle->index = 0;
-  }
+    }
 
   pHandle->_Super.FaultState = RVBS_CheckFaultState(pHandle);
-  return(pHandle->_Super.FaultState);
+  return (pHandle->_Super.FaultState);
   }
 //}}}
 //{{{
@@ -149,11 +145,11 @@ uint16_t RVBS_CheckFaultState (RDivider_Handle_t* pHandle) {
 
   uint16_t fault;
   if (pHandle->_Super.AvBusVoltage_d > pHandle->OverVoltageThreshold)
-      fault = MC_OVER_VOLT;
-    else if (pHandle->_Super.AvBusVoltage_d < pHandle->UnderVoltageThreshold)
-      fault = MC_UNDER_VOLT;
-    else
-      fault = MC_NO_ERROR;
+    fault = MC_OVER_VOLT;
+  else if (pHandle->_Super.AvBusVoltage_d < pHandle->UnderVoltageThreshold)
+    fault = MC_UNDER_VOLT;
+  else
+    fault = MC_NO_ERROR;
 
   return fault;
   }

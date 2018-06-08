@@ -108,8 +108,7 @@ ICL_State_t ICL_Exec (ICL_Handle_t *pHandle) {
   * @param  pHandle: handler of the current instance of the ICL component
   * @retval ICLState_t returns the current ICL state machine
   */
-ICL_State_t ICL_GetState (ICL_Handle_t *pHandle)
-{
+ICL_State_t ICL_GetState (ICL_Handle_t *pHandle) {
   return pHandle->ICLstate;
-}
+  }
 //}}}
