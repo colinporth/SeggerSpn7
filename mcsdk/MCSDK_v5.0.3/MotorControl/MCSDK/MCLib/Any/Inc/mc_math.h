@@ -1,10 +1,6 @@
 #pragma once
-
 #include "mc_type.h"
 
-/**
-  * @brief  Macro to compute logarithm of two
-  */
 #define LOG2(x) \
 ((x) == 65535 ? 16 : \
 ((x) == 2*2*2*2*2*2*2*2*2*2*2*2*2*2*2 ? 15 : \
@@ -24,13 +20,9 @@
 ((x) == 2 ? 1 : \
 ((x) == 1 ? 0 : -1)))))))))))))))))
 
-/**
-  * @brief  Trigonometrical functions type definition
-  */
-  typedef struct
-  {
-    int16_t hCos;
-    int16_t hSin;
+typedef struct {
+  int16_t hCos;
+  int16_t hSin;
   } Trig_Components;
 
 /**
@@ -68,26 +60,22 @@ Curr_Components MCM_Park(Curr_Components Curr_Input, int16_t Theta);
   */
 Volt_Components MCM_Rev_Park(Volt_Components Volt_Input, int16_t Theta);
 
-
 /**
-  * @brief  This function returns cosine and sine functions of the angle fed in
-  *         input
+  * @brief  This function returns cosine and sine functions of the angle fed in input
   * @param  hAngle: angle in q1.15 format
   * @retval Trig_Components Cos(angle) and Sin(angle) in Trig_Components format
   */
 Trig_Components MCM_Trig_Functions(int16_t hAngle);
 
 /**
-  * @brief  It calculates the square root of a non-negative s32. It returns 0
-  *         for negative s32.
+  * @brief  It calculates the square root of a non-negative s32. It returns 0 for negative s32.
   * @param  Input int32_t number
   * @retval int32_t Square root of Input (0 if Input<0)
   */
 int32_t MCM_Sqrt(int32_t wInput);
 
 /**
-  * @brief  This function codify a floting point number into the relative
-  *         32bit integer.
+  * @brief  This function codify a floting point number into the relative  32bit integer.
   * @param  float Floting point number to be coded.
   * @retval uint32_t Coded 32bit integer.
   */

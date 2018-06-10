@@ -1,7 +1,7 @@
 <!DOCTYPE CrossStudio_Session_File>
 <session>
  <Bookmarks>
-  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
+  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
   <BookmarkItem objectName="" line="4" column="-1" path="C:/projects/SeggerSpn7/common/cLcd.h" number="2" extra="#include &quot;..\STM32F3xx_HAL_Driver\inc\stm32f3xx_hal.h&quot;" color="5"/>
   <BookmarkItem objectName="" line="26" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="1" extra="std::string kVersion = &quot;WebCam 27/4/18&quot;;" color="5"/>
   <BookmarkItem objectName="" line="42" column="-1" path="C:/projects/segger/usbMsc/main.cpp" number="2" extra="&quot;&lt;/html>\r\n&quot;;" color="5"/>
@@ -825,7 +825,7 @@
   <BookmarkItem objectName="" line="1500" column="-1" path="C:/projects/seggerf4/main.cpp" number="246" extra="audBuf[i] = int16_t(0x2000 * sin (((i % 64) / 128.f) * kPi));" color="5"/>
   <BookmarkItem objectName="" line="1508" column="-1" path="C:/projects/seggerf4/main.cpp" number="247" extra="__HAL_RCC_CLEAR_RESET_FLAGS();" color="5"/>
   <BookmarkItem objectName="" line="1509" column="-1" path="C:/projects/seggerf4/main.cpp" number="248" extra="printf (&quot;main pin:%d power:%d cApp size:%d\n&quot;, pinReset, powerOnReset, sizeof (cApp));" color="5"/>
-  <BookmarkItem objectName="" line="1513" column="-1" path="C:/projects/seggerf4/main.cpp" number="250" extra="cApp::mApp->run();" color="5"/>
+  <BookmarkItem objectName="" line="1512" column="-1" path="C:/projects/seggerf4/main.cpp" number="249" extra="if (cApp::mApp->init())" color="5"/>
  </Bookmarks>
  <Breakpoints groups="Breakpoints" active_group="Breakpoints">
   <BreakpointListItem trigger="" line="356" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="spn7/main.cpp" useHWbreakpoint="false"/>
@@ -881,7 +881,6 @@
   <ProjectSessionItem path="spn7"/>
   <ProjectSessionItem path="spn7;mcsdk"/>
   <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3"/>
-  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;inc"/>
   <ProjectSessionItem path="spn7;spn7"/>
  </Project>
  <Register1>
@@ -944,7 +943,7 @@
  </Watch4>
  <Files>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="15" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h" selected="0" top="0" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="44" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/ramp_ext_mngr.h" selected="1" top="24" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="30" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/ramp_ext_mngr.h" selected="1" top="24" codecName="Default"/>
  </Files>
  <ARMCrossStudioWindow activeProject="mcsdk" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>

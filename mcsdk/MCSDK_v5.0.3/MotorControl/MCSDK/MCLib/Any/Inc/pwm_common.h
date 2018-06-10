@@ -4,10 +4,10 @@
  extern "C" {
 #endif /* __cplusplus */
 //}}}
-
 #include "mc_type.h"
 
-void startTimers(void);
+void startTimers();
+
 //{{{
 #ifdef __cplusplus
 }
