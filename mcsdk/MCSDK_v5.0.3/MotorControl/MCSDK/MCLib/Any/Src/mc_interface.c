@@ -323,6 +323,7 @@ uint16_t MCI_GetCurrentFaults (MCI_Handle_t* pHandle)
   return (uint16_t)(STM_GetFaultState( pHandle->pSTM ) >> 16);
 }
 //}}}
+
 //{{{
 /**
   * @brief  It returns the modality of the speed and torque controller.
@@ -370,6 +371,7 @@ int16_t MCI_GetImposedMotorDirection (MCI_Handle_t* pHandle) {
   return retVal;
   }
 //}}}
+
 //{{{
 /**
   * @brief  It returns information about the last ramp final speed sent by the user expressed in tenths of HZ.
@@ -389,6 +391,17 @@ int16_t MCI_GetLastRampFinalSpeed (MCI_Handle_t* pHandle) {
 
 //{{{
 /**
+  * @brief  Stop the execution of speed ramp.
+  * @param  pHandle Pointer on the component instance to work on.
+  * @retval bool It returns true if the command is executed, false otherwise.
+  */
+bool MCI_StopSpeedRamp (MCI_Handle_t* pHandle)
+{
+  return STC_StopSpeedRamp( pHandle->pSTC );
+}
+//}}}
+//{{{
+/**
   * @brief  Check if the settled speed or torque ramp has been completed.
   * @param  pHandle Pointer on the component instance to work on.
   * @retval bool It returns true if the ramp is completed, false otherwise.
@@ -401,17 +414,6 @@ bool MCI_RampCompleted (MCI_Handle_t* pHandle) {
 
   return retVal;
   }
-//}}}
-//{{{
-/**
-  * @brief  Stop the execution of speed ramp.
-  * @param  pHandle Pointer on the component instance to work on.
-  * @retval bool It returns true if the command is executed, false otherwise.
-  */
-bool MCI_StopSpeedRamp (MCI_Handle_t* pHandle)
-{
-  return STC_StopSpeedRamp( pHandle->pSTC );
-}
 //}}}
 
 //{{{

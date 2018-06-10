@@ -1,59 +1,9 @@
-/**
-  ******************************************************************************
-  * @file    mc_tuning.h
-  * @author  Motor Control SDK Team, ST Microelectronics
-  * @brief   This file contains all definitions and functions prototypes for the
-  *          motor control tuning component of the Motor Control SDK.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2018 STMicroelectronics International N.V.
-  * All rights reserved.</center></h2>
-  *
-  * Redistribution and use in source and binary forms, with or without
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice,
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other
-  *    contributors to this software may be used to endorse or promote products
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under
-  *    this license is void and will automatically terminate your rights under
-  *    this license.
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS"
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  * @ingroup MCTuning
-  */
-
-
-
-/* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __MC_TUNING_H
-#define __MC_TUNING_H
-
+#pragma once
+//{{{
 #ifdef __cplusplus
  extern "C" {
 #endif /* __cplusplus */
+//}}}
 
 /* Includes ------------------------------------------------------------------*/
 #include "mc_type.h"
@@ -76,11 +26,6 @@
 #include "feed_forward_ctrl.h"
 #include "flux_weakening_ctrl.h"
 #include "state_machine.h"
-
-/**
- * @addtogroup MCSDK
-  * @{
-  */
 
 /**
  * @defgroup MCTuning Motor Control Fine Tuning interface
@@ -147,7 +92,7 @@ typedef struct
 
 
 /**
-  * @brief  Use this method to set a new value for the voltage reference used by 
+  * @brief  Use this method to set a new value for the voltage reference used by
   *         flux weakening algorithm.
   * @param  pHandle Flux weakening init strutcture.
   * @param  uint16_t New target voltage value, expressend in tenth of percentage
@@ -157,54 +102,54 @@ typedef struct
 void FW_SetVref(FW_Handle_t *pHandle, uint16_t hNewVref);
 
 /**
-  * @brief  It returns the present value of target voltage used by flux 
+  * @brief  It returns the present value of target voltage used by flux
   *         weakening algorihtm.
   * @param  pHandle Flux weakening init strutcture.
-  * @retval int16_t Present target voltage value expressed in tenth of 
+  * @retval int16_t Present target voltage value expressed in tenth of
   *         percentage points of available voltage.
   */
 uint16_t FW_GetVref(FW_Handle_t *pHandle);
 
 /**
-  * @brief  It returns the present value of voltage actually used by flux 
+  * @brief  It returns the present value of voltage actually used by flux
   *         weakening algorihtm.
   * @param  pHandle Flux weakening init strutcture.
-  * @retval int16_t Present averaged phase stator voltage value, expressed 
-  *         in s16V (0-to-peak), where 
+  * @retval int16_t Present averaged phase stator voltage value, expressed
+  *         in s16V (0-to-peak), where
   *         PhaseVoltage(V) = [PhaseVoltage(s16A) * Vbus(V)] /[sqrt(3) *32767].
   */
 int16_t FW_GetAvVAmplitude(FW_Handle_t *pHandle);
 
 /**
-  * @brief  It returns the measure of present voltage actually used by flux 
+  * @brief  It returns the measure of present voltage actually used by flux
   *         weakening algorihtm as percentage of available voltage.
   * @param  pHandle Flux weakening init strutcture.
-  * @retval uint16_t Present averaged phase stator voltage value, expressed in 
+  * @retval uint16_t Present averaged phase stator voltage value, expressed in
   *         tenth of percentage points of available voltage.
   */
 uint16_t FW_GetAvVPercentage(FW_Handle_t *pHandle);
 
 /**
-  * @brief  Use this method to set new values for the constants utilized by 
+  * @brief  Use this method to set new values for the constants utilized by
   *         feed-forward algorithm.
   * @param  pHandle Feed forward  strutcture.
-  * @param  sNewConstants The FF_TuningStruct_t containing constants utilized by 
+  * @param  sNewConstants The FF_TuningStruct_t containing constants utilized by
   *         feed-forward algorithm.
   * @retval none
   */
 void FF_SetFFConstants(FF_Handle_t *pHandle, FF_TuningStruct_t sNewConstants);
 
 /**
-  * @brief  Use this method to get present values for the constants utilized by 
+  * @brief  Use this method to get present values for the constants utilized by
   *         feed-forward algorithm.
   * @param  pHandle Feed forward  strutcture.
-  * @retval FF_TuningStruct_t Values of the constants utilized by 
+  * @retval FF_TuningStruct_t Values of the constants utilized by
   *         feed-forward algorithm.
   */
 FF_TuningStruct_t FF_GetFFConstants(FF_Handle_t *pHandle);
 
 /**
-  * @brief  Use this method to get present values for the Vqd feed-forward 
+  * @brief  Use this method to get present values for the Vqd feed-forward
   *         components.
   * @param  pHandle Feed forward  strutcture.
   * @retval Volt_Components Vqd feed-forward components.
@@ -212,7 +157,7 @@ FF_TuningStruct_t FF_GetFFConstants(FF_Handle_t *pHandle);
 Volt_Components FF_GetVqdff(FF_Handle_t *pHandle);
 
 /**
-  * @brief  Use this method to get values of the averaged output of qd axes 
+  * @brief  Use this method to get values of the averaged output of qd axes
   *         currents PI regulators.
   * @param  pHandle Feed forward  strutcture.
   * @retval Volt_Components Averaged output of qd axes currents PI regulators.
@@ -404,9 +349,9 @@ void RUC_SetPhaseDurationms(RevUpCtrl_Handle_t *pHandle, uint8_t bPhase, uint16_
   * @param  bPhase is the rev up phase, zero based, to be modified.
   * @param  hFinalMecSpeed01Hz is the new value of mechanical speed at the end
   *         of that phase expressed in 0.1Hz.
-  * @retval none. 
+  * @retval none.
   */
-void RUC_SetPhaseFinalMecSpeed01Hz(RevUpCtrl_Handle_t *pHandle, uint8_t bPhase, 
+void RUC_SetPhaseFinalMecSpeed01Hz(RevUpCtrl_Handle_t *pHandle, uint8_t bPhase,
                                    int16_t hFinalMecSpeed01Hz);
 
 /**
@@ -815,18 +760,8 @@ float OTT_GetF(COTT this);
   */
 bool OTT_IsMotorAlreadyProfiled(COTT this);
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
-
+//{{{
 #ifdef __cplusplus
 }
 #endif /* __cpluplus */
-
-#endif /* __MC_TUNING_H */
-
-/************************ (C) COPYRIGHT 2018 STMicroelectronics *****END OF FILE****/
+//}}}

@@ -880,6 +880,8 @@
  <Project>
   <ProjectSessionItem path="spn7"/>
   <ProjectSessionItem path="spn7;mcsdk"/>
+  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3"/>
+  <ProjectSessionItem path="spn7;mcsdk;mcsdkv5.3;inc"/>
   <ProjectSessionItem path="spn7;spn7"/>
  </Project>
  <Register1>
@@ -940,6 +942,9 @@
  <Watch4>
   <Watches active="0" update="Never"/>
  </Watch4>
- <Files/>
+ <Files>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="15" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/pid_regulator.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="44" useTextEdit="1" useBinaryEdit="0" left="0" path="mcsdk/MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/ramp_ext_mngr.h" selected="1" top="24" codecName="Default"/>
+ </Files>
  <ARMCrossStudioWindow activeProject="mcsdk" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" debugSearchFileMap="../../../MotorControlDev/MCSDK/MCLib/Any/Src/revup_ctrl.c&#xa;&#xa;../../../MotorControlDev/MCSDK/MCLib/Any/Src/sto_pll_speed_pos_fdbk.c&#xa;&#xa;../CMSIS/cmsis_gcc.h&#xa;&#xa;../CMSIS/core_cm4.h&#xa;" fileDialogInitialDirectory="C:/Users/colin/Desktop" debugSearchPath="" autoConnectCapabilities="3199"/>
 </session>
