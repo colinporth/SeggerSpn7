@@ -4,12 +4,10 @@
  extern "C" {
 #endif /* __cplusplus */
 //}}}
-
 #include "motor_power_measurement.h"
 #include "bus_voltage_sensor.h"
 
-typedef struct
-{
+typedef struct {
 	MotorPowMeas_Handle_t _super;
 
 	int32_t wConvFact; /* It is the conversion factor used to convert the
@@ -20,7 +18,7 @@ typedef struct
 
 	pFOCVars_t pFOCVars;    /*!< Pointer to FOC vars used by MPM.*/
 	BusVoltageSensor_Handle_t * pVBS;              /*!< Bus voltage sensor object used by MPM.*/
-}PQD_MotorPowMeas_Handle_t;
+	}PQD_MotorPowMeas_Handle_t;
 
 
 

@@ -4,7 +4,6 @@
  extern "C" {
 #endif /* __cplusplus */
 //}}}
-
 #include "mc_type.h"
 #include "speed_torq_ctrl.h"
 #include "virtual_speed_sensor.h"
@@ -13,8 +12,7 @@
 
 #define RUC_MAX_PHASE_NUMBER 5u
 
-typedef struct
-{
+typedef struct {
     uint16_t hDurationms;         /**< Duration of the RevUp phase.
                                        This parameter is expressed in millisecond.*/
     int16_t hFinalMecSpeed01Hz;   /**< Mechanical speed expressed in 0.1Hz assumed
@@ -24,28 +22,19 @@ typedef struct
                                        actually the Iq current expressed in digit.*/
     void* pNext;                  /**< Pointer on the next phase section to proceed
                                        This parameter is NULL for the last element.*/
-} RevUpCtrl_PhaseParams_t;
+  } RevUpCtrl_PhaseParams_t;
 
-typedef struct
-{
+typedef struct {
   uint16_t hRUCFrequencyHz;        /**< Frequency call to main RevUp procedure RUC_Exec.
                                         This parameter is equal to speed loop frequency. */
-
   int16_t hStartingMecAngle;       /**< Starting angle of programmed RevUp.*/
-
   uint16_t hPhaseRemainingTicks;   /**< Number of clock events remaining to complete the phase. */
-
-  int16_t hDirection;              /**< Motor direction.
-                                        This parameter can be any value -1 or +1 */
-
+  int16_t hDirection;              /**< Motor direction. This parameter can be any value -1 or +1 */
   RevUpCtrl_PhaseParams_t *pCurrentPhaseParams; /**< Pointer on the current RevUp phase processed. */
-
   RevUpCtrl_PhaseParams_t ParamsData[RUC_MAX_PHASE_NUMBER]; /**< Start up Phases sequences used by RevUp controller.
                                                                 Up to five phases can be used for the start up.             */
-
   uint8_t bPhaseNbr;               /**< Number of phases relative to the programmed RevUp sequence.
                                         This parameter can be any value from 1 to 5 */
-
   uint8_t bFirstAccelerationStage; /**< Indicate the phase to start the final acceleration.
                                         At start of this stage sensor-less algorithm cleared.*/
   uint16_t hMinStartUpValidSpeed;  /**< Minimum rotor speed required to validate the startup.
@@ -53,43 +42,28 @@ typedef struct
   uint16_t hMinStartUpFlySpeed;    /**< Minimum rotor speed required to validate the on the fly.
                                         This parameter is expressed in 01Hz */
   int16_t hOTFFinalRevUpCurrent;   /**< Final targetted torque for OTF phase. */
-
-  uint16_t hOTFSection1Duration;   /**< On-the-fly phase duration, millisecond.
-                                        This parameter is expressed in millisecond.*/
-  bool OTFStartupEnabled;          /**< Flag for OTF feature activation.
-                                        Feature disabled when set to false */
+  uint16_t hOTFSection1Duration;   /**< On-the-fly phase duration, millisecond. This parameter is expressed in millisecond.*/
+  bool OTFStartupEnabled;          /**< Flag for OTF feature activation. Feature disabled when set to false */
   uint8_t bOTFRelCounter;          /**< Counts the number of reliability of state observer */
 
   bool OTFSCLowside;               /**< Flag to indicate status of low side switchs.
                                         This parameter can be true when Low Sides switch is ON otherwise set to false. */
   bool EnteredZone1;               /**< Flag to indicate that the minimum rotor speed has been reached. */
-
   uint8_t bResetPLLTh;            /**< Threshold to reset PLL during OTF */
-
   uint8_t bResetPLLCnt;           /**< Counter to reset PLL during OTF when the threshold is reached. */
-
-  uint8_t bStageCnt;              /**< Counter of executed phases.
-                                      This parameter can be any value from 0 to 5 */
+  uint8_t bStageCnt;              /**< Counter of executed phases. This parameter can be any value from 0 to 5 */
 
   RevUpCtrl_PhaseParams_t OTFPhaseParams; /**< RevUp phase parameter of OTF feature.*/
-
   SpeednTorqCtrl_Handle_t * pSTC;                      /**< Speed and torque controller object used by RevUpCtrl.*/
-
   VirtualSpeedSensor_Handle_t * pVSS;                  /**< Virtual speed sensor object used by RevUpCtrl.*/
-
   STO_Handle_t * pSNSL;                 /**< STO sensor object used by OTF startup.*/
-
   PWMC_Handle_t* pPWM;                     /**< PWM object used by OTF startup.*/
-
-} RevUpCtrl_Handle_t;
+  } RevUpCtrl_Handle_t;
 
 
 /*  Function used to initialize and configure the RevUpCtrl Component */
-void RUC_Init(RevUpCtrl_Handle_t *pHandle,
-              SpeednTorqCtrl_Handle_t * pSTC,
-              VirtualSpeedSensor_Handle_t * pVSS,
-              STO_Handle_t * pSNSL,
-              PWMC_Handle_t* pPWM);
+void RUC_Init (RevUpCtrl_Handle_t *pHandle, SpeednTorqCtrl_Handle_t * pSTC,
+              VirtualSpeedSensor_Handle_t * pVSS, STO_Handle_t * pSNSL, PWMC_Handle_t* pPWM);
 
 /*  Function used to reset internal state of the RevUpCtrl Component to its default state */
 void RUC_Clear(RevUpCtrl_Handle_t *pHandle, int16_t hMotorDirection);

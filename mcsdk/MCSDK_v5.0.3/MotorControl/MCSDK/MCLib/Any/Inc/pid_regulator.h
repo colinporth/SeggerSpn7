@@ -3,14 +3,12 @@
 
 /**
   * @brief Handle of a PID component
-  *
   * @detail This structure stores all the parameters needed to perform a proportional,
   * integral and derivative regulation computation. It also stores configurable limits
   * in order to saturate the integral terms and the output value. This structure is
   * passed to each PID component function.
   */
-typedef struct PID_Handle
-{
+typedef struct PID_Handle {
   int16_t   hDefKpGain;           /**< Default @f$K_{pg}@f$ gain */
   int16_t   hDefKiGain;           /**< Default @f$K_{ig}@f$ gain */
   int16_t   hKpGain;              /**< @f$K_{pg}@f$ gain used by PID component */
@@ -32,12 +30,9 @@ typedef struct PID_Handle
                                        execution. Only in this case this parameter
                                        specifies the number of right shifts to be executed */
   uint16_t  hKiDivisor;           /**< Ki gain divisor, used in conjuction with Ki gain allows obtaining fractional values.
-                                       If FULL_MISRA_C_COMPLIANCY is not defined
-                                       the divisor is implemented through
-                                       algebrical right shifts to speed up PI
-                                       execution. Only in this case this parameter
-                                       specifies the number of right shifts to be
-                                       executed */
+                                       If FULL_MISRA_C_COMPLIANCY is not defined the divisor is implemented through
+                                       algebrical right shifts to speed up PI execution. Only in this case this parameter
+                                       specifies the number of right shifts to be executed */
   uint16_t  hKpDivisorPOW2;       /**< Kp gain divisor expressed as power of 2. E.g. if gain divisor is 512 the value
                                        must be 9 as 2^9 = 512 */
   uint16_t  hKiDivisorPOW2;       /**< Ki gain divisor expressed as power of 2. E.g. if gain divisor is 512 the value
@@ -47,13 +42,12 @@ typedef struct PID_Handle
   uint16_t  hKdDivisor;           /**< Kd gain divisor, used in conjuction with
                                        Kd gain allows obtaining fractional values.
                                        If FULL_MISRA_C_COMPLIANCY is not defined the divisor is implemented through
-                                       algebrical right shifts to speed up PI
-                                       execution. Only in this case this parameter
+                                       algebrical right shifts to speed up PI execution. Only in this case this parameter
                                        specifies the number of right shifts to be executed */
   uint16_t  hKdDivisorPOW2;       /*!< Kd gain divisor expressed as power of 2.
                                        E.g. if gain divisor is 512 the value must be 9 as 2^9 = 512 */
   int32_t   wPrevProcessVarError; /*!< previous process variable used by the derivative part of the PID component */
-}PID_Handle_t;
+  } PID_Handle_t;
 
 void PID_HandleInit(PID_Handle_t *pHandle);
 void PID_SetKP(PID_Handle_t *pHandle, int16_t hKpGain);

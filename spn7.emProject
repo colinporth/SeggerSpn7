@@ -414,7 +414,6 @@
     <folder Name="mcsdkv5.3">
       <folder Name="inc">
         <file file_name="MCSDK_v5.0.3/MotorControl/Applications/Test_MotorApp/Inc/TimeBase.h" />
-        <file file_name="MCSDK_v5.0.3/MotorControl/Applications/Test_MotorApp/Inc/UITask.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/bus_voltage_sensor.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/circle_limitation.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Inc/digital_output.h" />
@@ -473,6 +472,7 @@
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/UILibrary/Inc/unidirectional_fast_com.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/UILibrary/Inc/usart_frame_communication_protocol.h" />
         <file file_name="MCSDK_v5.0.3/MotorControl/Legacy/Cube/std_hal_missing_define.h" />
+        <file file_name="MCSDK_v5.0.3/MotorControl/Applications/Test_MotorApp/Inc/UITask.h" />
       </folder>
       <folder Name="any">
         <file file_name="MCSDK_v5.0.3/MotorControl/MCSDK/MCLib/Any/Src/bus_voltage_sensor.c" />
